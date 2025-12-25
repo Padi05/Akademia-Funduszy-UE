@@ -53,7 +53,7 @@ export default async function OnlineCoursesPage() {
       })
     : []
 
-  const purchasedCourseIds = new Set(userPurchases.map((p) => p.courseId))
+  const purchasedCourseIds = new Set(userPurchases.map((p: { courseId: string }) => p.courseId))
 
   return (
     <div className="min-h-screen">
