@@ -37,6 +37,53 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = courseSchema.parse(body)
 
+    // Sprawdź czy w żądaniu jest paymentId (płatność musi być wykonana przed utworzeniem kursu)
+    const { paymentId, ...courseData } = body
+
+    if (!paymentId) {
+      return NextResponse.json(
+        { 
+          error: 'Płatność jest wymagana',
+          requiresPayment: true,
+          amount: 100.0,
+          message: 'Aby dodać kurs, musisz najpierw opłacić 100 PLN'
+        },
+        { status: 402 } // 402 Payment Required
+      )
+    }
+
+    // Sprawdź czy płatność istnieje i jest zakończona
+    const payment = await prisma.coursePayment.findUnique({
+      where: { id: paymentId },
+    })
+
+    if (!payment || payment.status !== 'COMPLETED') {
+      return NextResponse.json(
+        { 
+          error: 'Nieprawidłowa lub nieopłacona płatność',
+          requiresPayment: true,
+          amount: 100.0
+        },
+        { status: 402 }
+      )
+    }
+
+    if (payment.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: 'Płatność nie należy do tego użytkownika' },
+        { status: 403 }
+      )
+    }
+
+    // Sprawdź czy płatność nie została już użyta (czy ma już powiązany kurs)
+    if (payment.courseId) {
+      return NextResponse.json(
+        { error: 'Ta płatność została już wykorzystana' },
+        { status: 400 }
+      )
+    }
+
+    // Utwórz kurs
     const course = await prisma.course.create({
       data: {
         title: validatedData.title,
@@ -52,6 +99,14 @@ export async function POST(request: NextRequest) {
         onlinePrice: validatedData.onlinePrice || (validatedData.isOnlineCourse ? 100 : null),
         commissionRate: validatedData.commissionRate || (validatedData.isOnlineCourse ? 10 : null),
         isPublished: validatedData.isPublished || false,
+      },
+    })
+
+    // Powiąż płatność z utworzonym kursem
+    await prisma.coursePayment.update({
+      where: { id: paymentId },
+      data: {
+        courseId: course.id,
       },
     })
 

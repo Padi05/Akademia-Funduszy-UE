@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ArrowLeft, Save, Upload, FileText, X } from 'lucide-react'
+import { ArrowLeft, Save, Upload, FileText, X, CreditCard, Check } from 'lucide-react'
 import Link from 'next/link'
 
 const courseSchema = z.object({
@@ -37,6 +37,8 @@ export default function NewCoursePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState<string>('')
+  const [paymentId, setPaymentId] = useState<string | null>(null)
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
 
   const {
     register,
@@ -98,13 +100,47 @@ export default function NewCoursePage() {
     setUploadProgress('')
   }
 
+  const handlePayment = async () => {
+    setIsProcessingPayment(true)
+    setError(null)
+
+    try {
+      // Utwórz płatność (bez courseId - zostanie powiązana po utworzeniu kursu)
+      const paymentResponse = await fetch('/api/courses/payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const paymentResult = await paymentResponse.json()
+
+      if (!paymentResponse.ok) {
+        setError(paymentResult.error || 'Wystąpił błąd podczas przetwarzania płatności')
+        return
+      }
+
+      setPaymentId(paymentResult.payment.id)
+      setError(null)
+    } catch (err) {
+      setError('Wystąpił błąd podczas przetwarzania płatności')
+    } finally {
+      setIsProcessingPayment(false)
+    }
+  }
+
   const onSubmit = async (data: CourseForm) => {
+    if (!paymentId) {
+      setError('Musisz najpierw opłacić 100 PLN za dodanie kursu')
+      return
+    }
+
     setIsLoading(true)
     setError(null)
     setUploadProgress('')
 
     try {
-      // Utwórz kurs
+      // Utwórz kurs z paymentId
       const response = await fetch('/api/courses', {
         method: 'POST',
         headers: {
@@ -117,13 +153,19 @@ export default function NewCoursePage() {
           onlinePrice: data.onlinePrice ? parseFloat(data.onlinePrice) : (courseType === 'ONLINE' ? 100 : null),
           commissionRate: data.commissionRate ? parseFloat(data.commissionRate) : (courseType === 'ONLINE' ? 10 : null),
           isPublished: data.isPublished || false,
+          paymentId, // Przekaż ID płatności
         }),
       })
 
       const result = await response.json()
 
       if (!response.ok) {
-        setError(result.error || 'Wystąpił błąd podczas tworzenia kursu')
+        if (result.requiresPayment) {
+          setError(result.message || 'Płatność jest wymagana. Kliknij "Opłać 100 PLN" aby kontynuować.')
+          setPaymentId(null) // Reset paymentId jeśli płatność nie jest ważna
+        } else {
+          setError(result.error || 'Wystąpił błąd podczas tworzenia kursu')
+        }
         return
       }
 
@@ -237,10 +279,58 @@ export default function NewCoursePage() {
             </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-200 px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}
+
+        {/* Informacja o płatności */}
+        <div className={`mb-6 p-4 rounded-lg border ${
+          paymentId 
+            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+            : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {paymentId ? (
+                <>
+                  <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <div>
+                    <p className="font-semibold text-green-800 dark:text-green-200">
+                      Płatność została opłacona
+                    </p>
+                    <p className="text-sm text-green-600 dark:text-green-300">
+                      Możesz teraz utworzyć kurs
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <CreditCard className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                  <div>
+                    <p className="font-semibold text-yellow-800 dark:text-yellow-200">
+                      Wymagana płatność: 100 PLN
+                    </p>
+                    <p className="text-sm text-yellow-600 dark:text-yellow-300">
+                      Aby dodać kurs, musisz najpierw opłacić 100 PLN
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+            {!paymentId && (
+              <button
+                type="button"
+                onClick={handlePayment}
+                disabled={isProcessingPayment}
+                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <CreditCard className="h-4 w-4" />
+                {isProcessingPayment ? 'Przetwarzanie...' : 'Opłać 100 PLN'}
+              </button>
+            )}
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
@@ -439,11 +529,18 @@ export default function NewCoursePage() {
             </Link>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !paymentId}
               className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="h-4 w-4" />
-              <span>{isLoading ? 'Zapisywanie...' : 'Zapisz kurs'}</span>
+              <span>
+                {isLoading 
+                  ? 'Zapisywanie...' 
+                  : !paymentId 
+                    ? 'Najpierw opłać 100 PLN' 
+                    : 'Zapisz kurs'
+                }
+              </span>
             </button>
           </div>
         </form>

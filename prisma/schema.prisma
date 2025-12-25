@@ -23,6 +23,8 @@ model User {
   courses       Course[]
   files         UserFile[]
   purchases     CoursePurchase[] // Zakupione kursy online
+  subscription  Subscription? // Subskrypcja miesięczna
+  coursePayments CoursePayment[] // Płatności za dodanie kursów
 }
 
 model Course {
@@ -48,6 +50,7 @@ model Course {
   organizer     User        @relation(fields: [organizerId], references: [id], onDelete: Cascade)
   files         CourseFile[]
   purchases     CoursePurchase[] // Zakupy kursów online
+  payment       CoursePayment? // Płatność za dodanie tego kursu
 }
 
 model CourseFile {
@@ -101,4 +104,33 @@ model CoursePurchase {
   course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status              String    // ACTIVE, CANCELLED, EXPIRED
+  startDate           DateTime  @default(now())
+  endDate             DateTime  // Data wygaśnięcia subskrypcji
+  monthlyPrice        Float     @default(29.99) // Cena miesięczna w PLN
+  stripeSubscriptionId String?  // ID subskrypcji w Stripe (opcjonalnie)
+  stripeCustomerId    String?   // ID klienta w Stripe (opcjonalnie)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model CoursePayment {
+  id            String    @id @default(cuid())
+  amount        Float     @default(100.0) // Kwota płatności za dodanie kursu (100 PLN)
+  status        String    // PENDING, COMPLETED, FAILED
+  paymentDate   DateTime  @default(now())
+  stripePaymentId String?  // ID płatności w Stripe (opcjonalnie)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId      String?   @unique // Opcjonalne - ustawiane po utworzeniu kursu
+  course        Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }

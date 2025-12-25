@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
@@ -13,6 +15,15 @@ export async function GET(
   { params }: { params: { id: string; fileId: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Brak autoryzacji' },
+        { status: 401 }
+      )
+    }
+
     // Sprawdź czy kurs istnieje
     const course = await prisma.course.findUnique({
       where: { id: params.id },
@@ -35,6 +46,42 @@ export async function GET(
         { error: 'Plik nie został znaleziony' },
         { status: 404 }
       )
+    }
+
+    // Sprawdź uprawnienia do pobrania pliku:
+    // 1. Organizator kursu zawsze ma dostęp
+    // 2. Użytkownik z aktywną subskrypcją ma dostęp
+    // 3. Użytkownik, który kupił ten kurs online ma dostęp
+    
+    const isOrganizer = course.organizerId === session.user.id
+    
+    if (!isOrganizer) {
+      // Sprawdź subskrypcję
+      const subscription = await prisma.subscription.findUnique({
+        where: { userId: session.user.id },
+      })
+
+      const hasActiveSubscription = subscription && 
+        subscription.status === 'ACTIVE' && 
+        subscription.endDate > new Date()
+
+      // Sprawdź czy użytkownik kupił ten kurs
+      const hasPurchase = await prisma.coursePurchase.findFirst({
+        where: {
+          courseId: params.id,
+          userId: session.user.id,
+        },
+      })
+
+      if (!hasActiveSubscription && !hasPurchase) {
+        return NextResponse.json(
+          { 
+            error: 'Aby pobrać plik, potrzebujesz aktywnej subskrypcji miesięcznej lub zakupić ten kurs',
+            requiresSubscription: true
+          },
+          { status: 403 }
+        )
+      }
     }
 
     // Określ ścieżkę do pliku - w środowisku serverless używamy /tmp
