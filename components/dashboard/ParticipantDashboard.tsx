@@ -40,55 +40,33 @@ export default function ParticipantDashboard({
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {!hasBurEntry && (
-        <div className="bg-purple-900/30 border-2 border-purple-500/50 rounded-xl p-6 flex items-start space-x-4 animate-slide-in-right shadow-lg">
-          <div className="bg-purple-800/50 p-3 rounded-full border border-purple-500/30">
-            <AlertCircle className="h-6 w-6 text-purple-300" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-purple-200 mb-2">
-              Brak wpisu w BUR
-            </h3>
-            <p className="text-sm text-gray-100">
-              Aby móc przesyłać dokumenty, musisz mieć wpis w BUR. Skontaktuj się z administratorem, aby zaktualizować swoje konto.
-            </p>
-          </div>
-        </div>
-      )}
-
       <div>
         <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h2 className="text-3xl font-bold gradient-text">Moje dokumenty</h2>
             <p className="text-gray-200 mt-1">Zarządzaj swoimi przesłanymi dokumentami</p>
           </div>
-          {hasBurEntry && (
-            <Link
-              href="/dashboard/files/upload"
-              className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 flex items-center space-x-2 shadow-lg hover-lift transition-all font-semibold border border-purple-500/50"
-            >
-              <Upload className="h-5 w-5" />
-              <span>Prześlij dokument</span>
-            </Link>
-          )}
+          <Link
+            href="/dashboard/files/upload"
+            className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 flex items-center space-x-2 shadow-lg hover-lift transition-all font-semibold border border-purple-500/50"
+          >
+            <Upload className="h-5 w-5" />
+            <span>Prześlij dokument</span>
+          </Link>
         </div>
 
         {filesList.length === 0 ? (
           <div className="glass rounded-2xl shadow-xl p-12 text-center animate-scale-in border border-purple-500/30">
             <div className="text-6xl mb-4 animate-float">📄</div>
             <p className="text-gray-100 text-lg mb-6">
-              {hasBurEntry
-                ? 'Nie masz jeszcze żadnych przesłanych dokumentów.'
-                : 'Nie możesz przesyłać dokumentów bez wpisu w BUR.'}
+              Nie masz jeszcze żadnych przesłanych dokumentów.
             </p>
-            {hasBurEntry && (
-              <Link
-                href="/dashboard/files/upload"
-                className="inline-block bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 shadow-lg hover-lift transition-all font-semibold"
-              >
-                Prześlij pierwszy dokument
-              </Link>
-            )}
+            <Link
+              href="/dashboard/files/upload"
+              className="inline-block bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 shadow-lg hover-lift transition-all font-semibold"
+            >
+              Prześlij pierwszy dokument
+            </Link>
           </div>
         ) : (
           <div className="glass rounded-xl shadow-xl overflow-hidden animate-fade-in border border-purple-500/30">

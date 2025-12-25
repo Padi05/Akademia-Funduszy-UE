@@ -17,13 +17,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!session.user.hasBurEntry) {
-      return NextResponse.json(
-        { error: 'Tylko użytkownicy z wpisem w BUR mogą przesyłać pliki' },
-        { status: 403 }
-      )
-    }
-
     const formData = await request.formData()
     const file = formData.get('file') as File
 
