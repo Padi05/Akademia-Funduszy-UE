@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Upload, FileText, X } from 'lucide-react'
 import Link from 'next/link'
 
 const courseSchema = z.object({
@@ -35,6 +35,8 @@ export default function NewCoursePage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [uploadProgress, setUploadProgress] = useState<string>('')
 
   const {
     register,
@@ -47,11 +49,62 @@ export default function NewCoursePage() {
 
   const courseType = watch('type')
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files)
+      // Sprawdź rozmiar plików (max 10MB każdy)
+      const invalidFiles = filesArray.filter(file => file.size > 10 * 1024 * 1024)
+      if (invalidFiles.length > 0) {
+        setError(`Niektóre pliki są zbyt duże (max 10MB): ${invalidFiles.map(f => f.name).join(', ')}`)
+        return
+      }
+      setSelectedFiles(prev => [...prev, ...filesArray])
+      setError(null)
+    }
+  }
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const uploadFiles = async (courseId: string) => {
+    if (selectedFiles.length === 0) return
+
+    setUploadProgress(`Przesyłanie plików (0/${selectedFiles.length})...`)
+    
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i]
+      setUploadProgress(`Przesyłanie plików (${i + 1}/${selectedFiles.length}): ${file.name}...`)
+
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const response = await fetch(`/api/courses/${courseId}/files`, {
+          method: 'POST',
+          body: formData,
+        })
+
+        const result = await response.json()
+
+        if (!response.ok) {
+          throw new Error(result.error || `Błąd podczas przesyłania pliku ${file.name}`)
+        }
+      } catch (err) {
+        throw new Error(`Błąd podczas przesyłania pliku ${file.name}: ${err instanceof Error ? err.message : 'Nieznany błąd'}`)
+      }
+    }
+
+    setUploadProgress('')
+  }
+
   const onSubmit = async (data: CourseForm) => {
     setIsLoading(true)
     setError(null)
+    setUploadProgress('')
 
     try {
+      // Utwórz kurs
       const response = await fetch('/api/courses', {
         method: 'POST',
         headers: {
@@ -74,11 +127,27 @@ export default function NewCoursePage() {
         return
       }
 
+      // Prześlij pliki jeśli są wybrane
+      if (selectedFiles.length > 0) {
+        try {
+          await uploadFiles(result.id)
+        } catch (uploadError) {
+          // Kurs został utworzony, ale pliki nie zostały przesłane
+          setError(uploadError instanceof Error ? uploadError.message : 'Kurs został utworzony, ale wystąpił błąd podczas przesyłania plików')
+          // Przekieruj do edycji kursu, gdzie można dodać pliki ręcznie
+          setTimeout(() => {
+            router.push(`/dashboard/courses/${result.id}/edit`)
+          }, 3000)
+          return
+        }
+      }
+
       router.push(`/dashboard/courses/${result.id}/edit`)
     } catch (err) {
       setError('Wystąpił błąd podczas tworzenia kursu')
     } finally {
       setIsLoading(false)
+      setUploadProgress('')
     }
   }
 
@@ -297,6 +366,69 @@ export default function NewCoursePage() {
               )}
             </div>
           </div>
+
+          <div>
+            <label htmlFor="files" className="block text-sm font-medium text-white mb-2">
+              Pliki kursu (opcjonalnie)
+            </label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-700 border-dashed rounded-md hover:border-purple-500 transition">
+              <div className="space-y-1 text-center">
+                <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                <div className="flex text-sm text-gray-400">
+                  <label
+                    htmlFor="files"
+                    className="relative cursor-pointer bg-gray-800 rounded-md font-medium text-purple-400 hover:text-purple-300 px-4 py-2"
+                  >
+                    <span>Wybierz pliki</span>
+                    <input
+                      id="files"
+                      type="file"
+                      multiple
+                      className="sr-only"
+                      onChange={handleFileChange}
+                      disabled={isLoading}
+                      accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+                    />
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500">PDF, DOC, DOCX, TXT, XLS, XLSX (max 10MB każdy)</p>
+              </div>
+            </div>
+
+            {selectedFiles.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <h4 className="text-sm font-medium text-white">Wybrane pliki:</h4>
+                {selectedFiles.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between bg-gray-800 p-3 rounded border border-gray-700"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <FileText className="h-4 w-4 text-purple-400" />
+                      <span className="text-sm text-gray-300">{file.name}</span>
+                      <span className="text-xs text-gray-500">
+                        ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(index)}
+                      disabled={isLoading}
+                      className="text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {uploadProgress && (
+            <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded">
+              {uploadProgress}
+            </div>
+          )}
 
           <div className="flex justify-end space-x-4 pt-4">
             <Link
