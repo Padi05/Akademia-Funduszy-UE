@@ -13,17 +13,26 @@ export const maxDuration = 30
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> | { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     console.log('=== File Upload Started ===')
+    console.log('Params received:', params)
+    console.log('Params type:', typeof params)
     
-    // Obsługa asynchronicznych params w Next.js 15
-    const resolvedParams = await Promise.resolve(params)
-    const courseId = resolvedParams.id
+    // Sprawdź czy params istnieje i ma właściwość id
+    if (!params || !params.id) {
+      console.error('Invalid params:', params)
+      return NextResponse.json(
+        { error: 'Brak ID kursu w parametrach' },
+        { status: 400 }
+      )
+    }
+    
+    const courseId = params.id
     console.log('Course ID:', courseId)
 
-    if (!courseId) {
+    if (!courseId || courseId.trim() === '') {
       return NextResponse.json(
         { error: 'Brak ID kursu' },
         { status: 400 }
@@ -40,10 +49,22 @@ export async function POST(
       )
     }
 
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-    })
-    console.log('Course found:', course ? { id: course.id, organizerId: course.organizerId } : 'Not found')
+    let course
+    try {
+      course = await prisma.course.findUnique({
+        where: { id: courseId },
+      })
+      console.log('Course found:', course ? { id: course.id, organizerId: course.organizerId } : 'Not found')
+    } catch (dbError: any) {
+      console.error('Database error when fetching course:', dbError)
+      return NextResponse.json(
+        { 
+          error: 'Błąd podczas pobierania kursu z bazy danych',
+          details: dbError instanceof Error ? dbError.message : String(dbError)
+        },
+        { status: 500 }
+      )
+    }
 
     if (!course || course.organizerId !== session.user.id) {
       return NextResponse.json(
@@ -53,7 +74,21 @@ export async function POST(
     }
 
     console.log('Parsing formData...')
-    const formData = await request.formData()
+    let formData: FormData
+    try {
+      formData = await request.formData()
+      console.log('FormData parsed successfully')
+    } catch (formDataError: any) {
+      console.error('FormData parsing error:', formDataError)
+      return NextResponse.json(
+        { 
+          error: 'Błąd podczas parsowania danych formularza',
+          details: formDataError instanceof Error ? formDataError.message : String(formDataError)
+        },
+        { status: 400 }
+      )
+    }
+    
     const file = formData.get('file') as File
     console.log('File received:', file ? { 
       name: file.name, 
@@ -84,71 +119,70 @@ export async function POST(
     const cwd = process.cwd()
     const uploadsDir = join(cwd, 'public', 'uploads', 'courses', courseId)
 
-    // Sprawdź i utwórz katalogi - użyj try-catch z fallback
+    // Sprawdź i utwórz katalogi
+    console.log('=== Directory Creation ===')
+    console.log('CWD:', cwd)
+    console.log('Target directory:', uploadsDir)
+    console.log('Directory exists before creation:', existsSync(uploadsDir))
+    
     try {
-      console.log('=== Directory Creation ===')
-      console.log('CWD:', cwd)
-      console.log('Target directory:', uploadsDir)
+      // Upewnij się, że wszystkie katalogi nadrzędne istnieją
+      const baseUploadsDir = join(cwd, 'public', 'uploads')
+      const coursesDir = join(cwd, 'public', 'uploads', 'courses')
       
-      // Sprawdź czy katalog już istnieje
-      if (existsSync(uploadsDir)) {
-        console.log('Directory already exists, skipping creation')
-      } else {
-        // Utwórz całą strukturę katalogów naraz (recursive tworzy wszystkie potrzebne katalogi)
-        console.log('Creating directory structure...')
-        
-        // Upewnij się, że katalog public/uploads istnieje
-        const baseUploadsDir = join(cwd, 'public', 'uploads')
-        if (!existsSync(baseUploadsDir)) {
-          await mkdir(baseUploadsDir, { recursive: true })
-        }
-        
-        // Upewnij się, że katalog public/uploads/courses istnieje
-        const coursesDir = join(cwd, 'public', 'uploads', 'courses')
-        if (!existsSync(coursesDir)) {
-          await mkdir(coursesDir, { recursive: true })
-        }
-        
-        // Utwórz katalog dla konkretnego kursu
-        await mkdir(uploadsDir, { recursive: true })
-        console.log('Directory created')
-        
-        // Zweryfikuj utworzenie
-        if (!existsSync(uploadsDir)) {
-          throw new Error(`Directory verification failed: ${uploadsDir}`)
-        }
-        console.log('Directory verified')
+      // Utwórz katalogi rekursywnie - mkdir z recursive: true tworzy wszystkie potrzebne katalogi
+      if (!existsSync(baseUploadsDir)) {
+        console.log('Creating base uploads directory:', baseUploadsDir)
+        await mkdir(baseUploadsDir, { recursive: true })
       }
+      
+      if (!existsSync(coursesDir)) {
+        console.log('Creating courses directory:', coursesDir)
+        await mkdir(coursesDir, { recursive: true })
+      }
+      
+      if (!existsSync(uploadsDir)) {
+        console.log('Creating course directory:', uploadsDir)
+        await mkdir(uploadsDir, { recursive: true })
+      }
+      
+      // Zweryfikuj, że katalog został utworzony
+      if (!existsSync(uploadsDir)) {
+        throw new Error(`Failed to create directory: ${uploadsDir}`)
+      }
+      
+      console.log('Directory verified successfully')
     } catch (dirError: any) {
       const errorDetails = dirError instanceof Error ? dirError.message : String(dirError)
       const err = dirError as NodeJS.ErrnoException
       
       console.error('=== Directory Creation Error ===')
+      console.error('Error type:', typeof dirError)
       console.error('Error:', errorDetails)
-      console.error('Code:', err.code)
-      console.error('Errno:', err.errno)
-      console.error('Path:', uploadsDir)
+      console.error('Error code:', err.code)
+      console.error('Error errno:', err.errno)
+      console.error('Error syscall:', err.syscall)
+      console.error('Target path:', uploadsDir)
+      console.error('CWD:', cwd)
       
-      // Jeśli błąd to EEXIST (katalog już istnieje), to kontynuuj
-      if (err.code === 'EEXIST') {
-        console.log('EEXIST error - directory exists, continuing...')
-      } 
-      // Jeśli katalog istnieje mimo błędu, kontynuuj
-      else if (existsSync(uploadsDir)) {
-        console.log('Directory exists despite error, continuing...')
-      } 
-      // W przeciwnym razie zwróć błąd
-      else {
+      // Sprawdź czy katalog istnieje mimo błędu (może być race condition)
+      const dirExists = existsSync(uploadsDir)
+      console.error('Directory exists after error:', dirExists)
+      
+      if (!dirExists) {
         return NextResponse.json(
           { 
             error: 'Nie udało się utworzyć katalogu dla plików',
             details: errorDetails,
             path: uploadsDir,
             code: err.code || 'UNKNOWN',
-            cwd: cwd
+            cwd: cwd,
+            syscall: err.syscall || 'unknown'
           },
           { status: 500 }
         )
+      } else {
+        console.log('Directory exists despite error, continuing...')
       }
     }
 
@@ -264,11 +298,14 @@ export async function POST(
     console.error('=== File Upload Error (Top Level) ===')
     console.error('Error type:', typeof error)
     console.error('Error:', error)
+    console.error('Error stringified:', JSON.stringify(error, Object.getOwnPropertyNames(error)))
+    
     if (error instanceof Error) {
       console.error('Error name:', error.name)
       console.error('Error message:', error.message)
       console.error('Error stack:', error.stack)
     }
+    
     const err = error as NodeJS.ErrnoException
     if (err.code) {
       console.error('Error code:', err.code)
@@ -276,16 +313,24 @@ export async function POST(
     if (err.errno) {
       console.error('Error errno:', err.errno)
     }
+    if (err.syscall) {
+      console.error('Error syscall:', err.syscall)
+    }
+    if (err.path) {
+      console.error('Error path:', err.path)
+    }
     
     const errorMessage = error instanceof Error ? error.message : String(error)
-    return NextResponse.json(
-      { 
-        error: `Wystąpił błąd podczas przesyłania pliku: ${errorMessage}`,
-        type: typeof error,
-        code: err.code || 'UNKNOWN'
-      },
-      { status: 500 }
-    )
+    const errorDetails: any = {
+      error: `Wystąpił błąd podczas przesyłania pliku: ${errorMessage}`,
+      type: typeof error
+    }
+    
+    if (err.code) errorDetails.code = err.code
+    if (err.syscall) errorDetails.syscall = err.syscall
+    if (err.path) errorDetails.path = err.path
+    
+    return NextResponse.json(errorDetails, { status: 500 })
   }
 }
 
