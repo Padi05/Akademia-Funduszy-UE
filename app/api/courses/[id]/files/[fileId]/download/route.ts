@@ -37,9 +37,24 @@ export async function GET(
       )
     }
 
-    const filepath = join(process.cwd(), 'public', file.path)
+    // Określ ścieżkę do pliku - w środowisku serverless używamy /tmp
+    const isVercel = process.env.VERCEL === '1' || process.cwd().includes('/var/task')
+    let filepath: string
+    
+    if (isVercel) {
+      // W środowisku serverless pliki są w /tmp
+      // Ścieżka w bazie to /uploads/courses/..., więc usuwamy /uploads i dodajemy /tmp
+      const relativePath = file.path.replace(/^\/uploads\//, '')
+      filepath = join('/tmp', 'uploads', relativePath)
+    } else {
+      // W środowisku lokalnym używamy public
+      filepath = join(process.cwd(), 'public', file.path)
+    }
+    
+    console.log('File download - path:', filepath, 'isVercel:', isVercel)
 
     if (!existsSync(filepath)) {
+      console.error('File not found at:', filepath)
       return NextResponse.json(
         { error: 'Plik nie istnieje na serwerze' },
         { status: 404 }

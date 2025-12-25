@@ -115,27 +115,37 @@ export async function POST(
     const sanitizedOriginalName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
     const filename = `${Date.now()}-${sanitizedOriginalName}`
 
-    // Utwórz strukturę katalogów dla tego kursu
-    const cwd = process.cwd()
-    const uploadsDir = join(cwd, 'public', 'uploads', 'courses', courseId)
+    // Określ ścieżkę do katalogu uploads
+    // W środowisku serverless (Vercel) używamy /tmp, w lokalnym używamy public/uploads
+    const isVercel = process.env.VERCEL === '1' || process.cwd().includes('/var/task')
+    
+    let uploadsDir: string
+    let publicPath: string // Ścieżka względna dla URL
+    
+    if (isVercel) {
+      // W środowisku serverless używamy /tmp (public jest tylko do odczytu)
+      uploadsDir = join('/tmp', 'uploads', 'courses', courseId)
+      publicPath = `/uploads/courses/${courseId}/${filename}`
+      console.log('Using serverless environment - /tmp directory')
+    } else {
+      // W środowisku lokalnym używamy public/uploads
+      const cwd = process.cwd()
+      uploadsDir = join(cwd, 'public', 'uploads', 'courses', courseId)
+      publicPath = `/uploads/courses/${courseId}/${filename}`
+      console.log('Using local environment - public/uploads directory')
+    }
+    
+    console.log('Environment:', { isVercel, cwd: process.cwd() })
+    console.log('Uploads directory:', uploadsDir)
 
     // Sprawdź i utwórz katalogi
     console.log('=== Directory Creation ===')
-    console.log('CWD:', cwd)
+    console.log('CWD:', process.cwd())
     console.log('Target directory:', uploadsDir)
     console.log('Directory exists before creation:', existsSync(uploadsDir))
     
     try {
-      // Upewnij się, że wszystkie katalogi nadrzędne istnieją
-      const baseUploadsDir = join(cwd, 'public', 'uploads')
-      const coursesDir = join(cwd, 'public', 'uploads', 'courses')
-      
-      console.log('Base uploads dir:', baseUploadsDir)
-      console.log('Courses dir:', coursesDir)
-      console.log('Course-specific dir:', uploadsDir)
-      
       // Utwórz katalogi rekursywnie - mkdir z recursive: true tworzy wszystkie potrzebne katalogi
-      // Używamy jednego wywołania mkdir z recursive dla całej ścieżki
       console.log('Creating directory structure recursively...')
       await mkdir(uploadsDir, { recursive: true })
       console.log('Directory creation command completed')
@@ -145,13 +155,8 @@ export async function POST(
       console.log('Directory exists after creation:', dirExists)
       
       if (!dirExists) {
-        // Sprawdź czy katalogi nadrzędne istnieją
-        const baseExists = existsSync(baseUploadsDir)
-        const coursesExists = existsSync(coursesDir)
         console.error('Directory verification failed!')
-        console.error('Base uploads dir exists:', baseExists)
-        console.error('Courses dir exists:', coursesExists)
-        throw new Error(`Failed to create directory: ${uploadsDir}. Base exists: ${baseExists}, Courses exists: ${coursesExists}`)
+        throw new Error(`Failed to create directory: ${uploadsDir}`)
       }
       
       console.log('Directory verified successfully')
@@ -166,7 +171,8 @@ export async function POST(
       console.error('Error errno:', err.errno)
       console.error('Error syscall:', err.syscall)
       console.error('Target path:', uploadsDir)
-      console.error('CWD:', cwd)
+      console.error('CWD:', process.cwd())
+      console.error('Environment:', { isVercel })
       
       // Sprawdź czy katalog istnieje mimo błędu (może być race condition)
       const dirExists = existsSync(uploadsDir)
@@ -179,8 +185,9 @@ export async function POST(
             details: errorDetails,
             path: uploadsDir,
             code: err.code || 'UNKNOWN',
-            cwd: cwd,
-            syscall: err.syscall || 'unknown'
+            cwd: process.cwd(),
+            syscall: err.syscall || 'unknown',
+            environment: { isVercel }
           },
           { status: 500 }
         )
@@ -267,7 +274,7 @@ export async function POST(
         data: {
           filename,
           originalName: file.name,
-          path: `/uploads/courses/${courseId}/${filename}`,
+          path: publicPath,
           size: fileSize,
           mimeType: mimeType,
           courseId: courseId,

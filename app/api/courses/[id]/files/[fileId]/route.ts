@@ -46,8 +46,19 @@ export async function DELETE(
       )
     }
 
-    // Usuń plik z dysku
-    const filepath = join(process.cwd(), 'public', file.path)
+    // Usuń plik z dysku - obsługa zarówno lokalnego jak i serverless środowiska
+    const isVercel = process.env.VERCEL === '1' || process.cwd().includes('/var/task')
+    let filepath: string
+    
+    if (isVercel) {
+      // W środowisku serverless pliki są w /tmp
+      const relativePath = file.path.replace(/^\/uploads\//, '')
+      filepath = join('/tmp', 'uploads', relativePath)
+    } else {
+      // W środowisku lokalnym używamy public
+      filepath = join(process.cwd(), 'public', file.path)
+    }
+    
     if (existsSync(filepath)) {
       await unlink(filepath)
     }
