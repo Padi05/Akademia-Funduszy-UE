@@ -11,6 +11,24 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
 
+// Funkcja pomocnicza do tworzenia katalogów
+async function ensureDirectoryExists(dirPath: string): Promise<void> {
+  try {
+    if (!existsSync(dirPath)) {
+      await mkdir(dirPath, { recursive: true })
+      console.log('Directory created:', dirPath)
+    }
+    
+    // Sprawdź czy katalog rzeczywiście istnieje
+    if (!existsSync(dirPath)) {
+      throw new Error(`Failed to create directory: ${dirPath}`)
+    }
+  } catch (error) {
+    console.error('Error creating directory:', dirPath, error)
+    throw error
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> | { id: string } }
@@ -80,51 +98,44 @@ export async function POST(
     const sanitizedOriginalName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
     const filename = `${Date.now()}-${sanitizedOriginalName}`
 
-    // Utwórz strukturę katalogów jeśli nie istnieje
-    const publicDir = join(process.cwd(), 'public')
+    // Utwórz strukturę katalogów dla tego kursu
+    const cwd = process.cwd()
+    const publicDir = join(cwd, 'public')
     const uploadsBaseDir = join(publicDir, 'uploads')
     const uploadsCoursesDir = join(uploadsBaseDir, 'courses')
     const uploadsDir = join(uploadsCoursesDir, courseId)
 
     try {
-      // Utwórz katalog public jeśli nie istnieje
-      if (!existsSync(publicDir)) {
-        await mkdir(publicDir, { recursive: true })
-        console.log('Created public directory:', publicDir)
-      }
+      console.log('Creating directory structure...', {
+        cwd,
+        publicDir,
+        uploadsBaseDir,
+        uploadsCoursesDir,
+        uploadsDir
+      })
 
-      // Utwórz katalog uploads jeśli nie istnieje
-      if (!existsSync(uploadsBaseDir)) {
-        await mkdir(uploadsBaseDir, { recursive: true })
-        console.log('Created uploads directory:', uploadsBaseDir)
-      }
-
-      // Utwórz katalog courses jeśli nie istnieje
-      if (!existsSync(uploadsCoursesDir)) {
-        await mkdir(uploadsCoursesDir, { recursive: true })
-        console.log('Created courses directory:', uploadsCoursesDir)
-      }
-
-      // Utwórz katalog dla konkretnego kursu jeśli nie istnieje
-      if (!existsSync(uploadsDir)) {
-        await mkdir(uploadsDir, { recursive: true })
-        console.log('Created course directory:', uploadsDir)
-      }
+      // Utwórz wszystkie katalogi w kolejności - recursive: true utworzy wszystkie potrzebne katalogi nadrzędne
+      await ensureDirectoryExists(publicDir)
+      await ensureDirectoryExists(uploadsBaseDir)
+      await ensureDirectoryExists(uploadsCoursesDir)
+      await ensureDirectoryExists(uploadsDir)
+      
+      console.log('All directories created successfully:', uploadsDir)
     } catch (dirError) {
       const errorDetails = dirError instanceof Error ? dirError.message : String(dirError)
       console.error('Directory creation error:', {
         error: errorDetails,
-        publicDir,
-        uploadsBaseDir,
-        uploadsCoursesDir,
         uploadsDir,
         courseId,
-        cwd: process.cwd()
+        cwd,
+        stack: dirError instanceof Error ? dirError.stack : undefined
       })
+      
       return NextResponse.json(
         { 
           error: 'Nie udało się utworzyć katalogu dla plików',
-          details: errorDetails
+          details: errorDetails,
+          path: uploadsDir
         },
         { status: 500 }
       )
