@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { ArrowLeft, Save, Upload, FileText, X, CreditCard, Check } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect } from 'react'
 
 const courseSchema = z.object({
   title: z.string().min(3, 'Tytuł musi mieć minimum 3 znaki'),
@@ -37,8 +38,8 @@ export default function NewCoursePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState<string>('')
-  const [paymentId, setPaymentId] = useState<string | null>(null)
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+  const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean | null>(null)
+  const [isCheckingSubscription, setIsCheckingSubscription] = useState(true)
 
   const {
     register,
@@ -50,6 +51,23 @@ export default function NewCoursePage() {
   })
 
   const courseType = watch('type')
+
+  // Sprawdź status subskrypcji przy załadowaniu komponentu
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const response = await fetch('/api/subscription')
+        const data = await response.json()
+        setHasActiveSubscription(data.isActive || false)
+      } catch (err) {
+        console.error('Error checking subscription:', err)
+        setHasActiveSubscription(false)
+      } finally {
+        setIsCheckingSubscription(false)
+      }
+    }
+    checkSubscription()
+  }, [])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -100,38 +118,9 @@ export default function NewCoursePage() {
     setUploadProgress('')
   }
 
-  const handlePayment = async () => {
-    setIsProcessingPayment(true)
-    setError(null)
-
-    try {
-      // Utwórz płatność (bez courseId - zostanie powiązana po utworzeniu kursu)
-      const paymentResponse = await fetch('/api/courses/payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      const paymentResult = await paymentResponse.json()
-
-      if (!paymentResponse.ok) {
-        setError(paymentResult.error || 'Wystąpił błąd podczas przetwarzania płatności')
-        return
-      }
-
-      setPaymentId(paymentResult.payment.id)
-      setError(null)
-    } catch (err) {
-      setError('Wystąpił błąd podczas przetwarzania płatności')
-    } finally {
-      setIsProcessingPayment(false)
-    }
-  }
-
   const onSubmit = async (data: CourseForm) => {
-    if (!paymentId) {
-      setError('Musisz najpierw opłacić 100 PLN za dodanie kursu')
+    if (!hasActiveSubscription) {
+      setError('Aby dodać kurs, potrzebujesz aktywnej subskrypcji miesięcznej. Przejdź do sekcji Subskrypcja, aby ją aktywować.')
       return
     }
 
@@ -153,16 +142,15 @@ export default function NewCoursePage() {
           onlinePrice: data.onlinePrice ? parseFloat(data.onlinePrice) : (courseType === 'ONLINE' ? 100 : null),
           commissionRate: data.commissionRate ? parseFloat(data.commissionRate) : (courseType === 'ONLINE' ? 10 : null),
           isPublished: data.isPublished || false,
-          paymentId, // Przekaż ID płatności
         }),
       })
 
       const result = await response.json()
 
       if (!response.ok) {
-        if (result.requiresPayment) {
-          setError(result.message || 'Płatność jest wymagana. Kliknij "Opłać 100 PLN" aby kontynuować.')
-          setPaymentId(null) // Reset paymentId jeśli płatność nie jest ważna
+        if (result.requiresSubscription) {
+          setError(result.message || 'Aby dodać kurs, potrzebujesz aktywnej subskrypcji miesięcznej.')
+          router.push('/dashboard/subscription')
         } else {
           setError(result.error || 'Wystąpił błąd podczas tworzenia kursu')
         }
@@ -284,53 +272,60 @@ export default function NewCoursePage() {
           </div>
         )}
 
-        {/* Informacja o płatności */}
-        <div className={`mb-6 p-4 rounded-lg border ${
-          paymentId 
-            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
-            : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
-        }`}>
-          <div className="flex items-center justify-between">
+        {/* Informacja o subskrypcji */}
+        {isCheckingSubscription ? (
+          <div className="mb-6 p-4 rounded-lg border bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3">
-              {paymentId ? (
-                <>
-                  <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  <div>
-                    <p className="font-semibold text-green-800 dark:text-green-200">
-                      Płatność została opłacona
-                    </p>
-                    <p className="text-sm text-green-600 dark:text-green-300">
-                      Możesz teraz utworzyć kurs
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <CreditCard className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-                  <div>
-                    <p className="font-semibold text-yellow-800 dark:text-yellow-200">
-                      Wymagana płatność: 100 PLN
-                    </p>
-                    <p className="text-sm text-yellow-600 dark:text-yellow-300">
-                      Aby dodać kurs, musisz najpierw opłacić 100 PLN
-                    </p>
-                  </div>
-                </>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
+              <p className="text-gray-700 dark:text-gray-300">Sprawdzanie statusu subskrypcji...</p>
+            </div>
+          </div>
+        ) : (
+          <div className={`mb-6 p-4 rounded-lg border ${
+            hasActiveSubscription 
+              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+              : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {hasActiveSubscription ? (
+                  <>
+                    <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <div>
+                      <p className="font-semibold text-green-800 dark:text-green-200">
+                        Masz aktywną subskrypcję
+                      </p>
+                      <p className="text-sm text-green-600 dark:text-green-300">
+                        Możesz dodawać kursy bez dodatkowych opłat
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                    <div>
+                      <p className="font-semibold text-yellow-800 dark:text-yellow-200">
+                        Wymagana subskrypcja miesięczna
+                      </p>
+                      <p className="text-sm text-yellow-600 dark:text-yellow-300">
+                        Aby dodać kurs, musisz mieć aktywną subskrypcję miesięczną
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+              {!hasActiveSubscription && (
+                <Link
+                  href="/dashboard/subscription"
+                  className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md flex items-center gap-2 transition-colors"
+                >
+                  <CreditCard className="h-4 w-4" />
+                  Aktywuj subskrypcję
+                </Link>
               )}
             </div>
-            {!paymentId && (
-              <button
-                type="button"
-                onClick={handlePayment}
-                disabled={isProcessingPayment}
-                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                <CreditCard className="h-4 w-4" />
-                {isProcessingPayment ? 'Przetwarzanie...' : 'Opłać 100 PLN'}
-              </button>
-            )}
           </div>
-        </div>
+        )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
@@ -529,15 +524,15 @@ export default function NewCoursePage() {
             </Link>
             <button
               type="submit"
-              disabled={isLoading || !paymentId}
+              disabled={isLoading || !hasActiveSubscription || isCheckingSubscription}
               className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="h-4 w-4" />
               <span>
                 {isLoading 
                   ? 'Zapisywanie...' 
-                  : !paymentId 
-                    ? 'Najpierw opłać 100 PLN' 
+                  : !hasActiveSubscription 
+                    ? 'Wymagana subskrypcja' 
                     : 'Zapisz kurs'
                 }
               </span>

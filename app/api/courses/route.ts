@@ -34,56 +34,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
-    const validatedData = courseSchema.parse(body)
+    // Sprawdź czy użytkownik ma aktywną subskrypcję
+    const subscription = await prisma.subscription.findUnique({
+      where: { userId: session.user.id },
+    })
 
-    // Sprawdź czy w żądaniu jest paymentId (płatność musi być wykonana przed utworzeniem kursu)
-    const { paymentId, ...courseData } = body
+    const now = new Date()
+    const hasActiveSubscription = subscription && 
+      subscription.status === 'ACTIVE' && 
+      subscription.endDate > now
 
-    if (!paymentId) {
+    if (!hasActiveSubscription) {
       return NextResponse.json(
         { 
-          error: 'Płatność jest wymagana',
-          requiresPayment: true,
-          amount: 100.0,
-          message: 'Aby dodać kurs, musisz najpierw opłacić 100 PLN'
+          error: 'Aby dodać kurs, potrzebujesz aktywnej subskrypcji miesięcznej',
+          requiresSubscription: true,
+          message: 'Aktywuj subskrypcję miesięczną, aby móc dodawać kursy'
         },
         { status: 402 } // 402 Payment Required
       )
     }
 
-    // Sprawdź czy płatność istnieje i jest zakończona
-    const payment = await prisma.coursePayment.findUnique({
-      where: { id: paymentId },
-    })
+    const body = await request.json()
+    const validatedData = courseSchema.parse(body)
 
-    if (!payment || payment.status !== 'COMPLETED') {
-      return NextResponse.json(
-        { 
-          error: 'Nieprawidłowa lub nieopłacona płatność',
-          requiresPayment: true,
-          amount: 100.0
-        },
-        { status: 402 }
-      )
-    }
-
-    if (payment.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: 'Płatność nie należy do tego użytkownika' },
-        { status: 403 }
-      )
-    }
-
-    // Sprawdź czy płatność nie została już użyta (czy ma już powiązany kurs)
-    if (payment.courseId) {
-      return NextResponse.json(
-        { error: 'Ta płatność została już wykorzystana' },
-        { status: 400 }
-      )
-    }
-
-    // Utwórz kurs
+    // Utwórz kurs (z aktywną subskrypcją nie wymagamy dodatkowej płatności 100 PLN)
     const course = await prisma.course.create({
       data: {
         title: validatedData.title,
@@ -99,14 +74,6 @@ export async function POST(request: NextRequest) {
         onlinePrice: validatedData.onlinePrice || (validatedData.isOnlineCourse ? 100 : null),
         commissionRate: validatedData.commissionRate || (validatedData.isOnlineCourse ? 10 : null),
         isPublished: validatedData.isPublished || false,
-      },
-    })
-
-    // Powiąż płatność z utworzonym kursem
-    await prisma.coursePayment.update({
-      where: { id: paymentId },
-      data: {
-        courseId: course.id,
       },
     })
 
