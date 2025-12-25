@@ -20,7 +20,11 @@ export default function WatchCourse({ course }: WatchCourseProps) {
 
   const handleVideoEnd = () => {
     if (currentVideo) {
-      setWatchedVideos(new Set([...watchedVideos, currentVideo.id]))
+      setWatchedVideos(prev => {
+        const newSet = new Set(prev)
+        newSet.add(currentVideo.id)
+        return newSet
+      })
     }
     if (currentVideoIndex < course.videoFiles.length - 1) {
       setCurrentVideoIndex(currentVideoIndex + 1)
