@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { LogIn, LogOut, User, Home, Menu, X } from 'lucide-react'
+import { LogIn, LogOut, User, Home, Menu, X, FileText } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Navbar() {
@@ -60,6 +60,13 @@ export default function Navbar() {
                 >
                   <User className="h-4 w-4" />
                   <span>Dashboard</span>
+                </Link>
+                <Link
+                  href="/dashboard/course-files"
+                  className="text-gray-200 hover:text-purple-300 px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 hover:bg-gray-800 transition-all"
+                >
+                  <FileText className="h-4 w-4" />
+                  <span>Pliki z kursów</span>
                 </Link>
                 <div className="flex items-center space-x-2 bg-gray-800 px-3 py-2 rounded-lg border border-gray-700">
                   <span className="font-semibold text-white text-sm max-w-[120px] truncate">{session.user.name}</span>
@@ -135,6 +142,14 @@ export default function Navbar() {
                   >
                     <User className="h-4 w-4" />
                     <span>Dashboard</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/course-files"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-gray-200 hover:text-purple-300 px-4 py-3 rounded-lg text-sm font-medium flex items-center space-x-2 hover:bg-gray-800 transition-all"
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span>Pliki z kursów</span>
                   </Link>
                   <div className="px-4 py-3 bg-gray-800 rounded-lg border border-gray-700">
                     <div className="flex flex-col space-y-2">
