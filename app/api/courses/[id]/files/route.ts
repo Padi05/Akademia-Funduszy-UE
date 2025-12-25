@@ -64,16 +64,52 @@ export async function POST(
     const sanitizedOriginalName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
     const filename = `${Date.now()}-${sanitizedOriginalName}`
 
-    // Utwórz katalog jeśli nie istnieje
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'courses', courseId)
+    // Utwórz strukturę katalogów jeśli nie istnieje
+    const publicDir = join(process.cwd(), 'public')
+    const uploadsBaseDir = join(publicDir, 'uploads')
+    const uploadsCoursesDir = join(uploadsBaseDir, 'courses')
+    const uploadsDir = join(uploadsCoursesDir, courseId)
+
     try {
+      // Utwórz katalog public jeśli nie istnieje
+      if (!existsSync(publicDir)) {
+        await mkdir(publicDir, { recursive: true })
+        console.log('Created public directory:', publicDir)
+      }
+
+      // Utwórz katalog uploads jeśli nie istnieje
+      if (!existsSync(uploadsBaseDir)) {
+        await mkdir(uploadsBaseDir, { recursive: true })
+        console.log('Created uploads directory:', uploadsBaseDir)
+      }
+
+      // Utwórz katalog courses jeśli nie istnieje
+      if (!existsSync(uploadsCoursesDir)) {
+        await mkdir(uploadsCoursesDir, { recursive: true })
+        console.log('Created courses directory:', uploadsCoursesDir)
+      }
+
+      // Utwórz katalog dla konkretnego kursu jeśli nie istnieje
       if (!existsSync(uploadsDir)) {
         await mkdir(uploadsDir, { recursive: true })
+        console.log('Created course directory:', uploadsDir)
       }
     } catch (dirError) {
-      console.error('Directory creation error:', dirError)
+      const errorDetails = dirError instanceof Error ? dirError.message : String(dirError)
+      console.error('Directory creation error:', {
+        error: errorDetails,
+        publicDir,
+        uploadsBaseDir,
+        uploadsCoursesDir,
+        uploadsDir,
+        courseId,
+        cwd: process.cwd()
+      })
       return NextResponse.json(
-        { error: 'Nie udało się utworzyć katalogu dla plików' },
+        { 
+          error: 'Nie udało się utworzyć katalogu dla plików',
+          details: errorDetails
+        },
         { status: 500 }
       )
     }
