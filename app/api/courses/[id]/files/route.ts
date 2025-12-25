@@ -11,24 +11,6 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
 
-// Funkcja pomocnicza do tworzenia katalogów
-async function ensureDirectoryExists(dirPath: string): Promise<void> {
-  try {
-    if (!existsSync(dirPath)) {
-      await mkdir(dirPath, { recursive: true })
-      console.log('Directory created:', dirPath)
-    }
-    
-    // Sprawdź czy katalog rzeczywiście istnieje
-    if (!existsSync(dirPath)) {
-      throw new Error(`Failed to create directory: ${dirPath}`)
-    }
-  } catch (error) {
-    console.error('Error creating directory:', dirPath, error)
-    throw error
-  }
-}
-
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -96,47 +78,54 @@ export async function POST(
     const sanitizedOriginalName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
     const filename = `${Date.now()}-${sanitizedOriginalName}`
 
-    // Utwórz strukturę katalogów dla tego kursu
+    // Utwórz strukturę katalogów dla tego kursu - użyj bezpośrednio mkdir z recursive
     const cwd = process.cwd()
-    const publicDir = join(cwd, 'public')
-    const uploadsBaseDir = join(publicDir, 'uploads')
-    const uploadsCoursesDir = join(uploadsBaseDir, 'courses')
-    const uploadsDir = join(uploadsCoursesDir, courseId)
+    const uploadsDir = join(cwd, 'public', 'uploads', 'courses', courseId)
 
     try {
       console.log('Creating directory structure...', {
         cwd,
-        publicDir,
-        uploadsBaseDir,
-        uploadsCoursesDir,
-        uploadsDir
+        uploadsDir,
+        courseId
       })
 
-      // Utwórz wszystkie katalogi w kolejności - recursive: true utworzy wszystkie potrzebne katalogi nadrzędne
-      await ensureDirectoryExists(publicDir)
-      await ensureDirectoryExists(uploadsBaseDir)
-      await ensureDirectoryExists(uploadsCoursesDir)
-      await ensureDirectoryExists(uploadsDir)
+      // Utwórz całą strukturę katalogów naraz - recursive: true utworzy wszystkie potrzebne katalogi nadrzędne
+      await mkdir(uploadsDir, { recursive: true })
       
-      console.log('All directories created successfully:', uploadsDir)
+      // Sprawdź czy katalog został utworzony
+      if (!existsSync(uploadsDir)) {
+        throw new Error(`Directory was not created: ${uploadsDir}`)
+      }
+      
+      console.log('Directory created successfully:', uploadsDir)
     } catch (dirError) {
       const errorDetails = dirError instanceof Error ? dirError.message : String(dirError)
+      const err = dirError as NodeJS.ErrnoException
+      
       console.error('Directory creation error:', {
         error: errorDetails,
+        code: err.code,
+        errno: err.errno,
         uploadsDir,
         courseId,
         cwd,
         stack: dirError instanceof Error ? dirError.stack : undefined
       })
       
-      return NextResponse.json(
-        { 
-          error: 'Nie udało się utworzyć katalogu dla plików',
-          details: errorDetails,
-          path: uploadsDir
-        },
-        { status: 500 }
-      )
+      // Jeśli katalog już istnieje, kontynuuj
+      if (err.code === 'EEXIST' || existsSync(uploadsDir)) {
+        console.log('Directory already exists, continuing...')
+      } else {
+        return NextResponse.json(
+          { 
+            error: 'Nie udało się utworzyć katalogu dla plików',
+            details: errorDetails,
+            path: uploadsDir,
+            code: err.code
+          },
+          { status: 500 }
+        )
+      }
     }
 
     // Zapisz plik
