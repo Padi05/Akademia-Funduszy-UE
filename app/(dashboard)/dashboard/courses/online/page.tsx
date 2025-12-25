@@ -6,23 +6,17 @@ import Link from 'next/link'
 import { ArrowLeft, Play, DollarSign, Users, Eye } from 'lucide-react'
 import { format } from 'date-fns'
 import { pl } from 'date-fns/locale/pl'
-import { Prisma } from '@prisma/client'
+import { Course, CourseVideoFile, User } from '@prisma/client'
 
-type CourseWithIncludes = Prisma.CourseGetPayload<{
-  include: {
-    organizer: {
-      select: {
-        name: true
-      }
-    }
-    videoFiles: true
-    _count: {
-      select: {
-        purchases: true
-      }
-    }
+type CourseWithIncludes = Course & {
+  organizer: {
+    name: string
   }
-}>
+  videoFiles: CourseVideoFile[]
+  _count: {
+    purchases: number
+  }
+}
 
 async function getOnlineCourses(): Promise<CourseWithIncludes[]> {
   try {

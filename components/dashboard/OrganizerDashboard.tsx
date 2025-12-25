@@ -78,7 +78,7 @@ export default function OrganizerDashboard({ courses }: OrganizerDashboardProps)
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="flex items-start justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900 flex-1 group-hover:text-primary-600 transition-colors">
+                <h3 className="text-2xl font-bold text-white flex-1 group-hover:text-purple-300 transition-colors">
                   {course.title}
                 </h3>
                 <span
