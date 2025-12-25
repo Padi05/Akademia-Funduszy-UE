@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  role          String    // ORGANIZER lub PARTICIPANT
+  hasBurEntry   Boolean   @default(false) // Czy ma wpis w BUR
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  courses       Course[]
+  files         UserFile[]
+  purchases     CoursePurchase[] // Zakupione kursy online
+}
+
+model Course {
+  id            String      @id @default(cuid())
+  title         String
+  description   String
+  type          String      // STACJONARNY lub ONLINE
+  price         Float
+  fundingInfo   String      // Informacje o dofinansowaniu
+  startDate     DateTime
+  endDate       DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  // Pola dla kursów online
+  isOnlineCourse Boolean   @default(false) // Czy to kurs online do sprzedaży
+  onlinePrice    Float?    // Cena kursu online (domyślnie 100 zł)
+  commissionRate Float?    // Procent prowizji dla właściciela strony (domyślnie 10%)
+  isPublished    Boolean   @default(false) // Czy kurs jest wystawiony na sprzedaż
+  videoFiles     CourseVideoFile[] // Pliki wideo kursu online
+  
+  organizerId   String
+  organizer     User        @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  files         CourseFile[]
+  purchases     CoursePurchase[] // Zakupy kursów online
+}
+
+model CourseFile {
+  id          String    @id @default(cuid())
+  filename    String
+  originalName String
+  path        String
+  size        Int
+  mimeType    String
+  createdAt   DateTime  @default(now())
+  
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model UserFile {
+  id          String    @id @default(cuid())
+  filename    String
+  originalName String
+  path        String
+  size        Int
+  mimeType    String
+  createdAt   DateTime  @default(now())
+  
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CourseVideoFile {
+  id          String    @id @default(cuid())
+  filename    String
+  originalName String
+  path        String
+  size        Int
+  mimeType    String
+  duration    Int?      // Długość wideo w sekundach
+  order       Int       @default(0) // Kolejność odtwarzania
+  createdAt   DateTime  @default(now())
+  
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model CoursePurchase {
+  id          String    @id @default(cuid())
+  purchaseDate DateTime @default(now())
+  price       Float     // Cena zakupu
+  commission  Float     // Prowizja dla właściciela strony
+  
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
