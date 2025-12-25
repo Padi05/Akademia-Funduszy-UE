@@ -1,6 +1,6 @@
 import 'next-auth'
 
-export type UserRole = 'ORGANIZER' | 'PARTICIPANT'
+export type UserRole = 'ORGANIZER' | 'PARTICIPANT' | 'ADMIN'
 
 declare module 'next-auth' {
   interface Session {

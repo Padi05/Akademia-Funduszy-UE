@@ -13,7 +13,9 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:reset": "prisma migrate reset",
-    "test-db": "node test-db-connection.js"
+    "test-db": "node test-db-connection.js",
+    "create-admin": "node scripts/create-admin.js",
+    "import-neon": "node scripts/import-to-neon.js"
   },
   "dependencies": {
     "next": "14.0.4",

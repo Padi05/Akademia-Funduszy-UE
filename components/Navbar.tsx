@@ -81,8 +81,18 @@ export default function Navbar() {
                 
                 <div className="flex items-center gap-2 bg-gray-800/80 px-3 xl:px-4 py-2 rounded-lg border border-gray-700/50 hover:border-gray-600 transition-all duration-200">
                   <span className="font-semibold text-white text-sm max-w-[140px] xl:max-w-[180px] truncate">{session.user.name}</span>
-                  <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded-full font-medium whitespace-nowrap flex-shrink-0">
-                    {session.user.role === 'ORGANIZER' ? 'Organizator' : 'Uczestnik'}
+                  <span className={`text-xs text-white px-2 py-1 rounded-full font-medium whitespace-nowrap flex-shrink-0 ${
+                    session.user.role === 'ADMIN' 
+                      ? 'bg-red-600' 
+                      : session.user.role === 'ORGANIZER' 
+                        ? 'bg-purple-600' 
+                        : 'bg-blue-600'
+                  }`}>
+                    {session.user.role === 'ADMIN' 
+                      ? 'Admin' 
+                      : session.user.role === 'ORGANIZER' 
+                        ? 'Organizator' 
+                        : 'Uczestnik'}
                   </span>
                 </div>
                 
@@ -184,8 +194,18 @@ export default function Navbar() {
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-white text-sm truncate">{session.user.name}</span>
                       </div>
-                      <span className="inline-block text-xs bg-purple-600 text-white px-2 py-1 rounded-full font-medium w-fit">
-                        {session.user.role === 'ORGANIZER' ? 'Organizator' : 'Uczestnik'}
+                      <span className={`inline-block text-xs text-white px-2 py-1 rounded-full font-medium w-fit ${
+                        session.user.role === 'ADMIN' 
+                          ? 'bg-red-600' 
+                          : session.user.role === 'ORGANIZER' 
+                            ? 'bg-purple-600' 
+                            : 'bg-blue-600'
+                      }`}>
+                        {session.user.role === 'ADMIN' 
+                          ? 'Admin' 
+                          : session.user.role === 'ORGANIZER' 
+                            ? 'Organizator' 
+                            : 'Uczestnik'}
                       </span>
                     </div>
                   </div>

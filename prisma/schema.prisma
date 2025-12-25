@@ -15,7 +15,7 @@ model User {
   email         String    @unique
   password      String
   name          String
-  role          String    // ORGANIZER lub PARTICIPANT
+  role          String    // ORGANIZER, PARTICIPANT lub ADMIN
   hasBurEntry   Boolean   @default(false) // Czy ma wpis w BUR
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
