@@ -90,21 +90,22 @@ export default function EditCourseForm({ course }: EditCourseFormProps) {
     <div className="min-h-screen">
       {/* Hero Section z tłem */}
       <div className="hero-background relative overflow-hidden">
-        <div className="hero-content max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="hero-content max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <Link
             href="/dashboard"
-            className="inline-flex items-center text-white hover:text-yellow-300 mb-6 transition-colors drop-shadow-md"
+            className="inline-flex items-center text-white hover:text-yellow-300 mb-4 sm:mb-6 transition-colors drop-shadow-md text-sm sm:text-base"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Powrót do dashboardu
+            <span className="hidden sm:inline">Powrót do dashboardu</span>
+            <span className="sm:hidden">Powrót</span>
           </Link>
         </div>
       </div>
 
       <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="glass rounded-2xl shadow-xl p-8 border border-purple-500/30">
-        <h1 className="text-2xl font-bold text-white mb-6">Edytuj kurs</h1>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="glass rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-500/30">
+        <h1 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Edytuj kurs</h1>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">

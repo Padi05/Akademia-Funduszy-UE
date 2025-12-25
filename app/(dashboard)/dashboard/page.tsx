@@ -39,13 +39,13 @@ export default async function DashboardPage() {
     <div className="min-h-screen">
       {/* Hero Section z tłem jak na stronie głównej */}
       <div className="hero-background relative overflow-hidden">
-        <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="mb-10 animate-fade-in-scale">
-            <div className="glass rounded-2xl p-8 shadow-xl">
-              <h1 className="text-4xl font-bold text-white mb-3 drop-shadow-lg">
+        <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="mb-8 sm:mb-10 animate-fade-in-scale">
+            <div className="glass rounded-2xl p-6 sm:p-8 shadow-xl">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3 drop-shadow-lg">
                 Witaj, {session.user.name}! 👋
               </h1>
-            <p className="text-lg text-white drop-shadow-md">
+            <p className="text-base sm:text-lg text-white drop-shadow-md">
               {session.user.role === 'ORGANIZER'
                 ? 'Zarządzaj swoimi kursami dotacyjnymi i rozwijaj swoją działalność'
                 : 'Przeglądaj dostępne kursy i zarządzaj dokumentami'}
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
 
       {/* Sekcja z zawartością */}
       <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
           {session.user.role === 'ORGANIZER' ? (
             <OrganizerDashboard courses={await getOrganizerData(session.user.id)} />

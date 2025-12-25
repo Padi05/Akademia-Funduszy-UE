@@ -34,24 +34,25 @@ export default function WatchCourse({ course }: WatchCourseProps) {
   return (
     <div className="min-h-screen">
       <div className="hero-background relative overflow-hidden">
-        <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+        <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10">
           <Link
             href="/dashboard/courses/online"
-            className="inline-flex items-center text-white hover:text-purple-300 mb-6 transition-colors drop-shadow-md"
+            className="inline-flex items-center text-white hover:text-purple-300 mb-4 sm:mb-6 transition-colors drop-shadow-md text-sm sm:text-base"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Powrót do kursów online
+            <span className="hidden sm:inline">Powrót do kursów online</span>
+            <span className="sm:hidden">Powrót</span>
           </Link>
         </div>
       </div>
 
       <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Główny odtwarzacz */}
-            <div className="lg:col-span-3">
-              <div className="glass rounded-2xl shadow-xl p-6 border border-purple-500/30 mb-6">
-                <h1 className="text-2xl font-bold text-white mb-4">{course.title}</h1>
+            <div className="lg:col-span-3 order-2 lg:order-1">
+              <div className="glass rounded-2xl shadow-xl p-4 sm:p-6 border border-purple-500/30 mb-4 sm:mb-6">
+                <h1 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">{course.title}</h1>
                 {currentVideo ? (
                   <div className="aspect-video bg-black rounded-lg overflow-hidden">
                     <video
@@ -74,9 +75,9 @@ export default function WatchCourse({ course }: WatchCourseProps) {
             </div>
 
             {/* Lista lekcji */}
-            <div className="lg:col-span-1">
-              <div className="glass rounded-2xl shadow-xl p-6 border border-purple-500/30">
-                <h2 className="text-lg font-bold text-white mb-4">Lekcje</h2>
+            <div className="lg:col-span-1 order-1 lg:order-2">
+              <div className="glass rounded-2xl shadow-xl p-4 sm:p-6 border border-purple-500/30 mb-4 lg:mb-0">
+                <h2 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">Lekcje</h2>
                 <div className="space-y-2">
                   {course.videoFiles.map((video, index) => (
                     <button

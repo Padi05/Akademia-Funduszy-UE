@@ -2,10 +2,12 @@
 
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { LogIn, LogOut, User, Home } from 'lucide-react'
+import { LogIn, LogOut, User, Home, Menu, X } from 'lucide-react'
+import { useState } from 'react'
 
 export default function Navbar() {
   const { data: session, status } = useSession()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <nav className="glass border-b border-purple-500/30 sticky top-0 z-50 backdrop-blur-md bg-gray-900/95">
@@ -14,7 +16,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center space-x-2 text-purple-400 hover:text-purple-300 transition-all group">
             <div className="bg-purple-900/50 p-2 rounded-lg group-hover:bg-purple-800 transition-colors border border-purple-500/30 flex items-center justify-center">
               <svg 
-                className="h-6 w-6 animate-spin-slow group-hover:scale-110 transition-transform"
+                className="h-5 w-5 sm:h-6 sm:w-6 animate-spin-slow group-hover:scale-110 transition-transform"
                 viewBox="0 0 24 24" 
                 fill="none" 
                 xmlns="http://www.w3.org/2000/svg"
@@ -32,10 +34,11 @@ export default function Navbar() {
                 </defs>
               </svg>
             </div>
-            <span className="font-bold text-xl gradient-text-eu">Akademia Funduszy UE</span>
+            <span className="font-bold text-base sm:text-xl gradient-text-eu">Akademia Funduszy UE</span>
           </Link>
 
-          <div className="flex items-center space-x-3">
+          {/* Desktop Menu */}
+          <div className="hidden lg:flex items-center space-x-3">
             <Link
               href="/"
               className="text-gray-200 hover:text-purple-300 px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 hover:bg-gray-800 transition-all"
@@ -47,7 +50,7 @@ export default function Navbar() {
             {status === 'loading' ? (
               <div className="text-gray-200 flex items-center">
                 <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500 mr-2"></span>
-                Ładowanie...
+                <span className="hidden xl:inline">Ładowanie...</span>
               </div>
             ) : session ? (
               <>
@@ -58,13 +61,11 @@ export default function Navbar() {
                   <User className="h-4 w-4" />
                   <span>Dashboard</span>
                 </Link>
-                <div className="flex items-center space-x-3 text-sm">
-                  <div className="flex items-center space-x-2 bg-gray-800 px-3 py-2 rounded-lg border border-gray-700">
-                    <span className="font-semibold text-white">{session.user.name}</span>
-                    <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded-full font-medium">
-                      {session.user.role === 'ORGANIZER' ? 'Organizator' : 'Uczestnik'}
-                    </span>
-                  </div>
+                <div className="flex items-center space-x-2 bg-gray-800 px-3 py-2 rounded-lg border border-gray-700">
+                  <span className="font-semibold text-white text-sm max-w-[120px] truncate">{session.user.name}</span>
+                  <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded-full font-medium whitespace-nowrap">
+                    {session.user.role === 'ORGANIZER' ? 'Organizator' : 'Uczestnik'}
+                  </span>
                 </div>
                 <button
                   onClick={() => signOut({ callbackUrl: '/' })}
@@ -78,21 +79,106 @@ export default function Navbar() {
               <>
                 <Link
                   href="/register"
-                  className="bg-purple-600 text-white hover:bg-purple-700 px-6 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 shadow-lg hover-lift transition-all"
+                  className="bg-purple-600 text-white hover:bg-purple-700 px-4 xl:px-6 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 shadow-lg hover-lift transition-all"
                 >
                   <span>Rejestracja</span>
                 </Link>
                 <Link
                   href="/login"
-                  className="bg-gray-700 text-white hover:bg-gray-600 px-6 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 shadow-lg hover-lift transition-all border border-purple-500/50"
+                  className="bg-gray-700 text-white hover:bg-gray-600 px-4 xl:px-6 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 shadow-lg hover-lift transition-all border border-purple-500/50"
                 >
                   <LogIn className="h-4 w-4" />
-                  <span>Zaloguj się</span>
+                  <span className="hidden xl:inline">Zaloguj się</span>
                 </Link>
               </>
             )}
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden text-gray-200 hover:text-purple-300 p-2 rounded-lg hover:bg-gray-800 transition-all"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </button>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-purple-500/30 pt-4 pb-4 animate-slide-down">
+            <div className="flex flex-col space-y-2">
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-gray-200 hover:text-purple-300 px-4 py-3 rounded-lg text-sm font-medium flex items-center space-x-2 hover:bg-gray-800 transition-all"
+              >
+                <Home className="h-4 w-4" />
+                <span>Strona główna</span>
+              </Link>
+
+              {status === 'loading' ? (
+                <div className="text-gray-200 flex items-center px-4 py-3">
+                  <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500 mr-2"></span>
+                  Ładowanie...
+                </div>
+              ) : session ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-gray-200 hover:text-purple-300 px-4 py-3 rounded-lg text-sm font-medium flex items-center space-x-2 hover:bg-gray-800 transition-all"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                  <div className="px-4 py-3 bg-gray-800 rounded-lg border border-gray-700">
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-semibold text-white text-sm">{session.user.name}</span>
+                      </div>
+                      <span className="inline-block text-xs bg-purple-600 text-white px-2 py-1 rounded-full font-medium w-fit">
+                        {session.user.role === 'ORGANIZER' ? 'Organizator' : 'Uczestnik'}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      signOut({ callbackUrl: '/' })
+                    }}
+                    className="text-gray-200 hover:text-red-300 px-4 py-3 rounded-lg text-sm font-medium flex items-center space-x-2 hover:bg-gray-800 transition-all text-left"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Wyloguj</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="bg-purple-600 text-white hover:bg-purple-700 px-4 py-3 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 shadow-lg hover-lift transition-all"
+                  >
+                    <span>Rejestracja</span>
+                  </Link>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="bg-gray-700 text-white hover:bg-gray-600 px-4 py-3 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 shadow-lg hover-lift transition-all border border-purple-500/50"
+                  >
+                    <LogIn className="h-4 w-4" />
+                    <span>Zaloguj się</span>
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   )

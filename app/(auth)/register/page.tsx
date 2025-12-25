@@ -79,19 +79,19 @@ export default function RegisterPage() {
   }
 
   return (
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 hero-background">
-      <div className="max-w-md w-full space-y-8 animate-scale-in relative z-10">
-        <div className="glass rounded-2xl shadow-2xl p-8 relative z-10">
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="bg-purple-900/50 p-4 rounded-full animate-float border border-purple-500/30">
-                <UserPlus className="h-8 w-8 text-purple-400" />
+      <div className="min-h-screen flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 hero-background">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8 animate-scale-in relative z-10">
+        <div className="glass rounded-2xl shadow-2xl p-6 sm:p-8 relative z-10">
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="flex justify-center mb-3 sm:mb-4">
+              <div className="bg-purple-900/50 p-3 sm:p-4 rounded-full animate-float border border-purple-500/30">
+                <UserPlus className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400" />
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-white mb-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
               Utwórz nowe konto
             </h2>
-            <p className="text-sm text-gray-200">
+            <p className="text-xs sm:text-sm text-gray-200 px-2">
               Lub{' '}
               <Link
                 href="/login"

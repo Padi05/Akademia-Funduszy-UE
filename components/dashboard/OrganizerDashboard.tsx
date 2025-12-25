@@ -36,49 +36,49 @@ export default function OrganizerDashboard({ courses }: OrganizerDashboardProps)
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold gradient-text">Moje kursy</h2>
-          <p className="text-gray-200 mt-1">Zarządzaj swoimi kursami dotacyjnymi</p>
+          <h2 className="text-2xl sm:text-3xl font-bold gradient-text">Moje kursy</h2>
+          <p className="text-gray-200 mt-1 text-sm sm:text-base">Zarządzaj swoimi kursami dotacyjnymi</p>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
           <Link
             href="/dashboard/courses/online"
-            className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-600 flex items-center space-x-2 shadow-lg hover-lift transition-all font-semibold border border-purple-500/50"
+            className="bg-gray-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-gray-600 flex items-center justify-center space-x-2 shadow-lg hover-lift transition-all font-semibold border border-purple-500/50 text-sm sm:text-base"
           >
             <span>Kursy Online</span>
           </Link>
           <Link
             href="/dashboard/courses/new"
-            className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 flex items-center space-x-2 shadow-lg hover-lift transition-all font-semibold border border-purple-500/50"
+            className="bg-purple-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-purple-700 flex items-center justify-center space-x-2 shadow-lg hover-lift transition-all font-semibold border border-purple-500/50 text-sm sm:text-base"
           >
-            <Plus className="h-5 w-5" />
+            <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>Dodaj nowy kurs</span>
           </Link>
         </div>
       </div>
 
       {coursesList.length === 0 ? (
-        <div className="glass rounded-2xl shadow-xl p-12 text-center animate-scale-in">
-          <div className="text-6xl mb-4 animate-float">📚</div>
-          <p className="text-gray-100 text-lg mb-6">Nie masz jeszcze żadnych kursów.</p>
+        <div className="glass rounded-2xl shadow-xl p-6 sm:p-8 lg:p-12 text-center animate-scale-in">
+          <div className="text-4xl sm:text-5xl lg:text-6xl mb-3 sm:mb-4 animate-float">📚</div>
+          <p className="text-gray-100 text-base sm:text-lg mb-4 sm:mb-6">Nie masz jeszcze żadnych kursów.</p>
           <Link
             href="/dashboard/courses/new"
-            className="inline-block bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 shadow-lg hover-lift transition-all font-semibold"
+            className="inline-block bg-purple-600 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg hover:bg-purple-700 shadow-lg hover-lift transition-all font-semibold text-sm sm:text-base"
           >
             Dodaj pierwszy kurs
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {coursesList.map((course, index) => (
             <div
               key={course.id}
-              className="glass rounded-xl shadow-lg hover-lift p-6 border border-purple-500/30 animate-fade-in"
+              className="glass rounded-xl shadow-lg hover-lift p-4 sm:p-6 border border-purple-500/30 animate-fade-in"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="flex items-start justify-between mb-4">
-                <h3 className="text-2xl font-bold text-white flex-1 group-hover:text-purple-300 transition-colors">
+              <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-white flex-1 group-hover:text-purple-300 transition-colors">
                   {course.title}
                 </h3>
                 <span

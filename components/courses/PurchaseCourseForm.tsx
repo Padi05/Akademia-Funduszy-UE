@@ -55,28 +55,29 @@ export default function PurchaseCourseForm({ course }: PurchaseCourseFormProps) 
   return (
     <div className="min-h-screen">
       <div className="hero-background relative overflow-hidden">
-        <div className="hero-content max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
+        <div className="hero-content max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-10">
           <Link
             href="/dashboard/courses/online"
-            className="inline-flex items-center text-white hover:text-purple-300 mb-8 transition-colors drop-shadow-md"
+            className="inline-flex items-center text-white hover:text-purple-300 mb-6 sm:mb-8 transition-colors drop-shadow-md text-sm sm:text-base"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Powrót do kursów online
+            <span className="hidden sm:inline">Powrót do kursów online</span>
+            <span className="sm:hidden">Powrót</span>
           </Link>
 
-          <div className="glass rounded-2xl shadow-xl p-8 border border-purple-500/30 backdrop-blur-xl">
-            <h1 className="text-3xl font-bold text-white mb-2">{course.title}</h1>
-            <p className="text-gray-200 mb-6">{course.description}</p>
+          <div className="glass rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-500/30 backdrop-blur-xl">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{course.title}</h1>
+            <p className="text-sm sm:text-base text-gray-200 mb-4 sm:mb-6">{course.description}</p>
           </div>
         </div>
       </div>
 
       <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="glass rounded-2xl shadow-xl p-8 border border-purple-500/30">
-                <h2 className="text-2xl font-bold text-white mb-6 gradient-text">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6 order-2 lg:order-1">
+              <div className="glass rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-500/30">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 gradient-text">
                   Szczegóły kursu
                 </h2>
 
@@ -101,9 +102,9 @@ export default function PurchaseCourseForm({ course }: PurchaseCourseFormProps) 
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="glass rounded-2xl shadow-xl p-8 border border-purple-500/30">
-                <h3 className="text-xl font-bold text-white mb-6">Podsumowanie zakupu</h3>
+            <div className="space-y-4 sm:space-y-6 order-1 lg:order-2">
+              <div className="glass rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-500/30">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Podsumowanie zakupu</h3>
 
                 {error && (
                   <div className="bg-red-900/30 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg mb-6">
@@ -142,7 +143,7 @@ export default function PurchaseCourseForm({ course }: PurchaseCourseFormProps) 
                 <button
                   onClick={handlePurchase}
                   disabled={isLoading || success}
-                  className="w-full bg-purple-600 text-white px-6 py-4 rounded-lg hover:bg-purple-700 flex items-center justify-center space-x-2 shadow-lg hover-lift transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-purple-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg hover:bg-purple-700 flex items-center justify-center space-x-2 shadow-lg hover-lift transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                 >
                   {isLoading ? (
                     <>

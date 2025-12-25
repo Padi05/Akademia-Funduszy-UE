@@ -42,10 +42,10 @@ export default async function HomePage() {
     <div className="min-h-screen">
       {/* Hero Section z jednolitym tłem */}
       <div className="hero-background relative overflow-hidden">
-        <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+        <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32">
           <div className="text-center animate-fade-in-smooth">
             <div className="mb-6">
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in-smooth" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)' }}>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 animate-fade-in-smooth px-2" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)' }}>
                 <span className="animate-gradient-text inline-block">
                   {'Znajdź Idealny Kurs'.split('').map((letter, index) => (
                     <span
@@ -59,16 +59,16 @@ export default async function HomePage() {
                 </span>
               </h1>
             </div>
-            <p className="text-xl md:text-2xl text-white max-w-3xl mx-auto mb-10 drop-shadow-lg animate-fade-in-smooth animate-delay-200">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white max-w-3xl mx-auto mb-6 sm:mb-10 px-4 drop-shadow-lg animate-fade-in-smooth animate-delay-200">
               Przeglądaj dostępne kursy dotacyjne i znajdź coś dla siebie. 
               Rozwijaj się z najlepszymi programami szkoleniowymi.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in-smooth animate-delay-300">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4 animate-fade-in-smooth animate-delay-300">
               <a
                 href="#courses"
-                className="group bg-purple-600 text-white px-10 py-5 rounded-xl font-bold text-lg hover-lift shadow-2xl hover:bg-purple-700 transition-all duration-500 transform hover:scale-110 hover:shadow-purple-500/50 relative overflow-hidden"
+                className="group bg-purple-600 text-white px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 rounded-xl font-bold text-base sm:text-lg w-full sm:w-auto hover-lift shadow-2xl hover:bg-purple-700 transition-all duration-500 transform hover:scale-105 sm:hover:scale-110 hover:shadow-purple-500/50 relative overflow-hidden"
               >
-                <span className="relative z-10 flex items-center">
+                <span className="relative z-10 flex items-center justify-center">
                   Przeglądaj Kursy
                   <span className="ml-2 transform group-hover:translate-x-1 transition-transform duration-300">→</span>
                 </span>
@@ -76,9 +76,9 @@ export default async function HomePage() {
               </a>
               <a
                 href="/register"
-                className="group bg-gray-800 text-white px-10 py-5 rounded-xl font-bold text-lg hover-lift shadow-2xl hover:bg-gray-700 transition-all duration-500 transform hover:scale-110 hover:shadow-purple-500/30 relative overflow-hidden border border-purple-500"
+                className="group bg-gray-800 text-white px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 rounded-xl font-bold text-base sm:text-lg w-full sm:w-auto hover-lift shadow-2xl hover:bg-gray-700 transition-all duration-500 transform hover:scale-105 sm:hover:scale-110 hover:shadow-purple-500/30 relative overflow-hidden border border-purple-500"
               >
-                <span className="relative z-10 flex items-center">
+                <span className="relative z-10 flex items-center justify-center">
                   Dołącz Teraz
                   <span className="ml-2 transform group-hover:translate-x-1 transition-transform duration-300">→</span>
                 </span>
@@ -100,33 +100,33 @@ export default async function HomePage() {
 
       {/* Sekcja z kursami */}
       <div id="courses" className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center mb-16 animate-fade-in-smooth">
-            <h2 className="text-5xl font-bold gradient-text mb-6 animate-fade-in-smooth">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+          <div className="text-center mb-8 sm:mb-12 lg:mb-16 animate-fade-in-smooth px-4">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold gradient-text mb-4 sm:mb-6 animate-fade-in-smooth">
               Dostępne Kursy
             </h2>
-            <p className="text-xl text-gray-100 max-w-2xl mx-auto animate-fade-in-smooth animate-delay-200">
+            <p className="text-base sm:text-lg lg:text-xl text-gray-100 max-w-2xl mx-auto animate-fade-in-smooth animate-delay-200">
               Wybierz kurs, który najlepiej odpowiada Twoim potrzebom
             </p>
           </div>
 
         {courses.length === 0 ? (
-        <div className="text-center py-20 animate-fade-in-scale">
-          <div className="glass rounded-2xl p-12 max-w-md mx-auto shadow-2xl border border-purple-500/30">
-            <div className="text-6xl mb-6 animate-float">📚</div>
-            <p className="text-gray-100 text-lg mb-8 font-medium">
+        <div className="text-center py-12 sm:py-16 lg:py-20 animate-fade-in-scale px-4">
+          <div className="glass rounded-2xl p-6 sm:p-8 lg:p-12 max-w-md mx-auto shadow-2xl border border-purple-500/30">
+            <div className="text-4xl sm:text-5xl lg:text-6xl mb-4 sm:mb-6 animate-float">📚</div>
+            <p className="text-gray-100 text-base sm:text-lg mb-6 sm:mb-8 font-medium">
               Brak dostępnych kursów w tym momencie.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <Link
                 href="/register"
-                className="inline-block bg-purple-600 text-white px-8 py-4 rounded-xl hover:bg-purple-700 transition-all hover-lift shadow-xl font-semibold transform hover:scale-105"
+                className="inline-block bg-purple-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl hover:bg-purple-700 transition-all hover-lift shadow-xl font-semibold transform hover:scale-105 text-sm sm:text-base"
               >
                 Zarejestruj się
               </Link>
               <Link
                 href="/login"
-                className="inline-block bg-gray-700 text-white px-8 py-4 rounded-xl hover:bg-gray-600 transition-all hover-lift shadow-xl font-semibold transform hover:scale-105 border border-purple-500/50"
+                className="inline-block bg-gray-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl hover:bg-gray-600 transition-all hover-lift shadow-xl font-semibold transform hover:scale-105 border border-purple-500/50 text-sm sm:text-base"
               >
                 Zaloguj się
               </Link>
@@ -134,16 +134,16 @@ export default async function HomePage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {courses.map((course, index) => (
             <Link
               key={course.id}
               href={`/courses/${course.id}`}
-              className="glass rounded-xl shadow-xl hover-lift p-6 border border-purple-500/30 animate-fade-in-smooth group cursor-pointer block transition-all duration-300 hover:border-purple-400 hover:shadow-2xl"
+              className="glass rounded-xl shadow-xl hover-lift p-4 sm:p-6 border border-purple-500/30 animate-fade-in-smooth group cursor-pointer block transition-all duration-300 hover:border-purple-400 hover:shadow-2xl"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="flex items-start justify-between mb-4">
-                <h2 className="text-2xl font-bold text-white flex-1 group-hover:text-purple-300 transition-all duration-500 transform group-hover:scale-105 group-hover:translate-x-1">
+              <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white flex-1 group-hover:text-purple-300 transition-all duration-500 transform group-hover:scale-105 group-hover:translate-x-1">
                   {course.title}
                 </h2>
                 <span
