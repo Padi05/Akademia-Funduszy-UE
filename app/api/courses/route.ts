@@ -14,8 +14,8 @@ const courseSchema = z.object({
   endDate: z.string().optional(),
   // Pola dla kursów online
   isOnlineCourse: z.boolean().optional(),
-  onlinePrice: z.number().min(0).optional(),
-  commissionRate: z.number().min(0).max(100).optional(),
+  onlinePrice: z.number().min(0).nullable().optional(),
+  commissionRate: z.number().min(0).max(100).nullable().optional(),
   isPublished: z.boolean().optional(),
 })
 
