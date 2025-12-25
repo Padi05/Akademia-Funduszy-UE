@@ -5,27 +5,27 @@ import { prisma } from '@/lib/prisma'
 import OrganizerDashboard from '@/components/dashboard/OrganizerDashboard'
 import ParticipantDashboard from '@/components/dashboard/ParticipantDashboard'
 
-async function getDashboardData(userId: string, role: string) {
-  if (role === 'ORGANIZER') {
-    const courses = await prisma.course.findMany({
-      where: { organizerId: userId },
-      include: {
-        files: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
-    return { courses }
-  } else {
-    const files = await prisma.userFile.findMany({
-      where: { userId },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
-    return { files }
-  }
+async function getOrganizerData(userId: string) {
+  const courses = await prisma.course.findMany({
+    where: { organizerId: userId },
+    include: {
+      files: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+  return courses
+}
+
+async function getParticipantData(userId: string) {
+  const files = await prisma.userFile.findMany({
+    where: { userId },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+  return files
 }
 
 export default async function DashboardPage() {
@@ -34,8 +34,6 @@ export default async function DashboardPage() {
   if (!session) {
     redirect('/login')
   }
-
-  const data = await getDashboardData(session.user.id, session.user.role)
 
   return (
     <div className="min-h-screen">
@@ -65,10 +63,10 @@ export default async function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
           {session.user.role === 'ORGANIZER' ? (
-            <OrganizerDashboard courses={data.courses} />
+            <OrganizerDashboard courses={await getOrganizerData(session.user.id)} />
           ) : (
             <ParticipantDashboard
-              files={data.files}
+              files={await getParticipantData(session.user.id)}
               hasBurEntry={session.user.hasBurEntry}
             />
           )}
