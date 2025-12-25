@@ -1,16 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Upload, Play, Trash2, Eye, EyeOff, DollarSign, Percent } from 'lucide-react'
-import { Course, CourseVideoFile } from '@prisma/client'
+import { useState } from 'react'
+import { Upload, Play, Trash2, Eye, EyeOff, DollarSign, Percent, FileText } from 'lucide-react'
+import { Course, CourseVideoFile, CourseFile } from '@prisma/client'
 
 interface OnlineCourseManagerProps {
-  course: Course & { videoFiles: CourseVideoFile[] }
+  course: Course & { videoFiles: CourseVideoFile[]; files?: CourseFile[] }
 }
 
 export default function OnlineCourseManager({ course }: OnlineCourseManagerProps) {
   const [videoFiles, setVideoFiles] = useState<CourseVideoFile[]>(course.videoFiles || [])
+  const [files, setFiles] = useState<CourseFile[]>(course.files || [])
   const [isUploading, setIsUploading] = useState(false)
+  const [isUploadingFile, setIsUploadingFile] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [isPublishing, setIsPublishing] = useState(false)
@@ -18,7 +20,7 @@ export default function OnlineCourseManager({ course }: OnlineCourseManagerProps
   const [commissionRate, setCommissionRate] = useState(course.commissionRate?.toString() || '10')
   const [isPublished, setIsPublished] = useState(course.isPublished || false)
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return
 
     const file = e.target.files[0]
@@ -63,6 +65,59 @@ export default function OnlineCourseManager({ course }: OnlineCourseManagerProps
 
       if (response.ok) {
         setVideoFiles(videoFiles.filter((f) => f.id !== fileId))
+        setSuccess('Plik został usunięty')
+      } else {
+        setError('Wystąpił błąd podczas usuwania pliku')
+      }
+    } catch (err) {
+      setError('Wystąpił błąd podczas usuwania pliku')
+    }
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return
+
+    const file = e.target.files[0]
+    setIsUploadingFile(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch(`/api/courses/${course.id}/files`, {
+        method: 'POST',
+        body: formData,
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        setError(result.error || 'Wystąpił błąd podczas przesyłania pliku')
+        return
+      }
+
+      setFiles([...files, result])
+      setSuccess('Plik został przesłany pomyślnie')
+      e.target.value = ''
+    } catch (err) {
+      setError('Wystąpił błąd podczas przesyłania pliku')
+    } finally {
+      setIsUploadingFile(false)
+    }
+  }
+
+  const handleFileDelete = async (fileId: string) => {
+    if (!confirm('Czy na pewno chcesz usunąć ten plik?')) return
+
+    try {
+      const response = await fetch(`/api/courses/${course.id}/files/${fileId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        setFiles(files.filter((f) => f.id !== fileId))
         setSuccess('Plik został usunięty')
       } else {
         setError('Wystąpił błąd podczas usuwania pliku')
@@ -241,7 +296,7 @@ export default function OnlineCourseManager({ course }: OnlineCourseManagerProps
               <input
                 type="file"
                 accept="video/*"
-                onChange={handleFileUpload}
+                onChange={handleVideoUpload}
                 disabled={isUploading}
                 className="hidden"
               />
@@ -281,6 +336,69 @@ export default function OnlineCourseManager({ course }: OnlineCourseManagerProps
             </div>
           </div>
         )}
+
+        {/* Upload plików (PDF, dokumenty) */}
+        <div className="mt-8 pt-8 border-t border-gray-700">
+          <h3 className="text-xl font-bold text-white mb-4 gradient-text">
+            Pliki dodatkowe (PDF, dokumenty)
+          </h3>
+          
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-white mb-2">
+              Dodaj plik (PDF, DOC, DOCX - max 10MB)
+            </label>
+            <div className="flex items-center space-x-4">
+              <label className="flex-1 cursor-pointer">
+                <div className="flex items-center justify-center px-6 py-4 border-2 border-dashed border-gray-700 rounded-lg hover:border-purple-500 transition-colors bg-gray-800/50">
+                  <Upload className="h-6 w-6 mr-2 text-purple-300" />
+                  <span className="text-white font-medium">
+                    {isUploadingFile ? 'Przesyłanie...' : 'Wybierz plik'}
+                  </span>
+                </div>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileUpload}
+                  disabled={isUploadingFile}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* Lista plików */}
+          {files.length > 0 && (
+            <div>
+              <h4 className="text-lg font-semibold text-white mb-4">Przesłane pliki</h4>
+              <div className="space-y-3">
+                {files.map((file) => (
+                  <div
+                    key={file.id}
+                    className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700 hover:bg-purple-900/20 transition-colors"
+                  >
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className="bg-purple-900/50 p-2 rounded-lg border border-purple-500/30">
+                        <FileText className="h-5 w-5 text-purple-300" />
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">{file.originalName}</p>
+                        <p className="text-sm text-gray-400">
+                          {(file.size / (1024 * 1024)).toFixed(2)} MB
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleFileDelete(file.id)}
+                      className="text-red-300 hover:text-red-200 p-2 hover:bg-red-900/20 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

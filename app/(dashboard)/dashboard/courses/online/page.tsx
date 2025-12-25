@@ -6,19 +6,8 @@ import Link from 'next/link'
 import { ArrowLeft, Play, DollarSign, Users, Eye } from 'lucide-react'
 import { format } from 'date-fns'
 import { pl } from 'date-fns/locale/pl'
-import { Course, CourseVideoFile, User } from '@prisma/client'
 
-type CourseWithIncludes = Course & {
-  organizer: {
-    name: string
-  }
-  videoFiles: CourseVideoFile[]
-  _count: {
-    purchases: number
-  }
-}
-
-async function getOnlineCourses(): Promise<CourseWithIncludes[]> {
+async function getOnlineCourses() {
   try {
     const courses = await prisma.course.findMany({
       where: {
@@ -102,7 +91,14 @@ export default async function OnlineCoursesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {courses.map((course) => {
+              {courses.map((course: {
+                id: string
+                title: string
+                description: string
+                onlinePrice: number | null
+                videoFiles: Array<{ id: string }>
+                _count: { purchases: number }
+              }) => {
                 const isPurchased = purchasedCourseIds.has(course.id)
                 return (
                   <div
