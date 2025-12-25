@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { ArrowLeft, Save } from 'lucide-react'
 import Link from 'next/link'
-import { Course, CourseFile } from '@prisma/client'
+import { Course, CourseFile, CourseVideoFile } from '@prisma/client'
 import { format } from 'date-fns'
 import CourseFileUpload from './CourseFileUpload'
 import OnlineCourseManager from './OnlineCourseManager'
@@ -27,7 +27,7 @@ const courseSchema = z.object({
 type CourseForm = z.infer<typeof courseSchema>
 
 interface EditCourseFormProps {
-  course: Course & { files: CourseFile[]; videoFiles?: any[] }
+  course: Course & { files: CourseFile[]; videoFiles: CourseVideoFile[] }
 }
 
 export default function EditCourseForm({ course }: EditCourseFormProps) {
