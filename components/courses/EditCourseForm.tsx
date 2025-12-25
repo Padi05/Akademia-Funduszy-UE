@@ -45,7 +45,7 @@ export default function EditCourseForm({ course }: EditCourseFormProps) {
     defaultValues: {
       title: course.title,
       description: course.description,
-      type: course.type,
+      type: course.type as 'STACJONARNY' | 'ONLINE',
       price: course.price.toString(),
       fundingInfo: course.fundingInfo,
       startDate: format(new Date(course.startDate), "yyyy-MM-dd'T'HH:mm"),
