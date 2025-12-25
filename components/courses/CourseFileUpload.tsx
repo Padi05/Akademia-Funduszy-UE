@@ -58,7 +58,20 @@ export default function CourseFileUpload({
       console.log('Response data:', result)
 
       if (!response.ok) {
-        const errorMessage = result.error || result.details || 'Wystąpił błąd podczas przesyłania pliku'
+        // Zbuduj szczegółowy komunikat błędu
+        let errorMessage = result.error || 'Wystąpił błąd podczas przesyłania pliku'
+        
+        // Dodaj szczegóły jeśli są dostępne
+        if (result.details) {
+          errorMessage += `: ${result.details}`
+        }
+        if (result.code && result.code !== 'UNKNOWN') {
+          errorMessage += ` (kod: ${result.code})`
+        }
+        if (result.path) {
+          errorMessage += `\nŚcieżka: ${result.path}`
+        }
+        
         console.error('Upload error:', errorMessage, result)
         setError(errorMessage)
         return
@@ -127,10 +140,10 @@ export default function CourseFileUpload({
           </div>
         </div>
         {error && (
-          <div className="mt-2">
-            <p className="text-sm text-red-600 font-medium">{error}</p>
-            <p className="text-xs text-red-500 mt-1">
-              Sprawdź konsolę przeglądarki (F12) i logi serwera, aby zobaczyć szczegóły błędu.
+          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-800 font-medium whitespace-pre-wrap">{error}</p>
+            <p className="text-xs text-red-600 mt-2">
+              Sprawdź konsolę przeglądarki (F12) i logi serwera, aby zobaczyć więcej szczegółów.
             </p>
           </div>
         )}

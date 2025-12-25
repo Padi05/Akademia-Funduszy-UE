@@ -130,25 +130,28 @@ export async function POST(
       const baseUploadsDir = join(cwd, 'public', 'uploads')
       const coursesDir = join(cwd, 'public', 'uploads', 'courses')
       
+      console.log('Base uploads dir:', baseUploadsDir)
+      console.log('Courses dir:', coursesDir)
+      console.log('Course-specific dir:', uploadsDir)
+      
       // Utwórz katalogi rekursywnie - mkdir z recursive: true tworzy wszystkie potrzebne katalogi
-      if (!existsSync(baseUploadsDir)) {
-        console.log('Creating base uploads directory:', baseUploadsDir)
-        await mkdir(baseUploadsDir, { recursive: true })
-      }
-      
-      if (!existsSync(coursesDir)) {
-        console.log('Creating courses directory:', coursesDir)
-        await mkdir(coursesDir, { recursive: true })
-      }
-      
-      if (!existsSync(uploadsDir)) {
-        console.log('Creating course directory:', uploadsDir)
-        await mkdir(uploadsDir, { recursive: true })
-      }
+      // Używamy jednego wywołania mkdir z recursive dla całej ścieżki
+      console.log('Creating directory structure recursively...')
+      await mkdir(uploadsDir, { recursive: true })
+      console.log('Directory creation command completed')
       
       // Zweryfikuj, że katalog został utworzony
-      if (!existsSync(uploadsDir)) {
-        throw new Error(`Failed to create directory: ${uploadsDir}`)
+      const dirExists = existsSync(uploadsDir)
+      console.log('Directory exists after creation:', dirExists)
+      
+      if (!dirExists) {
+        // Sprawdź czy katalogi nadrzędne istnieją
+        const baseExists = existsSync(baseUploadsDir)
+        const coursesExists = existsSync(coursesDir)
+        console.error('Directory verification failed!')
+        console.error('Base uploads dir exists:', baseExists)
+        console.error('Courses dir exists:', coursesExists)
+        throw new Error(`Failed to create directory: ${uploadsDir}. Base exists: ${baseExists}, Courses exists: ${coursesExists}`)
       }
       
       console.log('Directory verified successfully')
