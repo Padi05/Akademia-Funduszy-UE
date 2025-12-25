@@ -31,14 +31,12 @@ async function ensureDirectoryExists(dirPath: string): Promise<void> {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> | { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     console.log('=== File Upload Started ===')
     
-    // Obsługa params jako Promise (Next.js 15) lub obiektu (Next.js 14)
-    const resolvedParams = await Promise.resolve(params)
-    const courseId = resolvedParams.id
+    const courseId = params.id
     console.log('Course ID:', courseId)
 
     if (!courseId) {
@@ -178,16 +176,20 @@ export async function POST(
         originalName: file.name,
         path: `/uploads/courses/${courseId}/${filename}`,
         size: file.size,
+        sizeType: typeof file.size,
         mimeType: mimeType,
         courseId: courseId,
       })
+      
+      // Upewnij się, że size jest liczbą (nie BigInt)
+      const fileSize = Number(file.size)
       
       const courseFile = await prisma.courseFile.create({
         data: {
           filename,
           originalName: file.name,
           path: `/uploads/courses/${courseId}/${filename}`,
-          size: file.size,
+          size: fileSize,
           mimeType: mimeType,
           courseId: courseId,
         },
