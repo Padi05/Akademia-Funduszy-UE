@@ -13,12 +13,14 @@ export const maxDuration = 30
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
     console.log('=== File Upload Started ===')
     
-    const courseId = params.id
+    // Obsługa asynchronicznych params w Next.js 15
+    const resolvedParams = await Promise.resolve(params)
+    const courseId = resolvedParams.id
     console.log('Course ID:', courseId)
 
     if (!courseId) {
@@ -92,8 +94,22 @@ export async function POST(
       if (existsSync(uploadsDir)) {
         console.log('Directory already exists, skipping creation')
       } else {
-        // Utwórz całą strukturę katalogów naraz
+        // Utwórz całą strukturę katalogów naraz (recursive tworzy wszystkie potrzebne katalogi)
         console.log('Creating directory structure...')
+        
+        // Upewnij się, że katalog public/uploads istnieje
+        const baseUploadsDir = join(cwd, 'public', 'uploads')
+        if (!existsSync(baseUploadsDir)) {
+          await mkdir(baseUploadsDir, { recursive: true })
+        }
+        
+        // Upewnij się, że katalog public/uploads/courses istnieje
+        const coursesDir = join(cwd, 'public', 'uploads', 'courses')
+        if (!existsSync(coursesDir)) {
+          await mkdir(coursesDir, { recursive: true })
+        }
+        
+        // Utwórz katalog dla konkretnego kursu
         await mkdir(uploadsDir, { recursive: true })
         console.log('Directory created')
         
