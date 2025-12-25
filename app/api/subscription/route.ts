@@ -64,13 +64,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
+    console.log('=== Subscription Creation Started ===')
+    console.log('User ID:', session.user.id)
+    
+    let body: any = {}
+    try {
+      body = await request.json()
+      console.log('Request body:', body)
+    } catch (parseError) {
+      console.log('No body provided, using defaults')
+    }
+    
     const { monthlyPrice = 29.99 } = body
+    console.log('Monthly price:', monthlyPrice)
 
     // Sprawdź czy użytkownik ma już subskrypcję
+    console.log('Checking for existing subscription...')
     const existingSubscription = await prisma.subscription.findUnique({
       where: { userId: session.user.id },
     })
+    console.log('Existing subscription:', existingSubscription ? 'Found' : 'Not found')
 
     const now = new Date()
     const endDate = new Date(now)
@@ -107,10 +120,31 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(subscription, { status: 201 })
     }
-  } catch (error) {
-    console.error('Subscription creation error:', error)
+  } catch (error: any) {
+    console.error('=== Subscription Creation Error ===')
+    console.error('Error type:', typeof error)
+    console.error('Error:', error)
+    if (error instanceof Error) {
+      console.error('Error name:', error.name)
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+    }
+    
+    // Sprawdź czy to błąd Prisma
+    if (error.code) {
+      console.error('Prisma error code:', error.code)
+    }
+    if (error.meta) {
+      console.error('Prisma error meta:', error.meta)
+    }
+    
+    const errorMessage = error instanceof Error ? error.message : String(error)
     return NextResponse.json(
-      { error: 'Wystąpił błąd podczas tworzenia subskrypcji' },
+      { 
+        error: 'Wystąpił błąd podczas tworzenia subskrypcji',
+        details: errorMessage,
+        code: error.code || 'UNKNOWN'
+      },
       { status: 500 }
     )
   }

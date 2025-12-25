@@ -34,7 +34,7 @@ export default function Navbar() {
                 </defs>
               </svg>
             </div>
-            <span className="font-bold text-base sm:text-xl gradient-text-eu">Akademia Funduszy UE</span>
+            <span className="font-bold text-base sm:text-xl gradient-text-eu whitespace-nowrap">Akademia Funduszy UE</span>
           </Link>
 
           {/* Desktop Menu */}
