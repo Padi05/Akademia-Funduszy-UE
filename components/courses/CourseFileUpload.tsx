@@ -28,6 +28,9 @@ export default function CourseFileUpload({
     setError(null)
 
     try {
+      console.log('Uploading file:', file.name, file.size, file.type)
+      console.log('Course ID:', courseId)
+      
       const formData = new FormData()
       formData.append('file', file)
 
@@ -36,10 +39,28 @@ export default function CourseFileUpload({
         body: formData,
       })
 
+      console.log('Response status:', response.status)
+      console.log('Response ok:', response.ok)
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+      console.log('Content-Type:', response.headers.get('content-type'))
+
+      // Sprawdź content-type przed parsowaniem JSON
+      const contentType = response.headers.get('content-type')
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text()
+        console.error('Unexpected content type:', contentType)
+        console.error('Response text (first 200 chars):', text.substring(0, 200))
+        setError(`Nieprawidłowy typ odpowiedzi: ${contentType}. Sprawdź konsolę.`)
+        return
+      }
+
       const result = await response.json()
+      console.log('Response data:', result)
 
       if (!response.ok) {
-        setError(result.error || 'Wystąpił błąd podczas przesyłania pliku')
+        const errorMessage = result.error || result.details || 'Wystąpił błąd podczas przesyłania pliku'
+        console.error('Upload error:', errorMessage, result)
+        setError(errorMessage)
         return
       }
 
@@ -48,7 +69,9 @@ export default function CourseFileUpload({
       // Reset file input
       e.target.value = ''
     } catch (err) {
-      setError('Wystąpił błąd podczas przesyłania pliku')
+      console.error('Upload exception:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Wystąpił błąd podczas przesyłania pliku'
+      setError(errorMessage)
     } finally {
       setIsUploading(false)
     }
@@ -104,7 +127,12 @@ export default function CourseFileUpload({
           </div>
         </div>
         {error && (
-          <p className="mt-2 text-sm text-red-600">{error}</p>
+          <div className="mt-2">
+            <p className="text-sm text-red-600 font-medium">{error}</p>
+            <p className="text-xs text-red-500 mt-1">
+              Sprawdź konsolę przeglądarki (F12) i logi serwera, aby zobaczyć szczegóły błędu.
+            </p>
+          </div>
         )}
         {isUploading && (
           <p className="mt-2 text-sm text-gray-500">Przesyłanie...</p>
