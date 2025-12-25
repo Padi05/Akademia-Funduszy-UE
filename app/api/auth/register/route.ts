@@ -3,6 +3,10 @@ import { prisma } from '@/lib/prisma'
 import { hashPassword } from '@/lib/auth'
 import { z } from 'zod'
 
+// Konfiguracja dla App Router - wymagane gdy używamy dynamicznych funkcji
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 const registerSchema = z.object({
   email: z.string().email('Nieprawidłowy adres email'),
   password: z.string().min(6, 'Hasło musi mieć minimum 6 znaków'),

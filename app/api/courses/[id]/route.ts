@@ -4,6 +4,10 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
+// Konfiguracja dla App Router - wymagane gdy używamy dynamicznych funkcji
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 const courseSchema = z.object({
   title: z.string().min(3, 'Tytuł musi mieć minimum 3 znaki'),
   description: z.string().min(10, 'Opis musi mieć minimum 10 znaki'),
