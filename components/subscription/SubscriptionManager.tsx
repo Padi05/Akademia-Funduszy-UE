@@ -221,7 +221,7 @@ export default function SubscriptionManager() {
                 Subskrypcja Miesięczna
               </h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Aktywuj subskrypcję, aby móc pobierać pliki z wszystkich kursów
+                Aktywuj subskrypcję, aby móc dodawać kursy i pobierać pliki z wszystkich kursów
               </p>
               <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                 29.99 PLN
@@ -230,6 +230,10 @@ export default function SubscriptionManager() {
             </div>
 
             <div className="space-y-2 mb-6">
+              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                <Check className="h-5 w-5 text-green-500" />
+                <span>Możliwość dodawania własnych kursów</span>
+              </div>
               <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                 <Check className="h-5 w-5 text-green-500" />
                 <span>Nieograniczony dostęp do pobierania plików z kursów</span>
