@@ -78,50 +78,58 @@ export async function POST(
     const sanitizedOriginalName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
     const filename = `${Date.now()}-${sanitizedOriginalName}`
 
-    // Utwórz strukturę katalogów dla tego kursu - użyj bezpośrednio mkdir z recursive
+    // Utwórz strukturę katalogów dla tego kursu
     const cwd = process.cwd()
     const uploadsDir = join(cwd, 'public', 'uploads', 'courses', courseId)
 
+    // Sprawdź i utwórz katalogi - użyj try-catch z fallback
     try {
-      console.log('Creating directory structure...', {
-        cwd,
-        uploadsDir,
-        courseId
-      })
-
-      // Utwórz całą strukturę katalogów naraz - recursive: true utworzy wszystkie potrzebne katalogi nadrzędne
-      await mkdir(uploadsDir, { recursive: true })
+      console.log('=== Directory Creation ===')
+      console.log('CWD:', cwd)
+      console.log('Target directory:', uploadsDir)
       
-      // Sprawdź czy katalog został utworzony
-      if (!existsSync(uploadsDir)) {
-        throw new Error(`Directory was not created: ${uploadsDir}`)
+      // Sprawdź czy katalog już istnieje
+      if (existsSync(uploadsDir)) {
+        console.log('Directory already exists, skipping creation')
+      } else {
+        // Utwórz całą strukturę katalogów naraz
+        console.log('Creating directory structure...')
+        await mkdir(uploadsDir, { recursive: true })
+        console.log('Directory created')
+        
+        // Zweryfikuj utworzenie
+        if (!existsSync(uploadsDir)) {
+          throw new Error(`Directory verification failed: ${uploadsDir}`)
+        }
+        console.log('Directory verified')
       }
-      
-      console.log('Directory created successfully:', uploadsDir)
-    } catch (dirError) {
+    } catch (dirError: any) {
       const errorDetails = dirError instanceof Error ? dirError.message : String(dirError)
       const err = dirError as NodeJS.ErrnoException
       
-      console.error('Directory creation error:', {
-        error: errorDetails,
-        code: err.code,
-        errno: err.errno,
-        uploadsDir,
-        courseId,
-        cwd,
-        stack: dirError instanceof Error ? dirError.stack : undefined
-      })
+      console.error('=== Directory Creation Error ===')
+      console.error('Error:', errorDetails)
+      console.error('Code:', err.code)
+      console.error('Errno:', err.errno)
+      console.error('Path:', uploadsDir)
       
-      // Jeśli katalog już istnieje, kontynuuj
-      if (err.code === 'EEXIST' || existsSync(uploadsDir)) {
-        console.log('Directory already exists, continuing...')
-      } else {
+      // Jeśli błąd to EEXIST (katalog już istnieje), to kontynuuj
+      if (err.code === 'EEXIST') {
+        console.log('EEXIST error - directory exists, continuing...')
+      } 
+      // Jeśli katalog istnieje mimo błędu, kontynuuj
+      else if (existsSync(uploadsDir)) {
+        console.log('Directory exists despite error, continuing...')
+      } 
+      // W przeciwnym razie zwróć błąd
+      else {
         return NextResponse.json(
           { 
             error: 'Nie udało się utworzyć katalogu dla plików',
             details: errorDetails,
             path: uploadsDir,
-            code: err.code
+            code: err.code || 'UNKNOWN',
+            cwd: cwd
           },
           { status: 500 }
         )
@@ -129,16 +137,45 @@ export async function POST(
     }
 
     // Zapisz plik
+    console.log('=== File Write ===')
+    console.log('Reading file buffer...')
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     const filepath = join(uploadsDir, filename)
+    
+    console.log('File path:', filepath)
+    console.log('File size:', buffer.length, 'bytes')
+    console.log('Directory exists:', existsSync(uploadsDir))
 
     try {
+      console.log('Writing file to disk...')
       await writeFile(filepath, buffer)
-    } catch (writeError) {
-      console.error('File write error:', writeError)
+      console.log('File written successfully')
+      
+      // Zweryfikuj zapis
+      if (!existsSync(filepath)) {
+        throw new Error(`File was not written: ${filepath}`)
+      }
+      console.log('File verified on disk')
+    } catch (writeError: any) {
+      console.error('=== File Write Error ===')
+      console.error('Error:', writeError)
+      if (writeError instanceof Error) {
+        console.error('Message:', writeError.message)
+        console.error('Stack:', writeError.stack)
+      }
+      const err = writeError as NodeJS.ErrnoException
+      console.error('Code:', err.code)
+      console.error('Errno:', err.errno)
+      console.error('Path:', filepath)
+      
       return NextResponse.json(
-        { error: 'Nie udało się zapisać pliku na dysku' },
+        { 
+          error: 'Nie udało się zapisać pliku na dysku',
+          details: writeError instanceof Error ? writeError.message : String(writeError),
+          code: err.code || 'UNKNOWN',
+          path: filepath
+        },
         { status: 500 }
       )
     }
@@ -207,16 +244,30 @@ export async function POST(
         { status: 500 }
       )
     }
-  } catch (error) {
-    console.error('=== File Upload Error ===')
+  } catch (error: any) {
+    console.error('=== File Upload Error (Top Level) ===')
+    console.error('Error type:', typeof error)
     console.error('Error:', error)
     if (error instanceof Error) {
+      console.error('Error name:', error.name)
       console.error('Error message:', error.message)
       console.error('Error stack:', error.stack)
     }
-    const errorMessage = error instanceof Error ? error.message : 'Nieznany błąd'
+    const err = error as NodeJS.ErrnoException
+    if (err.code) {
+      console.error('Error code:', err.code)
+    }
+    if (err.errno) {
+      console.error('Error errno:', err.errno)
+    }
+    
+    const errorMessage = error instanceof Error ? error.message : String(error)
     return NextResponse.json(
-      { error: `Wystąpił błąd podczas przesyłania pliku: ${errorMessage}` },
+      { 
+        error: `Wystąpił błąd podczas przesyłania pliku: ${errorMessage}`,
+        type: typeof error,
+        code: err.code || 'UNKNOWN'
+      },
       { status: 500 }
     )
   }
