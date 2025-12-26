@@ -20,8 +20,19 @@ const courseSchema = z.object({
     message: 'Podaj prawidłową cenę',
   }),
   fundingInfo: z.string().min(5, 'Informacje o dofinansowaniu są wymagane'),
-  startDate: z.string(),
+  startDate: z.string().min(1, 'Data rozpoczęcia jest wymagana'),
   endDate: z.string().optional(),
+}).refine((data) => {
+  // Jeśli data zakończenia jest podana, musi być po dacie rozpoczęcia
+  if (data.endDate && data.startDate) {
+    const startDate = new Date(data.startDate)
+    const endDate = new Date(data.endDate)
+    return endDate > startDate
+  }
+  return true
+}, {
+  message: 'Data zakończenia musi być po dacie rozpoczęcia',
+  path: ['endDate'],
 })
 
 type CourseForm = z.infer<typeof courseSchema>
@@ -40,6 +51,7 @@ export default function EditCourseForm({ course }: EditCourseFormProps) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<CourseForm>({
     resolver: zodResolver(courseSchema),
@@ -55,6 +67,15 @@ export default function EditCourseForm({ course }: EditCourseFormProps) {
         : '',
     },
   })
+
+  const startDate = watch('startDate')
+  
+  // Oblicz minimalną datę zakończenia (data rozpoczęcia + 1 dzień)
+  const minEndDate = startDate ? (() => {
+    const date = new Date(startDate)
+    date.setDate(date.getDate() + 1)
+    return date.toISOString().slice(0, 16)
+  })() : ''
 
   const onSubmit = async (data: CourseForm) => {
     setIsLoading(true)
@@ -257,11 +278,18 @@ export default function EditCourseForm({ course }: EditCourseFormProps) {
                 {...register('endDate')}
                 id="endDate"
                 type="datetime-local"
-                disabled={isLoading}
+                min={minEndDate}
+                disabled={isLoading || !startDate}
                 className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
+                placeholder={!startDate ? 'Najpierw wybierz datę rozpoczęcia' : ''}
               />
               {errors.endDate && (
                 <p className="mt-1 text-sm text-red-600">{errors.endDate.message}</p>
+              )}
+              {startDate && !errors.endDate && (
+                <p className="mt-1 text-sm text-gray-400">
+                  Data zakończenia musi być po dacie rozpoczęcia
+                </p>
               )}
             </div>
           </div>

@@ -14,13 +14,24 @@ const courseSchema = z.object({
   type: z.enum(['STACJONARNY', 'ONLINE']),
   price: z.number().min(0, 'Cena nie może być ujemna'),
   fundingInfo: z.string().min(5, 'Informacje o dofinansowaniu są wymagane'),
-  startDate: z.string(),
+  startDate: z.string().min(1, 'Data rozpoczęcia jest wymagana'),
   endDate: z.string().optional(),
   // Pola dla kursów online
   isOnlineCourse: z.boolean().optional(),
   onlinePrice: z.number().min(0).nullable().optional(),
   commissionRate: z.number().min(0).max(100).nullable().optional(),
   isPublished: z.boolean().optional(),
+}).refine((data) => {
+  // Jeśli data zakończenia jest podana, musi być po dacie rozpoczęcia
+  if (data.endDate && data.startDate) {
+    const startDate = new Date(data.startDate)
+    const endDate = new Date(data.endDate)
+    return endDate > startDate
+  }
+  return true
+}, {
+  message: 'Data zakończenia musi być po dacie rozpoczęcia',
+  path: ['endDate'],
 })
 
 export async function POST(request: NextRequest) {
