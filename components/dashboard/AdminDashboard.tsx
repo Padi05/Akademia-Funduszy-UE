@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Users, BookOpen, CreditCard, TrendingUp, Shield, Trash2, Edit, Ban, CheckCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { pl } from 'date-fns/locale/pl'
+import { useRouter } from 'next/navigation'
 
 interface AdminStats {
   totalUsers: number
@@ -442,13 +443,22 @@ export default function AdminDashboard() {
                           {format(new Date(course.createdAt), 'd MMM yyyy', { locale: pl })}
                         </td>
                         <td className="px-4 py-3">
-                          <button
-                            onClick={() => handleDeleteCourse(course.id)}
-                            className="text-red-400 hover:text-red-300 p-1"
-                            title="Usuń kurs"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <Link
+                              href={`/dashboard/courses/${course.id}/edit`}
+                              className="text-blue-400 hover:text-blue-300 p-1"
+                              title="Edytuj kurs"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Link>
+                            <button
+                              onClick={() => handleDeleteCourse(course.id)}
+                              className="text-red-400 hover:text-red-300 p-1"
+                              title="Usuń kurs"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

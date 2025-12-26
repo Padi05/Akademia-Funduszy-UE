@@ -42,9 +42,10 @@ export async function POST(
     const session = await getServerSession(authOptions)
     console.log('Session:', session ? { userId: session.user.id, role: session.user.role } : 'No session')
 
-    if (!session || session.user.role !== 'ORGANIZER') {
+    // Tylko ADMIN może przesyłać pliki (ponieważ tylko ADMIN może dodawać kursy)
+    if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Brak uprawnień' },
+        { error: 'Brak uprawnień. Tylko administrator może przesyłać pliki.' },
         { status: 403 }
       )
     }
@@ -66,12 +67,14 @@ export async function POST(
       )
     }
 
-    if (!course || course.organizerId !== session.user.id) {
+    if (!course) {
       return NextResponse.json(
-        { error: 'Kurs nie został znaleziony lub brak uprawnień' },
+        { error: 'Kurs nie został znaleziony' },
         { status: 404 }
       )
     }
+
+    // ADMIN może przesyłać pliki do każdego kursu (nie sprawdzamy organizerId)
 
     console.log('Parsing formData...')
     let formData: FormData

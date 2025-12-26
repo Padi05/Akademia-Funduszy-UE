@@ -1,9 +1,11 @@
 import { prisma } from '@/lib/prisma'
 import { format } from 'date-fns'
 import { pl } from 'date-fns/locale/pl'
-import { Calendar, MapPin, Monitor, User, Mail, FileText, ArrowLeft, LogIn, UserPlus } from 'lucide-react'
+import { Calendar, MapPin, Monitor, User, Mail, FileText, ArrowLeft, LogIn, UserPlus, Edit } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export const revalidate = 60 // Revalidate every 60 seconds
 
@@ -34,6 +36,8 @@ export default async function CourseDetailPage({
   params: { id: string }
 }) {
   const course = await getCourse(params.id)
+  const session = await getServerSession(authOptions)
+  const isAdmin = session?.user?.role === 'ADMIN'
 
   if (!course) {
     notFound()
@@ -50,14 +54,26 @@ export default async function CourseDetailPage({
         <div className="absolute bottom-1/3 right-1/4 w-28 h-28 bg-purple-600/30 rounded-full blur-xl animate-float animate-delay-100"></div>
 
         <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-10">
-          <Link
-            href="/"
-            className="inline-flex items-center text-white hover:text-purple-300 mb-6 sm:mb-8 transition-colors drop-shadow-md text-sm sm:text-base"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Powrót do strony głównej</span>
-            <span className="sm:hidden">Powrót</span>
-          </Link>
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
+            <Link
+              href="/"
+              className="inline-flex items-center text-white hover:text-purple-300 transition-colors drop-shadow-md text-sm sm:text-base"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Powrót do strony głównej</span>
+              <span className="sm:hidden">Powrót</span>
+            </Link>
+            {isAdmin && (
+              <Link
+                href={`/dashboard/courses/${course.id}/edit`}
+                className="inline-flex items-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors shadow-lg text-sm sm:text-base"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Edytuj kurs</span>
+                <span className="sm:hidden">Edytuj</span>
+              </Link>
+            )}
+          </div>
 
           <div className="glass rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-500/30 backdrop-blur-xl">
             <div className="flex items-start justify-between mb-4 sm:mb-6">

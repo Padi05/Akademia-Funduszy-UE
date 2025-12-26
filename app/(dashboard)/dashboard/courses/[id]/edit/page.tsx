@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import EditCourseForm from '@/components/courses/EditCourseForm'
 
-async function getCourse(courseId: string, userId: string) {
+async function getCourse(courseId: string, isAdmin: boolean) {
   const course = await prisma.course.findUnique({
     where: { id: courseId },
     include: {
@@ -15,10 +15,11 @@ async function getCourse(courseId: string, userId: string) {
     },
   })
 
-  if (!course || course.organizerId !== userId) {
+  if (!course) {
     return null
   }
 
+  // ADMIN może edytować każdy kurs, nie sprawdzamy organizerId
   return course
 }
 
@@ -29,11 +30,12 @@ export default async function EditCoursePage({
 }) {
   const session = await getServerSession(authOptions)
 
-  if (!session || session.user.role !== 'ORGANIZER') {
+  // Tylko ADMIN może edytować kursy
+  if (!session || session.user.role !== 'ADMIN') {
     redirect('/dashboard')
   }
 
-  const course = await getCourse(params.id, session.user.id)
+  const course = await getCourse(params.id, session.user.role === 'ADMIN')
 
   if (!course) {
     redirect('/dashboard')

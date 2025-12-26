@@ -17,9 +17,10 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== 'ORGANIZER') {
+    // Tylko ADMIN może usuwać wideo (ponieważ tylko ADMIN może dodawać kursy)
+    if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Brak uprawnień' },
+        { error: 'Brak uprawnień. Tylko administrator może usuwać wideo.' },
         { status: 403 }
       )
     }
@@ -28,12 +29,14 @@ export async function DELETE(
       where: { id: params.id },
     })
 
-    if (!course || course.organizerId !== session.user.id) {
+    if (!course) {
       return NextResponse.json(
-        { error: 'Kurs nie został znaleziony lub brak uprawnień' },
+        { error: 'Kurs nie został znaleziony' },
         { status: 404 }
       )
     }
+
+    // ADMIN może usuwać wideo z każdego kursu (nie sprawdzamy organizerId)
 
     const file = await prisma.courseVideoFile.findUnique({
       where: { id: params.fileId },

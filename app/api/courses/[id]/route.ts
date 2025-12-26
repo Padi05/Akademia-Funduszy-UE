@@ -63,9 +63,10 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== 'ORGANIZER') {
+    // Tylko ADMIN może edytować kursy
+    if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Brak uprawnień' },
+        { error: 'Brak uprawnień. Tylko administrator może edytować kursy.' },
         { status: 403 }
       )
     }
@@ -81,12 +82,7 @@ export async function PUT(
       )
     }
 
-    if (course.organizerId !== session.user.id) {
-      return NextResponse.json(
-        { error: 'Brak uprawnień do edycji tego kursu' },
-        { status: 403 }
-      )
-    }
+    // ADMIN może edytować każdy kurs (nie sprawdzamy organizerId)
 
     const body = await request.json()
     const validatedData = courseSchema.parse(body)
@@ -128,9 +124,10 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== 'ORGANIZER') {
+    // Tylko ADMIN może usuwać kursy
+    if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Brak uprawnień' },
+        { error: 'Brak uprawnień. Tylko administrator może usuwać kursy.' },
         { status: 403 }
       )
     }
@@ -146,12 +143,7 @@ export async function DELETE(
       )
     }
 
-    if (course.organizerId !== session.user.id) {
-      return NextResponse.json(
-        { error: 'Brak uprawnień do usunięcia tego kursu' },
-        { status: 403 }
-      )
-    }
+    // ADMIN może usuwać każdy kurs (nie sprawdzamy organizerId)
 
     await prisma.course.delete({
       where: { id: params.id },

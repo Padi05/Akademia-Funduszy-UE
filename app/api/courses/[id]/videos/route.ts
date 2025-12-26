@@ -17,9 +17,10 @@ export async function POST(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== 'ORGANIZER') {
+    // Tylko ADMIN może przesyłać wideo (ponieważ tylko ADMIN może dodawać kursy)
+    if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Brak uprawnień' },
+        { error: 'Brak uprawnień. Tylko administrator może przesyłać wideo.' },
         { status: 403 }
       )
     }
@@ -28,12 +29,14 @@ export async function POST(
       where: { id: params.id },
     })
 
-    if (!course || course.organizerId !== session.user.id) {
+    if (!course) {
       return NextResponse.json(
-        { error: 'Kurs nie został znaleziony lub brak uprawnień' },
+        { error: 'Kurs nie został znaleziony' },
         { status: 404 }
       )
     }
+
+    // ADMIN może przesyłać wideo do każdego kursu (nie sprawdzamy organizerId)
 
     if (!course.isOnlineCourse) {
       return NextResponse.json(
@@ -136,8 +139,10 @@ export async function GET(
       )
     }
 
-    // Sprawdź czy użytkownik ma dostęp (organizator lub kupił kurs)
+    // Sprawdź czy użytkownik ma dostęp (admin, organizator lub kupił kurs)
+    const isAdmin = session.user.role === 'ADMIN'
     const hasAccess = 
+      isAdmin ||
       course.organizerId === session.user.id ||
       (await prisma.coursePurchase.findFirst({
         where: {
