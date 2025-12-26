@@ -17,11 +17,10 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions)
 
-    // Tylko ADMIN może usuwać pliki (ponieważ tylko ADMIN może dodawać kursy)
-    if (!session || session.user.role !== 'ADMIN') {
+    if (!session) {
       return NextResponse.json(
-        { error: 'Brak uprawnień. Tylko administrator może usuwać pliki.' },
-        { status: 403 }
+        { error: 'Brak autoryzacji' },
+        { status: 401 }
       )
     }
 
@@ -36,7 +35,13 @@ export async function DELETE(
       )
     }
 
-    // ADMIN może usuwać pliki z każdego kursu (nie sprawdzamy organizerId)
+    // ADMIN może usuwać pliki z każdego kursu, organizator tylko ze swoich kursów
+    if (session.user.role !== 'ADMIN' && course.organizerId !== session.user.id) {
+      return NextResponse.json(
+        { error: 'Brak uprawnień. Możesz usuwać tylko pliki ze swoich kursów.' },
+        { status: 403 }
+      )
+    }
 
     const file = await prisma.courseFile.findUnique({
       where: { id: params.fileId },

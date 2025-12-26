@@ -59,7 +59,7 @@ export default function Navbar() {
                   className="text-gray-200 hover:text-purple-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
                 >
                   <User className="h-4 w-4 flex-shrink-0" />
-                  <span className="whitespace-nowrap">Dashboard</span>
+                  <span className="whitespace-nowrap">Panel</span>
                 </Link>
                 <Link
                   href="/dashboard/course-files"
@@ -176,7 +176,7 @@ export default function Navbar() {
                     className="text-gray-200 hover:text-purple-300 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
                   >
                     <User className="h-4 w-4 flex-shrink-0" />
-                    <span>Dashboard</span>
+                    <span>Panel</span>
                   </Link>
                   <Link
                     href="/dashboard/course-files"
