@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Users, BookOpen, CreditCard, TrendingUp, Shield, Trash2, Edit, Ban, CheckCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { pl } from 'date-fns/locale/pl'
@@ -186,6 +187,17 @@ export default function AdminDashboard() {
 
   return (
     <div className="animate-fade-in">
+      {/* Przycisk dodawania kursu dla admina */}
+      <div className="mb-6 flex justify-end">
+        <Link
+          href="/dashboard/courses/new"
+          className="bg-purple-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-purple-700 flex items-center justify-center space-x-2 shadow-lg hover-lift transition-all font-semibold border border-purple-500/50 text-sm sm:text-base"
+        >
+          <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span>Dodaj nowy kurs</span>
+        </Link>
+      </div>
+      
       {/* Tabs */}
       <div className="mb-6 flex flex-wrap gap-2 border-b border-gray-700">
         <button
