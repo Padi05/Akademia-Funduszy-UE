@@ -38,15 +38,47 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    // Tylko ADMIN może dodawać kursy
-    if (!session || session.user.role !== 'ADMIN') {
+    // ADMIN i ORGANIZER mogą dodawać kursy
+    if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'ORGANIZER')) {
       return NextResponse.json(
-        { error: 'Brak uprawnień. Tylko administrator może dodawać kursy.' },
+        { error: 'Brak uprawnień. Tylko administrator lub organizator może dodawać kursy.' },
         { status: 403 }
       )
     }
 
-    // ADMIN nie potrzebuje subskrypcji - pomijamy sprawdzanie
+    // ADMIN nie potrzebuje subskrypcji, ale ORGANIZER tak
+    if (session.user.role === 'ORGANIZER') {
+      const subscription = await prisma.subscription.findUnique({
+        where: { userId: session.user.id },
+      })
+
+      if (!subscription) {
+        return NextResponse.json(
+          { 
+            error: 'Aby dodać kurs, potrzebujesz aktywnej subskrypcji miesięcznej.',
+            requiresSubscription: true,
+            message: 'Przejdź do sekcji Subskrypcja, aby ją aktywować.'
+          },
+          { status: 403 }
+        )
+      }
+
+      // Sprawdź czy subskrypcja jest aktywna
+      const now = new Date()
+      const isExpired = subscription.endDate < now
+      const isActive = subscription.status === 'ACTIVE' && !isExpired
+
+      if (!isActive) {
+        return NextResponse.json(
+          { 
+            error: 'Twoja subskrypcja wygasła. Przedłuż subskrypcję, aby dodać kurs.',
+            requiresSubscription: true,
+            message: 'Przejdź do sekcji Subskrypcja, aby przedłużyć subskrypcję.'
+          },
+          { status: 403 }
+        )
+      }
+    }
 
     const body = await request.json()
     const validatedData = courseSchema.parse(body)

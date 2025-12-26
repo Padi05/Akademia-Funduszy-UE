@@ -77,6 +77,7 @@ export default function NewCoursePageClient() {
   })() : ''
 
   // Sprawdź status subskrypcji przy załadowaniu komponentu (tylko dla nie-adminów)
+  // Uwaga: Sprawdzanie subskrypcji po stronie serwera już przekierowuje, więc tutaj tylko ustawiamy stan
   useEffect(() => {
     const checkSubscription = async () => {
       // ADMIN nie potrzebuje subskrypcji
