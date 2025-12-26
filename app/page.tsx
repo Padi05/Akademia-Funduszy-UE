@@ -10,10 +10,12 @@ async function getCourses() {
   try {
     const courses = await prisma.course.findMany({
       where: {
-        // Pokaż tylko kursy stacjonarne lub kursy online które nie są wystawione na sprzedaż
+        // Pokaż tylko opublikowane kursy:
+        // - Kursy stacjonarne (są automatycznie publikowane)
+        // - Kursy online które są opublikowane
         OR: [
-          { isOnlineCourse: false },
-          { isOnlineCourse: true, isPublished: false },
+          { isOnlineCourse: false, isPublished: true },
+          { isOnlineCourse: true, isPublished: true },
         ],
       },
       include: {

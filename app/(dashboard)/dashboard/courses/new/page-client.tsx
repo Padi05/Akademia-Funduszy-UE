@@ -179,15 +179,24 @@ export default function NewCoursePageClient() {
         } catch (uploadError) {
           // Kurs został utworzony, ale pliki nie zostały przesłane
           setError(uploadError instanceof Error ? uploadError.message : 'Kurs został utworzony, ale wystąpił błąd podczas przesyłania plików')
-          // Przekieruj do edycji kursu, gdzie można dodać pliki ręcznie
+          // Jeśli admin, przekieruj na stronę główną, w przeciwnym razie do edycji
           setTimeout(() => {
-            router.push(`/dashboard/courses/${result.id}/edit`)
+            if (isAdmin) {
+              router.push('/')
+            } else {
+              router.push(`/dashboard/courses/${result.id}/edit`)
+            }
           }, 3000)
           return
         }
       }
 
-      router.push(`/dashboard/courses/${result.id}/edit`)
+      // Jeśli admin, przekieruj na stronę główną, w przeciwnym razie do edycji kursu
+      if (isAdmin) {
+        router.push('/')
+      } else {
+        router.push(`/dashboard/courses/${result.id}/edit`)
+      }
     } catch (err) {
       setError('Wystąpił błąd podczas tworzenia kursu')
     } finally {
