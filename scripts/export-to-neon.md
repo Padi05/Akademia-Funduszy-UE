@@ -112,3 +112,4 @@ npx prisma studio
 - Connection string zmienia się po każdym restarcie (jeśli nie używasz connection pooling)
 - Używaj connection pooling dla produkcji
 
+

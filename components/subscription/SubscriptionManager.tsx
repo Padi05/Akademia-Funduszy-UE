@@ -124,7 +124,7 @@ export default function SubscriptionManager() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="w-full">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
           <CreditCard className="h-6 w-6" />

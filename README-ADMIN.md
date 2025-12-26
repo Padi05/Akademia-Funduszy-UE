@@ -48,9 +48,27 @@ Skrypt poprosi Cię o:
 
 ### 3.2. Pobranie Connection String
 
-1. W dashboard Neon.tech znajdź sekcję "Connection Details"
-2. Skopiuj connection string (wygląda jak: `postgresql://user:password@ep-xxx.region.neon.tech/dbname?sslmode=require`)
-3. Zaktualizuj plik `.env`:
+**Gdzie znaleźć connection string:**
+
+1. **W głównym dashboard projektu:**
+   - Po utworzeniu projektu zobaczysz sekcję **"Connection Details"** na górze strony
+   - Kliknij przycisk **"Copy"** obok connection stringa
+
+2. **W ustawieniach:**
+   - Kliknij **"Settings"** w lewym menu
+   - Przejdź do zakładki **"Connection Details"**
+   - Skopiuj connection string
+
+3. **W SQL Editor:**
+   - Kliknij **"SQL Editor"** w lewym menu
+   - W prawym górnym rogu znajdź przycisk **"Copy connection string"**
+
+**Format connection string:**
+```
+postgresql://user:password@ep-xxx.region.neon.tech/dbname?sslmode=require
+```
+
+**Zaktualizuj plik `.env`:**
 
 ```env
 DATABASE_URL="postgresql://user:password@ep-xxx.region.neon.tech/dbname?sslmode=require"

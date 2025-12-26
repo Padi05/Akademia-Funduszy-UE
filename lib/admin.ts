@@ -27,3 +27,4 @@ export async function getUserRole(): Promise<UserRole | null> {
   return session?.user?.role || null
 }
 
+

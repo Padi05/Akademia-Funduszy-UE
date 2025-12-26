@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import OrganizerDashboard from '@/components/dashboard/OrganizerDashboard'
 import ParticipantDashboard from '@/components/dashboard/ParticipantDashboard'
+import AdminDashboard from '@/components/dashboard/AdminDashboard'
 
 async function getOrganizerData(userId: string) {
   const courses = await prisma.course.findMany({
@@ -46,7 +47,9 @@ export default async function DashboardPage() {
                 Witaj, {session.user.name}! 👋
               </h1>
             <p className="text-base sm:text-lg text-white drop-shadow-md">
-              {session.user.role === 'ORGANIZER'
+              {session.user.role === 'ADMIN'
+                ? 'Zarządzaj użytkownikami, kursami i subskrypcjami'
+                : session.user.role === 'ORGANIZER'
                 ? 'Zarządzaj swoimi kursami dotacyjnymi i rozwijaj swoją działalność'
                 : 'Przeglądaj dostępne kursy i zarządzaj dokumentami'}
             </p>
@@ -62,7 +65,9 @@ export default async function DashboardPage() {
       <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
-          {session.user.role === 'ORGANIZER' ? (
+          {session.user.role === 'ADMIN' ? (
+            <AdminDashboard />
+          ) : session.user.role === 'ORGANIZER' ? (
             <OrganizerDashboard courses={await getOrganizerData(session.user.id)} />
           ) : (
             <ParticipantDashboard

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { LogIn, LogOut, User, Home, Menu, X, FileText, CreditCard } from 'lucide-react'
+import { LogIn, LogOut, User, Home, Menu, X, FileText, CreditCard, Shield } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Navbar() {
@@ -75,6 +75,15 @@ export default function Navbar() {
                   <CreditCard className="h-4 w-4 flex-shrink-0" />
                   <span className="whitespace-nowrap">Subskrypcja</span>
                 </Link>
+                {session.user.role === 'ADMIN' && (
+                  <Link
+                    href="/dashboard/admin"
+                    className="text-gray-200 hover:text-red-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200 border border-red-500/30"
+                  >
+                    <Shield className="h-4 w-4 flex-shrink-0" />
+                    <span className="whitespace-nowrap">Admin</span>
+                  </Link>
+                )}
                 
                 {/* Separator */}
                 <div className="h-6 w-px bg-gray-700 mx-1"></div>
@@ -185,6 +194,16 @@ export default function Navbar() {
                     <CreditCard className="h-4 w-4 flex-shrink-0" />
                     <span>Subskrypcja</span>
                   </Link>
+                  {session.user.role === 'ADMIN' && (
+                    <Link
+                      href="/dashboard/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-gray-200 hover:text-red-300 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200 border border-red-500/30"
+                    >
+                      <Shield className="h-4 w-4 flex-shrink-0" />
+                      <span>Admin</span>
+                    </Link>
+                  )}
                   
                   {/* Separator */}
                   <div className="h-px bg-gray-700 my-1 mx-4"></div>

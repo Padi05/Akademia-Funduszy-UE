@@ -3,6 +3,29 @@ const { PrismaClient } = require('@prisma/client')
 const bcrypt = require('bcryptjs')
 const readline = require('readline')
 const path = require('path')
+const fs = require('fs')
+
+// Załaduj zmienne środowiskowe z .env
+const envPath = path.join(__dirname, '..', '.env')
+if (fs.existsSync(envPath)) {
+  const envFile = fs.readFileSync(envPath, 'utf8')
+  envFile.split('\n').forEach(line => {
+    const trimmedLine = line.trim()
+    if (trimmedLine && !trimmedLine.startsWith('#')) {
+      const match = trimmedLine.match(/^([^=]+)=(.*)$/)
+      if (match) {
+        const key = match[1].trim()
+        const value = match[2].trim().replace(/^["']|["']$/g, '')
+        if (!process.env[key]) {
+          process.env[key] = value
+        }
+      }
+    }
+  })
+} else {
+  console.warn('⚠ Ostrzeżenie: Nie znaleziono pliku .env')
+  console.warn('  Upewnij się, że DATABASE_URL jest ustawiony w zmiennych środowiskowych')
+}
 
 // Upewnij się, że Prisma Client jest wygenerowany
 try {
@@ -11,6 +34,47 @@ try {
   console.error('✗ Błąd: Prisma Client nie jest wygenerowany.')
   console.error('  Uruchom najpierw: npx prisma generate')
   process.exit(1)
+}
+
+// Sprawdź czy DATABASE_URL jest ustawiony
+if (!process.env.DATABASE_URL) {
+  console.error('✗ Błąd: DATABASE_URL nie jest ustawiony!')
+  console.error('  Upewnij się, że plik .env istnieje i zawiera DATABASE_URL')
+  console.error('  Przykład dla PostgreSQL: DATABASE_URL="postgresql://user:password@localhost:5432/dbname"')
+  console.error('  Przykład dla SQLite: DATABASE_URL="file:./prisma/dev.db"')
+  process.exit(1)
+}
+
+// Sprawdź typ bazy danych
+const dbUrl = process.env.DATABASE_URL
+const isPostgres = dbUrl.startsWith('postgresql://') || dbUrl.startsWith('postgres://')
+const isSqlite = dbUrl.startsWith('file:')
+
+if (!isPostgres && !isSqlite) {
+  console.error('✗ Błąd: Nieprawidłowy format DATABASE_URL!')
+  console.error('  Dla PostgreSQL: DATABASE_URL="postgresql://user:password@host:port/dbname"')
+  console.error('  Dla SQLite: DATABASE_URL="file:./prisma/dev.db"')
+  console.error(`  Obecna wartość: ${dbUrl.substring(0, 50)}...`)
+  process.exit(1)
+}
+
+if (isSqlite) {
+  console.error('\n✗ BŁĄD: Wykryto SQLite w DATABASE_URL, ale schema.prisma jest skonfigurowane na PostgreSQL!')
+  console.error('\nAby naprawić:')
+  console.error('1. Jeśli chcesz używać Neon.tech (PostgreSQL):')
+  console.error('   - Utwórz projekt w https://neon.tech')
+  console.error('   - Skopiuj connection string z Neon.tech')
+  console.error('   - Zaktualizuj DATABASE_URL w pliku .env')
+  console.error('   - Przykład: DATABASE_URL="postgresql://user:password@ep-xxx.region.neon.tech/dbname?sslmode=require"')
+  console.error('\n2. Jeśli chcesz używać lokalnego PostgreSQL:')
+  console.error('   - Zainstaluj PostgreSQL lokalnie')
+  console.error('   - Utwórz bazę danych')
+  console.error('   - Zaktualizuj DATABASE_URL w pliku .env')
+  console.error('   - Przykład: DATABASE_URL="postgresql://postgres:password@localhost:5432/dbname"')
+  console.error('\nPo zaktualizowaniu DATABASE_URL uruchom ponownie: npm run create-admin')
+  process.exit(1)
+} else {
+  console.log('ℹ Używana baza danych: PostgreSQL')
 }
 
 const prisma = new PrismaClient()
