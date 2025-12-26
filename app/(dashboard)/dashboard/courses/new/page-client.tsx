@@ -124,10 +124,8 @@ export default function NewCoursePageClient() {
 
     setUploadProgress(`Przesyłanie plików (0/${selectedFiles.length})...`)
     
-    for (let i = 0; i < selectedFiles.length; i++) {
-      const file = selectedFiles[i]
-      setUploadProgress(`Przesyłanie plików (${i + 1}/${selectedFiles.length}): ${file.name}...`)
-
+    // Przesyłaj pliki równolegle zamiast sekwencyjnie
+    const uploadPromises = selectedFiles.map(async (file, index) => {
       try {
         const formData = new FormData()
         formData.append('file', file)
@@ -142,11 +140,16 @@ export default function NewCoursePageClient() {
         if (!response.ok) {
           throw new Error(result.error || `Błąd podczas przesyłania pliku ${file.name}`)
         }
+        
+        // Aktualizuj postęp
+        setUploadProgress(`Przesyłanie plików (${index + 1}/${selectedFiles.length})...`)
       } catch (err) {
         throw new Error(`Błąd podczas przesyłania pliku ${file.name}: ${err instanceof Error ? err.message : 'Nieznany błąd'}`)
       }
-    }
+    })
 
+    // Czekaj na wszystkie pliki równocześnie
+    await Promise.all(uploadPromises)
     setUploadProgress('')
   }
 
@@ -189,33 +192,30 @@ export default function NewCoursePageClient() {
         } else {
           setError(result.error || 'Wystąpił błąd podczas tworzenia kursu')
         }
+        setIsLoading(false)
+        setUploadProgress('')
         return
       }
 
-      // Prześlij pliki jeśli są wybrane
-      if (selectedFiles.length > 0) {
-        try {
-          await uploadFiles(result.id)
-        } catch (uploadError) {
-          // Kurs został utworzony, ale pliki nie zostały przesłane
-          setError(uploadError instanceof Error ? uploadError.message : 'Kurs został utworzony, ale wystąpił błąd podczas przesyłania plików')
-          // Jeśli admin, przekieruj na stronę główną, w przeciwnym razie do edycji
-          setTimeout(() => {
-            if (isAdmin) {
-              router.push('/')
-            } else {
-              router.push(`/dashboard/courses/${result.id}/edit`)
-            }
-          }, 3000)
-          return
-        }
-      }
+      // Kurs został utworzony pomyślnie
+      // Przekieruj od razu (nie czekaj na pliki - będą przesłane w tle)
+      setIsLoading(false)
+      setUploadProgress('')
 
-      // Jeśli admin, przekieruj na stronę główną, w przeciwnym razie do edycji kursu
+      // Przekieruj natychmiast
       if (isAdmin) {
         router.push('/')
       } else {
         router.push(`/dashboard/courses/${result.id}/edit`)
+      }
+
+      // Prześlij pliki w tle (jeśli są wybrane) - nie blokuj przekierowania
+      if (selectedFiles.length > 0) {
+        // Przesyłanie w tle - nie czekamy na zakończenie
+        uploadFiles(result.id).catch((uploadError) => {
+          // Loguj błąd, ale nie blokuj użytkownika
+          console.error('Błąd podczas przesyłania plików w tle:', uploadError)
+        })
       }
     } catch (err) {
       setError('Wystąpił błąd podczas tworzenia kursu')

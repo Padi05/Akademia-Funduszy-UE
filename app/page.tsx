@@ -10,13 +10,8 @@ async function getCourses() {
   try {
     const courses = await prisma.course.findMany({
       where: {
-        // Pokaż tylko opublikowane kursy:
-        // - Kursy stacjonarne (są automatycznie publikowane)
-        // - Kursy online które są opublikowane
-        OR: [
-          { isOnlineCourse: false, isPublished: true },
-          { isOnlineCourse: true, isPublished: true },
-        ],
+        // Pokaż wszystkie opublikowane kursy (stacjonarne i online)
+        isPublished: true,
       },
       include: {
         organizer: {
@@ -173,7 +168,11 @@ export default async function HomePage() {
                   </span>
                 </div>
                 <div className="flex items-center text-sm text-white bg-gray-800/50 rounded-lg px-3 py-2 hover:bg-purple-900/30 transition-colors group/item border border-gray-700">
-                  <span className="font-bold text-lg text-purple-200">{course.price} zł</span>
+                  <span className="font-bold text-lg text-purple-200">
+                    {course.isOnlineCourse && course.onlinePrice 
+                      ? `${course.onlinePrice} zł` 
+                      : `${course.price} zł`}
+                  </span>
                 </div>
               </div>
 
