@@ -154,7 +154,9 @@ export default function NewCoursePageClient() {
           isOnlineCourse: courseType === 'ONLINE' ? (data.isOnlineCourse || false) : false,
           onlinePrice: data.onlinePrice ? parseFloat(data.onlinePrice) : (courseType === 'ONLINE' ? 100 : null),
           commissionRate: data.commissionRate ? parseFloat(data.commissionRate) : (courseType === 'ONLINE' ? 10 : null),
-          isPublished: data.isPublished || false,
+          // Kursy stacjonarne są automatycznie publikowane (widoczne na stronie głównej)
+          // Kursy online wymagają ręcznej publikacji
+          isPublished: courseType === 'STACJONARNY' ? true : (data.isPublished || false),
         }),
       })
 

@@ -40,6 +40,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = courseSchema.parse(body)
 
+    // Określ czy kurs jest online
+    const isOnlineCourse = validatedData.isOnlineCourse || false
+    
+    // Kursy stacjonarne są automatycznie publikowane (widoczne na stronie głównej)
+    // Kursy online wymagają ręcznej publikacji (dla sprzedaży)
+    const shouldPublish = validatedData.isPublished !== undefined 
+      ? validatedData.isPublished 
+      : (validatedData.type === 'STACJONARNY' ? true : false)
+    
     // Utwórz kurs (z aktywną subskrypcją nie wymagamy dodatkowej płatności 100 PLN)
     const course = await prisma.course.create({
       data: {
@@ -52,10 +61,10 @@ export async function POST(request: NextRequest) {
         endDate: validatedData.endDate ? new Date(validatedData.endDate) : null,
         organizerId: session.user.id,
         // Pola dla kursów online
-        isOnlineCourse: validatedData.isOnlineCourse || false,
-        onlinePrice: validatedData.onlinePrice || (validatedData.isOnlineCourse ? 100 : null),
-        commissionRate: validatedData.commissionRate || (validatedData.isOnlineCourse ? 10 : null),
-        isPublished: validatedData.isPublished || false,
+        isOnlineCourse: isOnlineCourse,
+        onlinePrice: validatedData.onlinePrice || (isOnlineCourse ? 100 : null),
+        commissionRate: validatedData.commissionRate || (isOnlineCourse ? 10 : null),
+        isPublished: shouldPublish,
       },
     })
 
