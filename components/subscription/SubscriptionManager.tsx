@@ -23,19 +23,6 @@ export default function SubscriptionManager() {
 
   useEffect(() => {
     fetchSubscription()
-    
-    // Sprawdź parametry URL po powrocie z Stripe
-    const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('success') === 'true') {
-      setSuccess('Subskrypcja została aktywowana pomyślnie!')
-      fetchSubscription()
-      // Usuń parametr z URL
-      window.history.replaceState({}, '', window.location.pathname)
-    } else if (urlParams.get('canceled') === 'true') {
-      setError('Płatność została anulowana')
-      // Usuń parametr z URL
-      window.history.replaceState({}, '', window.location.pathname)
-    }
   }, [])
 
   const fetchSubscription = async () => {
@@ -56,8 +43,7 @@ export default function SubscriptionManager() {
     setSuccess(null)
 
     try {
-      // Utwórz sesję Checkout w Stripe
-      const response = await fetch('/api/subscription/create-checkout', {
+      const response = await fetch('/api/subscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,21 +54,20 @@ export default function SubscriptionManager() {
       const result = await response.json()
 
       if (!response.ok) {
-        setError(result.error || 'Wystąpił błąd podczas tworzenia sesji płatności')
-        setIsProcessing(false)
+        setError(result.error || 'Wystąpił błąd podczas aktywacji subskrypcji')
         return
       }
 
-      // Przekieruj do Stripe Checkout
-      if (result.url) {
-        window.location.href = result.url
-      } else {
-        setError('Nie udało się utworzyć sesji płatności')
-        setIsProcessing(false)
-      }
+      setSuccess('Subskrypcja została aktywowana pomyślnie!')
+      await fetchSubscription()
+      
+      // Odśwież stronę po 2 sekundach
+      setTimeout(() => {
+        router.refresh()
+      }, 2000)
     } catch (err) {
-      console.error('Error creating checkout session:', err)
-      setError('Wystąpił błąd podczas tworzenia sesji płatności')
+      setError('Wystąpił błąd podczas aktywacji subskrypcji')
+    } finally {
       setIsProcessing(false)
     }
   }
@@ -97,8 +82,8 @@ export default function SubscriptionManager() {
     setSuccess(null)
 
     try {
-      const response = await fetch('/api/subscription/cancel', {
-        method: 'POST',
+      const response = await fetch('/api/subscription', {
+        method: 'DELETE',
       })
 
       const result = await response.json()
