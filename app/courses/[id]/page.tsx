@@ -172,6 +172,13 @@ export default async function CourseDetailPage({
                   <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 gradient-text">
                     Materiały do pobrania
                   </h2>
+                  {!session ? (
+                    <div className="p-4 bg-yellow-900/30 rounded-lg border border-yellow-500/50 mb-4">
+                      <p className="text-yellow-200 text-sm sm:text-base">
+                        Aby pobrać materiały, musisz się zalogować lub zarejestrować.
+                      </p>
+                    </div>
+                  ) : null}
                   <div className="space-y-3">
                     {course.files.map((file) => (
                       <div
@@ -182,12 +189,16 @@ export default async function CourseDetailPage({
                           <FileText className="h-5 w-5 mr-3 text-purple-300" />
                           <span className="text-white font-medium">{file.originalName}</span>
                         </div>
-                        <a
-                          href={`/api/courses/${course.id}/files/${file.id}/download`}
-                          className="text-purple-300 hover:text-purple-200 font-semibold hover:underline transition-colors"
-                        >
-                          Pobierz
-                        </a>
+                        {session ? (
+                          <a
+                            href={`/api/courses/${course.id}/files/${file.id}/download`}
+                            className="text-purple-300 hover:text-purple-200 font-semibold hover:underline transition-colors"
+                          >
+                            Pobierz
+                          </a>
+                        ) : (
+                          <span className="text-gray-500 text-sm">Wymagane logowanie</span>
+                        )}
                       </div>
                     ))}
                   </div>
