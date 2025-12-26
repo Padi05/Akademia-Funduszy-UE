@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import DeleteCourseButton from '@/components/courses/DeleteCourseButton'
 
 export const revalidate = 60 // Revalidate every 60 seconds
 
@@ -64,14 +65,17 @@ export default async function CourseDetailPage({
               <span className="sm:hidden">Powrót</span>
             </Link>
             {isAdmin && (
-              <Link
-                href={`/dashboard/courses/${course.id}/edit`}
-                className="inline-flex items-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors shadow-lg text-sm sm:text-base"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Edytuj kurs</span>
-                <span className="sm:hidden">Edytuj</span>
-              </Link>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Link
+                  href={`/dashboard/courses/${course.id}/edit`}
+                  className="inline-flex items-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors shadow-lg text-sm sm:text-base"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Edytuj kurs</span>
+                  <span className="sm:hidden">Edytuj</span>
+                </Link>
+                <DeleteCourseButton courseId={course.id} />
+              </div>
             )}
           </div>
 

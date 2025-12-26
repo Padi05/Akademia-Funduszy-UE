@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { Course, CourseFile, CourseVideoFile } from '@prisma/client'
 import { format } from 'date-fns'
@@ -34,6 +34,7 @@ export default function EditCourseForm({ course }: EditCourseFormProps) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [files, setFiles] = useState<CourseFile[]>(course.files || [])
 
   const {
@@ -79,10 +80,41 @@ export default function EditCourseForm({ course }: EditCourseFormProps) {
       }
 
       router.push('/dashboard')
+      router.refresh()
     } catch (err) {
       setError('Wystąpił błąd podczas aktualizacji kursu')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!confirm('Czy na pewno chcesz usunąć ten kurs? Ta operacja jest nieodwracalna.')) {
+      return
+    }
+
+    setIsDeleting(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/courses/${course.id}`, {
+        method: 'DELETE',
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        setError(result.error || 'Wystąpił błąd podczas usuwania kursu')
+        setIsDeleting(false)
+        return
+      }
+
+      // Przekieruj do dashboardu po usunięciu
+      router.push('/dashboard')
+      router.refresh()
+    } catch (err) {
+      setError('Wystąpił błąd podczas usuwania kursu')
+      setIsDeleting(false)
     }
   }
 
@@ -250,21 +282,33 @@ export default function EditCourseForm({ course }: EditCourseFormProps) {
             </div>
           )}
 
-          <div className="flex justify-end space-x-4 pt-4">
-            <Link
-              href="/dashboard"
-              className="px-6 py-2 border border-gray-700 rounded-md text-white hover:bg-gray-800"
-            >
-              Anuluj
-            </Link>
+          <div className="flex justify-between items-center pt-4 border-t border-gray-700">
             <button
-              type="submit"
-              disabled={isLoading}
-              className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              type="button"
+              onClick={handleDelete}
+              disabled={isDeleting || isLoading}
+              className="px-6 py-2 bg-red-900/50 text-red-300 rounded-md hover:bg-red-800/50 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed border border-red-500/30 transition-all"
             >
-              <Save className="h-4 w-4" />
-              <span>{isLoading ? 'Zapisywanie...' : 'Zapisz zmiany'}</span>
+              <Trash2 className="h-4 w-4" />
+              <span>{isDeleting ? 'Usuwanie...' : 'Usuń kurs'}</span>
             </button>
+            
+            <div className="flex space-x-4">
+              <Link
+                href="/dashboard"
+                className="px-6 py-2 border border-gray-700 rounded-md text-white hover:bg-gray-800 transition-all"
+              >
+                Anuluj
+              </Link>
+              <button
+                type="submit"
+                disabled={isLoading || isDeleting}
+                className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                <Save className="h-4 w-4" />
+                <span>{isLoading ? 'Zapisywanie...' : 'Zapisz zmiany'}</span>
+              </button>
+            </div>
           </div>
         </form>
           </div>

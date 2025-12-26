@@ -96,6 +96,10 @@ export default function AdminDashboard() {
         if (res.ok) {
           const data = await res.json()
           setUsers(data)
+        } else {
+          const errorData = await res.json().catch(() => ({ error: 'Nieznany błąd' }))
+          setError(`Błąd podczas ładowania użytkowników: ${errorData.error || res.statusText}`)
+          console.error('Error fetching users:', errorData)
         }
       } else if (activeTab === 'courses') {
         const res = await fetch('/api/admin/courses')
@@ -336,6 +340,12 @@ export default function AdminDashboard() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+            </div>
+          ) : users.length === 0 ? (
+            <div className="glass rounded-xl p-8 border border-purple-500/30 text-center">
+              <Users className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+              <p className="text-gray-400 text-lg">Brak użytkowników w bazie danych</p>
+              <p className="text-gray-500 text-sm mt-2">Użytkownicy pojawią się tutaj po rejestracji</p>
             </div>
           ) : (
             <div className="glass rounded-xl overflow-hidden border border-purple-500/30">
