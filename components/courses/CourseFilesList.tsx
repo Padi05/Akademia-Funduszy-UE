@@ -9,7 +9,7 @@ interface CourseFile {
   id: string
   originalName: string
   size: number
-  createdAt: Date
+  createdAt: Date | string
   course: {
     id: string
     title: string
@@ -35,7 +35,7 @@ function formatFileSize(bytes: number): string {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
 }
 
-function formatDate(date: Date): string {
+function formatDate(date: Date | string): string {
   return new Date(date).toLocaleDateString('pl-PL', {
     year: 'numeric',
     month: 'long',
