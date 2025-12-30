@@ -79,6 +79,8 @@ export default function MapPage() {
   const [currentAltitude, setCurrentAltitude] = useState<number>(2.5)
   const globeRef = useRef<any>(null)
   const rotationRef = useRef<number>(0)
+  const [atmosphereColor, setAtmosphereColor] = useState<string>('#87ceeb')
+  const [animationTime, setAnimationTime] = useState<number>(0)
 
   // Funkcja obliczająca rozmiar punktu na podstawie altitude
   // Im mniejsze altitude (bliżej/przybliżenie), tym mniejszy punkt
@@ -95,20 +97,54 @@ export default function MapPage() {
     return baseSize * sizeMultiplier
   }
 
-  // Przygotuj punkty na globie dla województw z dynamicznym rozmiarem
+  // Animacja kolorów atmosfery - zmieniające się kolory
+  useEffect(() => {
+    if (!globeReady) return
+
+    const intervalId = setInterval(() => {
+      setAnimationTime((prev) => prev + 0.01)
+      // Tworzenie płynnie zmieniających się kolorów (cykl kolorów)
+      const hue = (animationTime * 50) % 360
+      const saturation = 60 + Math.sin(animationTime * 2) * 20
+      const lightness = 70 + Math.cos(animationTime * 1.5) * 15
+      setAtmosphereColor(`hsl(${hue}, ${saturation}%, ${lightness}%)`)
+    }, 50)
+
+    return () => clearInterval(intervalId)
+  }, [globeReady, animationTime])
+
+  // Przygotuj punkty na globie dla województw z dynamicznym rozmiarem i animacjami
   // Użyj useMemo, aby przeliczać tylko gdy zmienia się altitude lub selectedVoivodeship
   const points = useMemo(() => {
     // Zmniejszone baseSize dla mniejszych znaczników
     const baseSize = selectedVoivodeship ? 0.5 : 0.4
-    return VOIVODESHIPS.map((voivodeship) => ({
-      lat: voivodeship.lat,
-      lng: voivodeship.lng,
-      size: calculatePointSize(baseSize, currentAltitude),
-      color: selectedVoivodeship === voivodeship.name ? '#60a5fa' : '#a78bfa',
-      voivodeship: voivodeship.name,
-      label: voivodeship.name,
-    }))
-  }, [currentAltitude, selectedVoivodeship])
+    const pulseFactor = 1 + Math.sin(animationTime * 3) * 0.15 // Pulsowanie punktów
+    
+    return VOIVODESHIPS.map((voivodeship, index) => {
+      const isSelected = selectedVoivodeship === voivodeship.name
+      // Animowane kolory - gradient dla wybranego, pulsujące dla innych
+      let color: string
+      if (isSelected) {
+        // Wybrany punkt - jasny niebieski z pulsowaniem
+        const brightness = 0.7 + Math.sin(animationTime * 4 + index) * 0.3
+        color = `rgba(96, 165, 250, ${brightness})`
+      } else {
+        // Inne punkty - fioletowy z pulsowaniem
+        const hue = (240 + Math.sin(animationTime * 2 + index * 0.5) * 30) % 360
+        const saturation = 70 + Math.cos(animationTime * 3 + index) * 20
+        color = `hsl(${hue}, ${saturation}%, 65%)`
+      }
+      
+      return {
+        lat: voivodeship.lat,
+        lng: voivodeship.lng,
+        size: calculatePointSize(baseSize, currentAltitude) * pulseFactor,
+        color: color,
+        voivodeship: voivodeship.name,
+        label: voivodeship.name,
+      }
+    })
+  }, [currentAltitude, selectedVoivodeship, animationTime])
 
   useEffect(() => {
     if (selectedVoivodeship) {
@@ -158,15 +194,22 @@ export default function MapPage() {
     return () => clearInterval(intervalId)
   }, [globeReady, currentAltitude])
 
-  // Animacja automatycznego obrotu globusa
+  // Animacja automatycznego obrotu globusa z płynnymi efektami
   useEffect(() => {
     if (!globeReady || !globeRef.current || selectedVoivodeship) return
 
     let animationFrameId: number
     const animateRotation = () => {
       if (globeRef.current && !selectedVoivodeship) {
-        rotationRef.current += 0.15
-        globeRef.current.rotation({ lat: 0, lng: rotationRef.current, meridian: 0 })
+        // Płynniejsza rotacja z lekkim efektem falowania
+        rotationRef.current += 0.12 + Math.sin(animationTime * 0.5) * 0.03
+        // Dodaj subtelne wahania w osi lat dla efektu "kołysania"
+        const latVariation = Math.sin(animationTime * 0.3) * 2
+        globeRef.current.rotation({ 
+          lat: latVariation, 
+          lng: rotationRef.current, 
+          meridian: Math.sin(animationTime * 0.4) * 5 
+        })
       }
       animationFrameId = requestAnimationFrame(animateRotation)
     }
@@ -177,7 +220,7 @@ export default function MapPage() {
         cancelAnimationFrame(animationFrameId)
       }
     }
-  }, [globeReady, selectedVoivodeship])
+  }, [globeReady, selectedVoivodeship, animationTime])
 
 
   const fetchCourses = async (voivodeship: string) => {
@@ -290,8 +333,8 @@ export default function MapPage() {
                   globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
                   backgroundColor="rgba(0, 0, 0, 0)"
                   showAtmosphere={true}
-                  atmosphereColor="#87ceeb"
-                  atmosphereAltitude={0.2}
+                  atmosphereColor={atmosphereColor}
+                  atmosphereAltitude={0.15 + Math.sin(animationTime * 2) * 0.05}
                   backgroundImageUrl=""
                   pointsData={points}
                   pointColor="color"
@@ -314,11 +357,23 @@ export default function MapPage() {
                   pointRadius={(d: any) => d.size || 0.8}
                   showGlobe={true}
                   showGraticules={true}
+                  graticuleColor="rgba(100, 150, 200, 0.3)"
                   polygonsData={countriesData}
                   polygonAltitude={0.01}
-                  polygonCapColor={(d: any) => 'rgba(120, 160, 200, 0.25)'}
-                  polygonSideColor={(d: any) => 'rgba(100, 140, 180, 0.15)'}
-                  polygonStrokeColor={() => 'rgba(150, 180, 220, 0.6)'}
+                  polygonCapColor={(d: any) => {
+                    // Animowane kolory krajów z gradientem
+                    const hue = (animationTime * 20 + (d.properties?.NAME?.length || 0) * 10) % 360
+                    return `hsla(${hue}, 40%, 50%, 0.2)`
+                  }}
+                  polygonSideColor={(d: any) => {
+                    const hue = (animationTime * 20 + (d.properties?.NAME?.length || 0) * 10) % 360
+                    return `hsla(${hue}, 30%, 40%, 0.15)`
+                  }}
+                  polygonStrokeColor={() => {
+                    // Animowany kolor obramowania
+                    const hue = (animationTime * 30) % 360
+                    return `hsla(${hue}, 50%, 60%, 0.4)`
+                  }}
                   polygonLabel={(d: any) => {
                     const props = d.properties || {}
                     return props.NAME || props.name || props.NAME_EN || 'Country'
