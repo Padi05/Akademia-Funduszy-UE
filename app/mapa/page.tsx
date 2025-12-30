@@ -293,11 +293,6 @@ export default function MapPage() {
                     setCurrentAltitude(initialPOV.altitude)
                   }
                 }}
-                onPointOfViewChange={(pov: any) => {
-                  if (pov && pov.altitude !== undefined) {
-                    setCurrentAltitude(pov.altitude)
-                  }
-                }}
                 pointResolution={32}
                 pointAltitude={0.02}
                 pointRadius={(d: any) => d.size || 0.8}
