@@ -33,24 +33,163 @@ const GlobeComponent = dynamic(
   }
 ) as any
 
-// Lista województw Polski z koordynatami
-const VOIVODESHIPS = [
-  { name: 'Dolnośląskie', lat: 51.1, lng: 17.0 },
-  { name: 'Kujawsko-Pomorskie', lat: 53.0, lng: 18.0 },
-  { name: 'Lubelskie', lat: 51.2, lng: 22.6 },
-  { name: 'Lubuskie', lat: 52.4, lng: 15.6 },
-  { name: 'Łódzkie', lat: 51.8, lng: 19.5 },
-  { name: 'Małopolskie', lat: 50.1, lng: 19.9 },
-  { name: 'Mazowieckie', lat: 52.2, lng: 21.0 },
-  { name: 'Opolskie', lat: 50.7, lng: 17.9 },
-  { name: 'Podkarpackie', lat: 50.0, lng: 22.0 },
-  { name: 'Podlaskie', lat: 53.1, lng: 23.2 },
-  { name: 'Pomorskie', lat: 54.4, lng: 18.6 },
-  { name: 'Śląskie', lat: 50.3, lng: 19.0 },
-  { name: 'Świętokrzyskie', lat: 50.9, lng: 20.6 },
-  { name: 'Warmińsko-Mazurskie', lat: 53.8, lng: 20.5 },
-  { name: 'Wielkopolskie', lat: 52.4, lng: 16.9 },
-  { name: 'Zachodniopomorskie', lat: 53.4, lng: 14.6 },
+// Lista regionów z całego świata z koordynatami
+const REGIONS = [
+  // POLSKA - Województwa
+  { name: 'Dolnośląskie', lat: 51.1, lng: 17.0, country: 'Polska' },
+  { name: 'Kujawsko-Pomorskie', lat: 53.0, lng: 18.0, country: 'Polska' },
+  { name: 'Lubelskie', lat: 51.2, lng: 22.6, country: 'Polska' },
+  { name: 'Lubuskie', lat: 52.4, lng: 15.6, country: 'Polska' },
+  { name: 'Łódzkie', lat: 51.8, lng: 19.5, country: 'Polska' },
+  { name: 'Małopolskie', lat: 50.1, lng: 19.9, country: 'Polska' },
+  { name: 'Mazowieckie', lat: 52.2, lng: 21.0, country: 'Polska' },
+  { name: 'Opolskie', lat: 50.7, lng: 17.9, country: 'Polska' },
+  { name: 'Podkarpackie', lat: 50.0, lng: 22.0, country: 'Polska' },
+  { name: 'Podlaskie', lat: 53.1, lng: 23.2, country: 'Polska' },
+  { name: 'Pomorskie', lat: 54.4, lng: 18.6, country: 'Polska' },
+  { name: 'Śląskie', lat: 50.3, lng: 19.0, country: 'Polska' },
+  { name: 'Świętokrzyskie', lat: 50.9, lng: 20.6, country: 'Polska' },
+  { name: 'Warmińsko-Mazurskie', lat: 53.8, lng: 20.5, country: 'Polska' },
+  { name: 'Wielkopolskie', lat: 52.4, lng: 16.9, country: 'Polska' },
+  { name: 'Zachodniopomorskie', lat: 53.4, lng: 14.6, country: 'Polska' },
+  
+  // NIEMCY - Kraje związkowe
+  { name: 'Bavaria', lat: 48.8, lng: 11.5, country: 'Niemcy' },
+  { name: 'Berlin', lat: 52.5, lng: 13.4, country: 'Niemcy' },
+  { name: 'North Rhine-Westphalia', lat: 51.2, lng: 7.0, country: 'Niemcy' },
+  { name: 'Baden-Württemberg', lat: 48.8, lng: 9.2, country: 'Niemcy' },
+  { name: 'Lower Saxony', lat: 52.8, lng: 9.8, country: 'Niemcy' },
+  { name: 'Hesse', lat: 50.1, lng: 8.7, country: 'Niemcy' },
+  { name: 'Saxony', lat: 51.1, lng: 13.7, country: 'Niemcy' },
+  { name: 'Rhineland-Palatinate', lat: 49.9, lng: 7.4, country: 'Niemcy' },
+  
+  // FRANCJA - Regiony
+  { name: 'Île-de-France', lat: 48.9, lng: 2.3, country: 'Francja' },
+  { name: 'Auvergne-Rhône-Alpes', lat: 45.8, lng: 4.8, country: 'Francja' },
+  { name: 'Provence-Alpes-Côte d\'Azur', lat: 43.7, lng: 7.3, country: 'Francja' },
+  { name: 'Nouvelle-Aquitaine', lat: 44.8, lng: -0.6, country: 'Francja' },
+  { name: 'Occitanie', lat: 43.6, lng: 1.4, country: 'Francja' },
+  { name: 'Hauts-de-France', lat: 50.6, lng: 3.1, country: 'Francja' },
+  { name: 'Grand Est', lat: 48.6, lng: 7.7, country: 'Francja' },
+  { name: 'Normandy', lat: 49.2, lng: -0.4, country: 'Francja' },
+  
+  // WŁOCHY - Regiony
+  { name: 'Lombardy', lat: 45.5, lng: 9.2, country: 'Włochy' },
+  { name: 'Lazio', lat: 41.9, lng: 12.5, country: 'Włochy' },
+  { name: 'Campania', lat: 40.8, lng: 14.3, country: 'Włochy' },
+  { name: 'Sicily', lat: 37.5, lng: 14.3, country: 'Włochy' },
+  { name: 'Veneto', lat: 45.4, lng: 11.9, country: 'Włochy' },
+  { name: 'Emilia-Romagna', lat: 44.5, lng: 11.3, country: 'Włochy' },
+  { name: 'Piedmont', lat: 45.1, lng: 7.7, country: 'Włochy' },
+  { name: 'Tuscany', lat: 43.8, lng: 11.3, country: 'Włochy' },
+  
+  // HISZPANIA - Wspólnoty autonomiczne
+  { name: 'Madrid', lat: 40.4, lng: -3.7, country: 'Hiszpania' },
+  { name: 'Catalonia', lat: 41.4, lng: 2.2, country: 'Hiszpania' },
+  { name: 'Andalusia', lat: 37.4, lng: -5.9, country: 'Hiszpania' },
+  { name: 'Valencia', lat: 39.5, lng: -0.4, country: 'Hiszpania' },
+  { name: 'Basque Country', lat: 43.3, lng: -2.9, country: 'Hiszpania' },
+  { name: 'Galicia', lat: 42.9, lng: -8.5, country: 'Hiszpania' },
+  
+  // WIELKA BRYTANIA - Regiony
+  { name: 'Greater London', lat: 51.5, lng: -0.1, country: 'Wielka Brytania' },
+  { name: 'West Midlands', lat: 52.5, lng: -1.9, country: 'Wielka Brytania' },
+  { name: 'Greater Manchester', lat: 53.5, lng: -2.2, country: 'Wielka Brytania' },
+  { name: 'West Yorkshire', lat: 53.8, lng: -1.6, country: 'Wielka Brytania' },
+  { name: 'Scotland', lat: 56.0, lng: -4.2, country: 'Wielka Brytania' },
+  { name: 'Wales', lat: 52.1, lng: -3.8, country: 'Wielka Brytania' },
+  
+  // USA - Stany
+  { name: 'California', lat: 36.8, lng: -119.4, country: 'USA' },
+  { name: 'New York', lat: 40.7, lng: -74.0, country: 'USA' },
+  { name: 'Texas', lat: 31.0, lng: -99.9, country: 'USA' },
+  { name: 'Florida', lat: 27.8, lng: -81.8, country: 'USA' },
+  { name: 'Illinois', lat: 40.3, lng: -89.0, country: 'USA' },
+  { name: 'Pennsylvania', lat: 40.6, lng: -77.2, country: 'USA' },
+  { name: 'Ohio', lat: 40.4, lng: -82.8, country: 'USA' },
+  { name: 'Georgia', lat: 33.0, lng: -83.6, country: 'USA' },
+  { name: 'North Carolina', lat: 35.5, lng: -79.4, country: 'USA' },
+  { name: 'Michigan', lat: 43.3, lng: -84.5, country: 'USA' },
+  
+  // KANADA - Prowincje
+  { name: 'Ontario', lat: 43.7, lng: -79.4, country: 'Kanada' },
+  { name: 'Quebec', lat: 46.8, lng: -71.2, country: 'Kanada' },
+  { name: 'British Columbia', lat: 49.3, lng: -123.1, country: 'Kanada' },
+  { name: 'Alberta', lat: 53.5, lng: -113.5, country: 'Kanada' },
+  
+  // BRAZYLIA - Stany
+  { name: 'São Paulo', lat: -23.6, lng: -46.6, country: 'Brazylia' },
+  { name: 'Rio de Janeiro', lat: -22.9, lng: -43.2, country: 'Brazylia' },
+  { name: 'Minas Gerais', lat: -19.9, lng: -43.9, country: 'Brazylia' },
+  { name: 'Bahia', lat: -12.9, lng: -38.5, country: 'Brazylia' },
+  
+  // CHINY - Prowincje
+  { name: 'Beijing', lat: 39.9, lng: 116.4, country: 'Chiny' },
+  { name: 'Shanghai', lat: 31.2, lng: 121.5, country: 'Chiny' },
+  { name: 'Guangdong', lat: 23.1, lng: 113.3, country: 'Chiny' },
+  { name: 'Jiangsu', lat: 32.1, lng: 118.8, country: 'Chiny' },
+  { name: 'Zhejiang', lat: 30.3, lng: 120.2, country: 'Chiny' },
+  
+  // INDIE - Stany
+  { name: 'Maharashtra', lat: 19.1, lng: 72.9, country: 'Indie' },
+  { name: 'Delhi', lat: 28.6, lng: 77.2, country: 'Indie' },
+  { name: 'Karnataka', lat: 12.9, lng: 77.6, country: 'Indie' },
+  { name: 'Tamil Nadu', lat: 13.1, lng: 80.3, country: 'Indie' },
+  { name: 'Gujarat', lat: 23.0, lng: 72.6, country: 'Indie' },
+  
+  // JAPONIA - Prefektury
+  { name: 'Tokyo', lat: 35.7, lng: 139.7, country: 'Japonia' },
+  { name: 'Osaka', lat: 34.7, lng: 135.5, country: 'Japonia' },
+  { name: 'Kyoto', lat: 35.0, lng: 135.8, country: 'Japonia' },
+  { name: 'Kanagawa', lat: 35.4, lng: 139.6, country: 'Japonia' },
+  
+  // AUSTRALIA - Stany
+  { name: 'New South Wales', lat: -33.9, lng: 151.2, country: 'Australia' },
+  { name: 'Victoria', lat: -37.8, lng: 144.9, country: 'Australia' },
+  { name: 'Queensland', lat: -27.5, lng: 153.0, country: 'Australia' },
+  { name: 'Western Australia', lat: -31.9, lng: 115.9, country: 'Australia' },
+  
+  // RPA - Prowincje
+  { name: 'Gauteng', lat: -26.2, lng: 28.0, country: 'RPA' },
+  { name: 'Western Cape', lat: -33.9, lng: 18.4, country: 'RPA' },
+  { name: 'KwaZulu-Natal', lat: -29.9, lng: 30.9, country: 'RPA' },
+  
+  // MEKSYK - Stany
+  { name: 'Mexico City', lat: 19.4, lng: -99.1, country: 'Meksyk' },
+  { name: 'Jalisco', lat: 20.7, lng: -103.3, country: 'Meksyk' },
+  { name: 'Nuevo León', lat: 25.7, lng: -100.3, country: 'Meksyk' },
+  
+  // ARGENTYNA - Prowincje
+  { name: 'Buenos Aires', lat: -34.6, lng: -58.4, country: 'Argentyna' },
+  { name: 'Córdoba', lat: -31.4, lng: -64.2, country: 'Argentyna' },
+  
+  // ROSJA - Regiony
+  { name: 'Moscow', lat: 55.8, lng: 37.6, country: 'Rosja' },
+  { name: 'Saint Petersburg', lat: 59.9, lng: 30.3, country: 'Rosja' },
+  { name: 'Siberia', lat: 60.0, lng: 100.0, country: 'Rosja' },
+  
+  // TURCJA - Regiony
+  { name: 'Istanbul', lat: 41.0, lng: 28.9, country: 'Turcja' },
+  { name: 'Ankara', lat: 39.9, lng: 32.9, country: 'Turcja' },
+  { name: 'Izmir', lat: 38.4, lng: 27.1, country: 'Turcja' },
+  
+  // KOREA POŁUDNIOWA - Regiony
+  { name: 'Seoul', lat: 37.6, lng: 127.0, country: 'Korea Południowa' },
+  { name: 'Busan', lat: 35.2, lng: 129.1, country: 'Korea Południowa' },
+  
+  // SINGAPUR
+  { name: 'Singapore', lat: 1.3, lng: 103.8, country: 'Singapur' },
+  
+  // ZJEDNOCZONE EMIRATY ARABSKIE
+  { name: 'Dubai', lat: 25.2, lng: 55.3, country: 'ZEA' },
+  { name: 'Abu Dhabi', lat: 24.5, lng: 54.4, country: 'ZEA' },
+  
+  // EGIPT
+  { name: 'Cairo', lat: 30.0, lng: 31.2, country: 'Egipt' },
+  
+  // MAROKO
+  { name: 'Casablanca', lat: 33.6, lng: -7.6, country: 'Maroko' },
+  { name: 'Rabat', lat: 34.0, lng: -6.8, country: 'Maroko' },
 ]
 
 interface Course {
@@ -120,8 +259,8 @@ export default function MapPage() {
     const baseSize = selectedVoivodeship ? 0.5 : 0.4
     const pulseFactor = 1 + Math.sin(animationTime * 3) * 0.15 // Pulsowanie punktów
     
-    return VOIVODESHIPS.map((voivodeship, index) => {
-      const isSelected = selectedVoivodeship === voivodeship.name
+    return REGIONS.map((region, index) => {
+      const isSelected = selectedVoivodeship === region.name
       // Animowane kolory - gradient dla wybranego, pulsujące dla innych
       let color: string
       if (isSelected) {
@@ -136,12 +275,13 @@ export default function MapPage() {
       }
       
       return {
-        lat: voivodeship.lat,
-        lng: voivodeship.lng,
+        lat: region.lat,
+        lng: region.lng,
         size: calculatePointSize(baseSize, currentAltitude) * pulseFactor,
         color: color,
-        voivodeship: voivodeship.name,
-        label: voivodeship.name,
+        voivodeship: region.name,
+        label: `${region.name}${region.country ? `, ${region.country}` : ''}`,
+        country: region.country,
       }
     })
   }, [currentAltitude, selectedVoivodeship, animationTime])
@@ -246,11 +386,11 @@ export default function MapPage() {
       setSelectedVoivodeship(point.voivodeship)
       // Przesuń glob do wybranego województwa
       if (globeRef.current) {
-        const voivodeshipData = VOIVODESHIPS.find((v) => v.name === point.voivodeship)
-        if (voivodeshipData) {
+        const regionData = REGIONS.find((r) => r.name === point.voivodeship)
+        if (regionData) {
           globeRef.current.pointOfView({
-            lat: voivodeshipData.lat,
-            lng: voivodeshipData.lng,
+            lat: regionData.lat,
+            lng: regionData.lng,
             altitude: 1.5,
           }, 1000)
         }
@@ -277,7 +417,7 @@ export default function MapPage() {
               </span>
             </h1>
             <p className="text-gray-300 text-lg">
-              Kliknij na punkt na globie, aby zobaczyć dostępne kursy w danym województwie
+              Kliknij na punkt na globie, aby zobaczyć dostępne kursy w danym regionie
             </p>
           </div>
         </div>
@@ -338,7 +478,7 @@ export default function MapPage() {
                   backgroundImageUrl=""
                   pointsData={points}
                   pointColor="color"
-                  pointLabel={(d: any) => `${d.voivodeship}`}
+                  pointLabel={(d: any) => d.label || `${d.voivodeship}${d.country ? `, ${d.country}` : ''}`}
                   onPointClick={handlePointClick}
                   onGlobeReady={() => {
                     setGlobeReady(true)
@@ -405,12 +545,22 @@ export default function MapPage() {
               {selectedVoivodeship ? (
                 <>
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-white flex items-center">
+                    <div className="flex items-center">
                       <MapPin className="h-6 w-6 mr-2 text-blue-400" />
-                      <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                        {selectedVoivodeship}
-                      </span>
-                    </h2>
+                      <div className="flex flex-col">
+                        <h2 className="text-2xl font-bold text-white">
+                          <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                            {selectedVoivodeship}
+                          </span>
+                        </h2>
+                        {(() => {
+                          const region = REGIONS.find(r => r.name === selectedVoivodeship)
+                          return region?.country ? (
+                            <span className="text-sm text-gray-400 mt-1">{region.country}</span>
+                          ) : null
+                        })()}
+                      </div>
+                    </div>
                     <button
                       onClick={() => {
                         setSelectedVoivodeship(null)
@@ -437,7 +587,7 @@ export default function MapPage() {
                   ) : courses.length === 0 ? (
                     <div className="text-center py-12">
                       <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-300">Brak kursów w tym województwie</p>
+                      <p className="text-gray-300">Brak kursów w tym regionie</p>
                     </div>
                   ) : (
                     <div className="space-y-4 max-h-[calc(100vh-400px)] overflow-y-auto pr-2">
@@ -483,9 +633,9 @@ export default function MapPage() {
               ) : (
                 <div className="text-center py-12">
                   <Globe className="h-20 w-20 text-blue-400 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-xl font-bold text-white mb-2">Wybierz województwo</h3>
+                  <h3 className="text-xl font-bold text-white mb-2">Wybierz region</h3>
                   <p className="text-gray-400">
-                    Kliknij na punkt na globie, aby zobaczyć dostępne kursy w danym województwie
+                    Kliknij na punkt na globie, aby zobaczyć dostępne kursy w danym regionie
                   </p>
                 </div>
               )}
