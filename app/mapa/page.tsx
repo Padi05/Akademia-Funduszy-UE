@@ -238,13 +238,13 @@ export default function MapPage() {
     return baseSize * sizeMultiplier
   }
 
-  // Delikatna animacja czasu dla innych efektów
+  // Delikatna animacja czasu dla innych efektów - rzadsze aktualizacje
   useEffect(() => {
     if (!globeReady) return
 
     const intervalId = setInterval(() => {
-      setAnimationTime((prev) => prev + 0.005) // Wolniejsza animacja
-    }, 100)
+      setAnimationTime((prev) => prev + 0.01) // Rzadsze aktualizacje
+    }, 200) // Co 200ms zamiast 100ms
 
     return () => clearInterval(intervalId)
   }, [globeReady])
@@ -260,6 +260,32 @@ export default function MapPage() {
     return Array.from(countries).sort()
   }, [])
 
+  // Zoptymalizowane etykiety krajów - tylko większe kraje
+  const countryLabels = useMemo(() => {
+    if (!countriesData.length) return []
+    
+    // Ogranicz liczbę etykiet dla lepszej wydajności
+    return countriesData
+      .filter((country: any) => {
+        if (!country.name || !country.centroid || country.centroid.lat === 0) return false
+        // Filtruj tylko większe/ważniejsze kraje
+        const name = country.name.toLowerCase()
+        const majorCountries = ['poland', 'germany', 'france', 'spain', 'italy', 'united kingdom', 
+          'united states', 'canada', 'brazil', 'china', 'india', 'japan', 'australia', 'russia',
+          'mexico', 'argentina', 'south africa', 'turkey', 'south korea', 'egypt', 'morocco',
+          'ukraine', 'netherlands', 'belgium', 'sweden', 'norway', 'denmark', 'finland',
+          'greece', 'portugal', 'switzerland', 'austria', 'czech', 'hungary', 'romania']
+        return majorCountries.some(mc => name.includes(mc)) || country.name.length < 12
+      })
+      .slice(0, 40) // Maksymalnie 40 etykiet
+      .map((country: any) => ({
+        lat: country.centroid.lat,
+        lng: country.centroid.lng,
+        text: country.name,
+        size: country.name.length > 15 ? 0.4 : 0.5,
+      }))
+  }, [countriesData])
+
   // Inicjalizuj wszystkie kraje jako wybrane przy pierwszym renderowaniu
   useEffect(() => {
     if (selectedCountries.size === 0 && uniqueCountries.length > 0) {
@@ -272,7 +298,8 @@ export default function MapPage() {
   const points = useMemo(() => {
     // Zmniejszone baseSize dla mniejszych znaczników
     const baseSize = selectedVoivodeship ? 0.5 : 0.4
-    const pulseFactor = 1 + Math.sin(animationTime * 1.5) * 0.08 // Delikatne pulsowanie punktów
+    // Usunięto pulsowanie dla lepszej wydajności
+    const pulseFactor = 1
     
     // Filtruj regiony według wybranych krajów
     const filteredRegions = REGIONS.filter(region => {
@@ -288,10 +315,8 @@ export default function MapPage() {
         // Wybrany punkt - jasny niebieski
         color = '#60a5fa'
       } else {
-        // Inne punkty - delikatny fioletowy, mniej animacji
-        const hue = 250 + Math.sin(animationTime * 0.5 + index * 0.1) * 10
-        const saturation = 60 + Math.cos(animationTime * 1 + index) * 10
-        color = `hsl(${hue}, ${saturation}%, 70%)`
+        // Inne punkty - statyczny fioletowy, bez animacji dla lepszej wydajności
+        color = '#a78bfa'
       }
       
       return {
@@ -334,14 +359,19 @@ export default function MapPage() {
               let totalLng = 0
               let count = 0
               
-              const extractCoords = (arr: any) => {
+              // Zoptymalizowane obliczanie centroidu - próbkowanie co 20 punkt dla wydajności
+              const extractCoords = (arr: any, depth = 0) => {
+                if (depth > 4) return // Ogranicz głębokość rekurencji
                 if (Array.isArray(arr)) {
                   if (arr.length === 2 && typeof arr[0] === 'number' && typeof arr[1] === 'number') {
-                    totalLng += arr[0]
-                    totalLat += arr[1]
+                    // Próbkuj co 20 punkt dla lepszej wydajności
+                    if (count % 20 === 0) {
+                      totalLng += arr[0]
+                      totalLat += arr[1]
+                    }
                     count++
                   } else {
-                    arr.forEach(extractCoords)
+                    arr.forEach((item: any) => extractCoords(item, depth + 1))
                   }
                 }
               }
@@ -349,7 +379,8 @@ export default function MapPage() {
               extractCoords(coords)
               
               if (count > 0) {
-                centroid = { lat: totalLat / count, lng: totalLng / count }
+                const sampleCount = Math.floor(count / 20) || 1
+                centroid = { lat: totalLat / sampleCount, lng: totalLng / sampleCount }
               }
             } catch (e) {
               console.warn('Error calculating centroid:', e)
@@ -377,7 +408,7 @@ export default function MapPage() {
       })
   }, [])
 
-  // Śledź zmiany punktu widoku (altitude) dla dynamicznego rozmiaru punktów
+  // Śledź zmiany punktu widoku (altitude) dla dynamicznego rozmiaru punktów - rzadsze sprawdzanie
   useEffect(() => {
     if (!globeReady || !globeRef.current) return
 
@@ -385,8 +416,12 @@ export default function MapPage() {
       if (globeRef.current) {
         try {
           const pov = globeRef.current.pointOfView()
-          if (pov && pov.altitude !== undefined && pov.altitude !== currentAltitude) {
-            setCurrentAltitude(pov.altitude)
+          if (pov && pov.altitude !== undefined) {
+            const newAltitude = pov.altitude
+            // Aktualizuj tylko jeśli różnica jest znacząca (0.1)
+            if (Math.abs(newAltitude - currentAltitude) > 0.1) {
+              setCurrentAltitude(newAltitude)
+            }
           }
         } catch (e) {
           // Ignoruj błędy podczas sprawdzania
@@ -394,7 +429,7 @@ export default function MapPage() {
       }
     }
 
-    const intervalId = setInterval(checkAltitude, 100) // Sprawdzaj co 100ms
+    const intervalId = setInterval(checkAltitude, 300) // Sprawdzaj co 300ms zamiast 100ms
     return () => clearInterval(intervalId)
   }, [globeReady, currentAltitude])
 
@@ -584,7 +619,7 @@ export default function MapPage() {
               {/* Delikatne tło - mniej gwiazd, subtelne efekty */}
               <div className="starfield" style={{ opacity: 0.3 }}>
                 {/* Mniej gwiazd dla czytelności */}
-                {Array.from({ length: 60 }).map((_, i) => {
+                {Array.from({ length: 30 }).map((_, i) => {
                   const size = Math.random() < 0.8 ? 'small' : 'medium'
                   const left = Math.random() * 100
                   const top = Math.random() * 100
@@ -631,7 +666,7 @@ export default function MapPage() {
                       setCurrentAltitude(initialPOV.altitude)
                     }
                   }}
-                  pointResolution={32}
+                  pointResolution={16}
                   pointAltitude={0.02}
                   pointRadius={(d: any) => d.size || 0.8}
                   showGlobe={true}
@@ -648,14 +683,7 @@ export default function MapPage() {
                     const name = props.NAME || props.name || props.NAME_EN || props.NAME_LONG || props.ADMIN || d.name || 'Country'
                     return `<b>${name}</b>`
                   }}
-                  labelsData={countriesData
-                    .filter((country: any) => country.name && country.centroid && country.centroid.lat !== 0)
-                    .map((country: any) => ({
-                      lat: country.centroid.lat,
-                      lng: country.centroid.lng,
-                      text: country.name,
-                      size: country.name.length > 15 ? 0.4 : 0.5,
-                    }))}
+                  labelsData={countryLabels}
                   labelColor={() => 'rgba(255, 255, 255, 0.95)'}
                   labelSize={(d: any) => d.size || 0.5}
                   labelResolution={2}
