@@ -5,11 +5,7 @@ import dynamic from 'next/dynamic'
 
 // Dynamiczny import Globe
 const GlobeComponent = dynamic(
-  () => import('react-globe.gl').then((mod) => {
-    if (mod.default) return mod.default
-    if (typeof mod === 'function') return mod
-    return mod.Globe || mod
-  }),
+  () => import('react-globe.gl'),
   { 
     ssr: false,
   }
