@@ -240,16 +240,6 @@ export default function MapPage() {
                   const props = d.properties || {}
                   return props.NAME || props.name || props.NAME_EN || 'Country'
                 }}
-                polygonCapMaterial={{ 
-                  ambient: '#ffffff',
-                  opacity: 0.25,
-                  transparent: true
-                }}
-                polygonSideMaterial={{ 
-                  ambient: '#ffffff',
-                  opacity: 0.15,
-                  transparent: true
-                }}
               />
               {!globeReady && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 rounded-xl">
