@@ -24,6 +24,11 @@ const courseSchema = z.object({
   onlinePrice: z.number().min(0).nullable().optional(),
   commissionRate: z.number().min(0).max(100).nullable().optional(),
   isPublished: z.boolean().optional(),
+  // Pola dla dofinansowania UE (kursy stacjonarne)
+  euFundingPercentage: z.number().min(0).max(100).nullable().optional(),
+  participantPrice: z.number().min(0).nullable().optional(),
+  liveCommissionRate: z.number().min(0).max(100).nullable().optional(),
+  onlineDiscountPercentage: z.number().min(0).max(100).nullable().optional(),
 }).refine((data) => {
   // Jeśli data zakończenia jest podana, musi być po dacie rozpoczęcia
   if (data.endDate && data.startDate) {
