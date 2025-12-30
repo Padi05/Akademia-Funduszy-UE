@@ -31,6 +31,9 @@ model User {
   receivedMessages Message[] @relation("MessageReceiver") // Wiadomości otrzymane
   forumPosts    ForumPost[] // Posty na forum
   forumComments ForumComment[] // Komentarze na forum
+  consultationsAsTrainer Consultation[] @relation("ConsultationTrainer") // Konsultacje jako trener
+  consultationsAsParticipant Consultation[] @relation("ConsultationParticipant") // Konsultacje jako uczestnik
+  companyPackages CompanyPackage[] // Pakiety firmowe
 }
 
 model Course {
@@ -59,6 +62,12 @@ model Course {
   promotionEndDate DateTime? // Data zakończenia promocji
   promotionPrice  Float?    // Cena promocyjna
   
+  // Pola dla dofinansowania UE (kursy stacjonarne)
+  euFundingPercentage Float?    // Procent dofinansowania UE (np. 95%)
+  participantPrice    Float?    // Cena dla uczestnika po dofinansowaniu
+  liveCommissionRate  Float?    @default(10) // Prowizja platformy od kursów stacjonarnych (domyślnie 10%)
+  onlineDiscountPercentage Float? @default(50) // Zniżka dla kursu online w stosunku do stacjonarnego (domyślnie 50%)
+  
   organizerId   String
   organizer     User        @relation(fields: [organizerId], references: [id], onDelete: Cascade)
   files         CourseFile[]
@@ -66,6 +75,7 @@ model Course {
   payment       CoursePayment? // Płatność za dodanie tego kursu
   enrollments   CourseEnrollment[] // Zapisy na kursy stacjonarne
   reviews       CourseReview[] // Recenzje i oceny
+  financialTransactions FinancialTransaction[] // Transakcje finansowe związane z kursem
 }
 
 model CourseFile {
@@ -157,6 +167,11 @@ model CourseEnrollment {
   enrolledAt  DateTime  @default(now())
   notes       String?   // Opcjonalne notatki
   
+  // Pola finansowe dla kursów stacjonarnych
+  participantPricePaid Float?    // Cena zapłacona przez uczestnika
+  commissionAmount    Float?     // Prowizja platformy
+  organizerEarnings   Float?     // Przychód organizatora
+  
   courseId    String
   course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
   userId      String
@@ -225,4 +240,104 @@ model ForumComment {
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   
   @@index([postId])
+}
+
+// Konsultacje 1:1
+model Consultation {
+  id            String    @id @default(cuid())
+  title         String    // Tytuł konsultacji
+  description   String?   // Opis konsultacji
+  pricePerHour  Float     // Cena za godzinę (ustalana przez trenera)
+  duration      Int       // Czas trwania w minutach
+  scheduledDate DateTime  // Data i godzina konsultacji
+  status        String    @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  videoCallLink String?   // Link do video call (generowany po potwierdzeniu)
+  notes         String?   // Opcjonalne notatki
+  
+  // Prowizja platformy
+  commissionRate Float     @default(10) // Procent prowizji (domyślnie 10%)
+  commissionAmount Float?  // Kwota prowizji
+  organizerEarnings Float? // Przychód trenera
+  
+  trainerId     String
+  trainer       User      @relation("ConsultationTrainer", fields: [trainerId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   User      @relation("ConsultationParticipant", fields: [participantId], references: [id], onDelete: Cascade)
+  financialTransactions FinancialTransaction[] // Transakcje finansowe
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([trainerId])
+  @@index([participantId])
+  @@index([scheduledDate])
+}
+
+// Pakiety premium dla firm
+model CompanyPackage {
+  id            String    @id @default(cuid())
+  companyName   String    // Nazwa firmy
+  contactEmail  String    // Email kontaktowy
+  contactPhone  String?   // Telefon kontaktowy
+  packageType   String    // BASIC, PREMIUM, ENTERPRISE
+  price         Float     // Cena pakietu
+  duration      Int       // Czas trwania w miesiącach
+  maxUsers      Int       // Maksymalna liczba użytkowników
+  features      String?   // JSON z listą funkcji
+  
+  status        String    @default("PENDING") // PENDING, ACTIVE, EXPIRED, CANCELLED
+  startDate     DateTime?
+  endDate       DateTime?
+  
+  // Prowizja platformy
+  commissionRate Float     @default(10) // Procent prowizji
+  commissionAmount Float?  // Kwota prowizji
+  organizerEarnings Float? // Przychód organizatora
+  
+  organizerId   String
+  organizer     User      @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  financialTransactions FinancialTransaction[] // Transakcje finansowe
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([organizerId])
+  @@index([status])
+}
+
+// Transakcje finansowe - śledzenie wszystkich przychodów i prowizji
+model FinancialTransaction {
+  id            String    @id @default(cuid())
+  transactionType String  // COURSE_LIVE, COURSE_ONLINE, CONSULTATION, COMPANY_PACKAGE, SUBSCRIPTION
+  amount        Float     // Kwota transakcji
+  commission    Float     // Prowizja platformy
+  organizerEarnings Float  // Przychód organizatora/trenera
+  status        String    @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  
+  // Referencje do powiązanych encji
+  courseId      String?
+  course        Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  consultationId String?
+  consultation  Consultation? @relation(fields: [consultationId], references: [id], onDelete: SetNull)
+  companyPackageId String?
+  companyPackage CompanyPackage? @relation(fields: [companyPackageId], references: [id], onDelete: SetNull)
+  enrollmentId  String?   // ID zapisu na kurs stacjonarny
+  purchaseId    String?   // ID zakupu kursu online
+  
+  organizerId   String    // ID organizatora/trenera
+  participantId String?   // ID uczestnika (opcjonalne)
+  
+  paymentDate   DateTime? // Data płatności
+  paymentMethod String?   // Metoda płatności (STRIPE, TRANSFER, etc.)
+  paymentReference String? // Referencja płatności (ID z systemu płatności)
+  
+  notes         String?   // Opcjonalne notatki
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([organizerId])
+  @@index([transactionType])
+  @@index([status])
+  @@index([paymentDate])
 }

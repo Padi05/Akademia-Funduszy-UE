@@ -66,12 +66,13 @@ export default function MapPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [globeReady, setGlobeReady] = useState(false)
   const globeRef = useRef<any>(null)
+  const rotationRef = useRef<number>(0)
 
-  // Przygotuj punkty na globie dla województw
+  // Przygotuj punkty na globie dla województw z animacją pulsowania
   const points = VOIVODESHIPS.map((voivodeship) => ({
     lat: voivodeship.lat,
     lng: voivodeship.lng,
-    size: selectedVoivodeship === voivodeship.name ? 1.0 : 0.6,
+    size: selectedVoivodeship === voivodeship.name ? 1.2 : 0.8,
     color: selectedVoivodeship === voivodeship.name ? '#60a5fa' : '#a78bfa',
     voivodeship: voivodeship.name,
     label: voivodeship.name,
@@ -84,6 +85,27 @@ export default function MapPage() {
       setCourses([])
     }
   }, [selectedVoivodeship])
+
+  // Animacja automatycznego obrotu globusa
+  useEffect(() => {
+    if (!globeReady || !globeRef.current || selectedVoivodeship) return
+
+    let animationFrameId: number
+    const animateRotation = () => {
+      if (globeRef.current && !selectedVoivodeship) {
+        rotationRef.current += 0.15
+        globeRef.current.rotation({ lat: 0, lng: rotationRef.current, meridian: 0 })
+      }
+      animationFrameId = requestAnimationFrame(animateRotation)
+    }
+
+    animationFrameId = requestAnimationFrame(animateRotation)
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId)
+      }
+    }
+  }, [globeReady, selectedVoivodeship])
 
 
   const fetchCourses = async (voivodeship: string) => {
@@ -164,9 +186,12 @@ export default function MapPage() {
             >
               <GlobeComponent
                 ref={globeRef}
-                globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+                globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
                 backgroundColor="rgba(0, 0, 0, 0)"
-                showAtmosphere={false}
+                showAtmosphere={true}
+                atmosphereColor="#4a90e2"
+                atmosphereAltitude={0.15}
+                backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
                 pointsData={points}
                 pointColor="color"
                 pointRadius="size"
@@ -182,10 +207,10 @@ export default function MapPage() {
                     }, 0)
                   }
                 }}
-                pointResolution={12}
-                pointAltitude={0.02}
+                pointResolution={16}
+                pointAltitude={0.03}
                 showGlobe={true}
-                showGraticules={false}
+                showGraticules={true}
               />
               {!globeReady && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 rounded-xl">

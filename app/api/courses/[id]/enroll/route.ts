@@ -73,12 +73,36 @@ export async function POST(
     const body = await request.json()
     const validatedData = enrollmentSchema.parse(body)
 
+    // Oblicz cenę i prowizję dla kursu stacjonarnego z dofinansowaniem UE
+    let participantPrice = course.price
+    let commissionAmount = 0
+    let organizerEarnings = course.price
+
+    // Jeśli kurs ma dofinansowanie UE
+    if (course.euFundingPercentage && course.euFundingPercentage > 0) {
+      // Cena dla uczestnika po dofinansowaniu
+      participantPrice = course.participantPrice || (course.price * (1 - course.euFundingPercentage / 100))
+      
+      // Prowizja platformy od ceny uczestnika
+      const commissionRate = course.liveCommissionRate || 10
+      commissionAmount = (participantPrice * commissionRate) / 100
+      organizerEarnings = participantPrice - commissionAmount
+    } else {
+      // Jeśli nie ma dofinansowania, prowizja od pełnej ceny
+      const commissionRate = course.liveCommissionRate || 10
+      commissionAmount = (course.price * commissionRate) / 100
+      organizerEarnings = course.price - commissionAmount
+    }
+
     const enrollment = await prisma.courseEnrollment.create({
       data: {
         courseId: params.id,
         userId: session.user.id,
         status: 'PENDING',
         notes: validatedData.notes,
+        participantPricePaid: participantPrice,
+        commissionAmount,
+        organizerEarnings,
       },
       include: {
         user: {
@@ -94,6 +118,22 @@ export async function POST(
             title: true,
           },
         },
+      },
+    })
+
+    // Utwórz transakcję finansową (status PENDING, zmieni się na COMPLETED po potwierdzeniu)
+    await prisma.financialTransaction.create({
+      data: {
+        transactionType: 'COURSE_LIVE',
+        amount: participantPrice,
+        commission: commissionAmount,
+        organizerEarnings,
+        status: 'PENDING',
+        courseId: params.id,
+        enrollmentId: enrollment.id,
+        organizerId: course.organizerId,
+        participantId: session.user.id,
+        notes: `Zapis na kurs stacjonarny: ${course.title}`,
       },
     })
 

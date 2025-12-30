@@ -24,6 +24,11 @@ const courseSchema = z.object({
   onlinePrice: z.number().min(0).nullable().optional(),
   commissionRate: z.number().min(0).max(100).nullable().optional(),
   isPublished: z.boolean().optional(),
+  // Pola dla dofinansowania UE (kursy stacjonarne)
+  euFundingPercentage: z.number().min(0).max(100).nullable().optional(),
+  participantPrice: z.number().min(0).nullable().optional(),
+  liveCommissionRate: z.number().min(0).max(100).nullable().optional(),
+  onlineDiscountPercentage: z.number().min(0).max(100).nullable().optional(),
 }).refine((data) => {
   // Jeśli data zakończenia jest podana, musi być po dacie rozpoczęcia
   if (data.endDate && data.startDate) {
@@ -108,11 +113,16 @@ export async function POST(request: NextRequest) {
         voivodeship: validatedData.voivodeship || null,
         city: validatedData.city || null,
         organizerId: session.user.id,
+        // Pola dla dofinansowania UE (tylko dla kursów stacjonarnych)
+        euFundingPercentage: validatedData.type === 'STACJONARNY' ? (validatedData.euFundingPercentage || null) : null,
+        participantPrice: validatedData.type === 'STACJONARNY' ? (validatedData.participantPrice || null) : null,
+        liveCommissionRate: validatedData.type === 'STACJONARNY' ? (validatedData.liveCommissionRate || 10) : null,
         // Pola dla kursów online
         isOnlineCourse: isOnlineCourse,
         onlinePrice: validatedData.onlinePrice || (isOnlineCourse ? 100 : null),
         commissionRate: validatedData.commissionRate || (isOnlineCourse ? 10 : null),
         isPublished: shouldPublish,
+        onlineDiscountPercentage: validatedData.type === 'ONLINE' ? (validatedData.onlineDiscountPercentage || 50) : null,
       },
     })
 

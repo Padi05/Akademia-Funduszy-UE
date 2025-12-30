@@ -62,17 +62,45 @@ export async function POST(
       )
     }
 
-    const price = course.onlinePrice || 100
+    // Oblicz cenę z uwzględnieniem zniżki 50% dla kursu online
+    let basePrice = course.onlinePrice || 100
+    
+    // Jeśli kurs ma cenę bazową (price), zastosuj zniżkę 50%
+    if (course.price && course.price > 0) {
+      const onlineDiscount = course.onlineDiscountPercentage || 50
+      basePrice = course.price * (1 - onlineDiscount / 100)
+    }
+    
+    // Użyj onlinePrice jeśli jest ustawione, w przeciwnym razie użyj ceny po zniżce
+    const finalPrice = course.onlinePrice || basePrice
     const commissionRate = course.commissionRate || 10
-    const commission = (price * commissionRate) / 100
+    const commission = (finalPrice * commissionRate) / 100
+    const organizerEarnings = finalPrice - commission
 
     // Utwórz zakup
     const purchase = await prisma.coursePurchase.create({
       data: {
         courseId: params.id,
         userId: session.user.id,
-        price,
+        price: finalPrice,
         commission,
+      },
+    })
+
+    // Utwórz transakcję finansową
+    await prisma.financialTransaction.create({
+      data: {
+        transactionType: 'COURSE_ONLINE',
+        amount: finalPrice,
+        commission,
+        organizerEarnings,
+        status: 'COMPLETED',
+        courseId: params.id,
+        organizerId: course.organizerId,
+        participantId: session.user.id,
+        purchaseId: purchase.id,
+        paymentDate: new Date(),
+        paymentMethod: 'STRIPE',
       },
     })
 

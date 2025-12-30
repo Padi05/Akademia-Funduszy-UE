@@ -16,6 +16,9 @@ const courseSchema = z.object({
   fundingInfo: z.string().min(5, 'Informacje o dofinansowaniu są wymagane'),
   startDate: z.string().min(1, 'Data rozpoczęcia jest wymagana'),
   endDate: z.string().optional(),
+  // Pola lokalizacji
+  voivodeship: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
   // Pola dla kursów online (opcjonalne przy edycji)
   isOnlineCourse: z.boolean().optional(),
   onlinePrice: z.number().min(0).nullable().optional(),
@@ -118,11 +121,27 @@ export async function PUT(
         fundingInfo: validatedData.fundingInfo,
         startDate: new Date(validatedData.startDate),
         endDate: validatedData.endDate ? new Date(validatedData.endDate) : null,
+        // Pola lokalizacji (tylko dla kursów stacjonarnych)
+        voivodeship: validatedData.type === 'STACJONARNY' ? (validatedData.voivodeship || null) : null,
+        city: validatedData.type === 'STACJONARNY' ? (validatedData.city || null) : null,
+        // Pola dla dofinansowania UE (tylko dla kursów stacjonarnych)
+        euFundingPercentage: validatedData.type === 'STACJONARNY' 
+          ? (validatedData.euFundingPercentage !== undefined ? validatedData.euFundingPercentage : course.euFundingPercentage)
+          : null,
+        participantPrice: validatedData.type === 'STACJONARNY'
+          ? (validatedData.participantPrice !== undefined ? validatedData.participantPrice : course.participantPrice)
+          : null,
+        liveCommissionRate: validatedData.type === 'STACJONARNY'
+          ? (validatedData.liveCommissionRate !== undefined ? validatedData.liveCommissionRate : course.liveCommissionRate)
+          : null,
         // Pola dla kursów online (zachowaj istniejące jeśli nie podano)
         isOnlineCourse: isOnlineCourse,
         onlinePrice: body.onlinePrice !== undefined ? body.onlinePrice : course.onlinePrice,
         commissionRate: body.commissionRate !== undefined ? body.commissionRate : course.commissionRate,
         isPublished: body.isPublished !== undefined ? body.isPublished : course.isPublished,
+        onlineDiscountPercentage: validatedData.type === 'ONLINE'
+          ? (validatedData.onlineDiscountPercentage !== undefined ? validatedData.onlineDiscountPercentage : course.onlineDiscountPercentage)
+          : null,
       },
     })
 

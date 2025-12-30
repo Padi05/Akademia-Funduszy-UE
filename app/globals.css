@@ -694,3 +694,17 @@ body {
   display: block !important;
 }
 
+/* Globe animations */
+@keyframes globeGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(74, 144, 226, 0.3), 0 0 40px rgba(74, 144, 226, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(74, 144, 226, 0.5), 0 0 60px rgba(74, 144, 226, 0.3);
+  }
+}
+
+[data-globe-container] {
+  animation: globeGlow 3s ease-in-out infinite;
+}
+

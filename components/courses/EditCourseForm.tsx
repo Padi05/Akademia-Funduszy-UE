@@ -22,6 +22,13 @@ const courseSchema = z.object({
   fundingInfo: z.string().min(5, 'Informacje o dofinansowaniu są wymagane'),
   startDate: z.string().min(1, 'Data rozpoczęcia jest wymagana'),
   endDate: z.string().optional(),
+  voivodeship: z.string().optional(),
+  city: z.string().optional(),
+  // Pola dla dofinansowania UE
+  euFundingPercentage: z.number().min(0).max(100).nullable().optional(),
+  participantPrice: z.number().min(0).nullable().optional(),
+  liveCommissionRate: z.number().min(0).max(100).nullable().optional(),
+  onlineDiscountPercentage: z.number().min(0).max(100).nullable().optional(),
 }).refine((data) => {
   // Jeśli data zakończenia jest podana, musi być po dacie rozpoczęcia
   if (data.endDate && data.startDate) {
@@ -65,10 +72,13 @@ export default function EditCourseForm({ course }: EditCourseFormProps) {
       endDate: course.endDate
         ? format(new Date(course.endDate), "yyyy-MM-dd'T'HH:mm")
         : '',
+      voivodeship: course.voivodeship || '',
+      city: course.city || '',
     },
   })
 
   const startDate = watch('startDate')
+  const courseType = watch('type')
   
   // Oblicz minimalną datę zakończenia (data rozpoczęcia + 1 dzień)
   const minEndDate = startDate ? (() => {
@@ -90,6 +100,12 @@ export default function EditCourseForm({ course }: EditCourseFormProps) {
         body: JSON.stringify({
           ...data,
           price: parseFloat(data.price),
+          voivodeship: courseType === 'STACJONARNY' ? (data.voivodeship || null) : null,
+          city: courseType === 'STACJONARNY' ? (data.city || null) : null,
+          euFundingPercentage: courseType === 'STACJONARNY' ? (data.euFundingPercentage || null) : null,
+          participantPrice: courseType === 'STACJONARNY' ? (data.participantPrice || null) : null,
+          liveCommissionRate: courseType === 'STACJONARNY' ? (data.liveCommissionRate || null) : null,
+          onlineDiscountPercentage: courseType === 'ONLINE' ? (data.onlineDiscountPercentage || null) : null,
         }),
       })
 
@@ -294,6 +310,123 @@ export default function EditCourseForm({ course }: EditCourseFormProps) {
               )}
             </div>
           </div>
+
+          {/* Pola lokalizacji - tylko dla kursów stacjonarnych */}
+          {courseType === 'STACJONARNY' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="voivodeship" className="block text-sm font-medium text-white mb-2">
+                    Województwo (opcjonalnie)
+                  </label>
+                  <select
+                    {...register('voivodeship')}
+                    id="voivodeship"
+                    disabled={isLoading}
+                    className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
+                  >
+                    <option value="">Wybierz województwo</option>
+                    <option value="Dolnośląskie">Dolnośląskie</option>
+                    <option value="Kujawsko-Pomorskie">Kujawsko-Pomorskie</option>
+                    <option value="Lubelskie">Lubelskie</option>
+                    <option value="Lubuskie">Lubuskie</option>
+                    <option value="Łódzkie">Łódzkie</option>
+                    <option value="Małopolskie">Małopolskie</option>
+                    <option value="Mazowieckie">Mazowieckie</option>
+                    <option value="Opolskie">Opolskie</option>
+                    <option value="Podkarpackie">Podkarpackie</option>
+                    <option value="Podlaskie">Podlaskie</option>
+                    <option value="Pomorskie">Pomorskie</option>
+                    <option value="Śląskie">Śląskie</option>
+                    <option value="Świętokrzyskie">Świętokrzyskie</option>
+                    <option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
+                    <option value="Wielkopolskie">Wielkopolskie</option>
+                    <option value="Zachodniopomorskie">Zachodniopomorskie</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="city" className="block text-sm font-medium text-white mb-2">
+                    Miasto (opcjonalnie)
+                  </label>
+                  <input
+                    {...register('city')}
+                    id="city"
+                    type="text"
+                    disabled={isLoading}
+                    className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
+                    placeholder="Np. Warszawa"
+                  />
+                </div>
+              </div>
+
+              {/* Pola dla dofinansowania UE */}
+              <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                <h3 className="text-lg font-semibold text-white mb-4">Dofinansowanie UE</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label htmlFor="euFundingPercentage" className="block text-sm font-medium text-white mb-2">
+                      Procent dofinansowania UE (%)
+                    </label>
+                    <input
+                      {...register('euFundingPercentage', { valueAsNumber: true })}
+                      id="euFundingPercentage"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      defaultValue={course.euFundingPercentage || ''}
+                      disabled={isLoading}
+                      className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
+                      placeholder="np. 95"
+                    />
+                    <p className="mt-1 text-xs text-gray-400">Przykład: 95% dofinansowania</p>
+                  </div>
+                  <div>
+                    <label htmlFor="participantPrice" className="block text-sm font-medium text-white mb-2">
+                      Cena dla uczestnika (PLN)
+                    </label>
+                    <input
+                      {...register('participantPrice', { valueAsNumber: true })}
+                      id="participantPrice"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      defaultValue={course.participantPrice || ''}
+                      disabled={isLoading}
+                      className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
+                      placeholder="np. 250"
+                    />
+                    <p className="mt-1 text-xs text-gray-400">Cena po dofinansowaniu</p>
+                  </div>
+                  <div>
+                    <label htmlFor="liveCommissionRate" className="block text-sm font-medium text-white mb-2">
+                      Prowizja platformy (%)
+                    </label>
+                    <input
+                      {...register('liveCommissionRate', { valueAsNumber: true })}
+                      id="liveCommissionRate"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      defaultValue={course.liveCommissionRate || 10}
+                      disabled={isLoading}
+                      className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
+                      placeholder="10"
+                    />
+                    <p className="mt-1 text-xs text-gray-400">Domyślnie 10%</p>
+                  </div>
+                </div>
+                <div className="mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded">
+                  <p className="text-sm text-blue-300">
+                    <strong>Przykład:</strong> Wartość kursu: 5000 PLN, Dofinansowanie: 95%, 
+                    Cena dla uczestnika: 250 PLN, Prowizja platformy: 10% (25 PLN), 
+                    Twoje zarobki: 225 PLN
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
 
           <div className="pt-4 border-t">
             <CourseFileUpload
