@@ -7,6 +7,8 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import DeleteCourseButton from '@/components/courses/DeleteCourseButton'
+import CourseReviews from '@/components/courses/CourseReviews'
+import EnrollButton from '@/components/courses/EnrollButton'
 
 export const revalidate = 60 // Revalidate every 60 seconds
 
@@ -42,6 +44,32 @@ export default async function CourseDetailPage({
 
   if (!course) {
     notFound()
+  }
+
+  // Sprawdź czy użytkownik może dodać recenzję
+  let canReview = false
+  let isEnrolled = false
+  let enrollmentStatus: string | undefined = undefined
+  
+  if (session) {
+    const hasPurchase = await prisma.coursePurchase.findFirst({
+      where: {
+        courseId: course.id,
+        userId: session.user.id,
+      },
+    })
+
+    const enrollment = await prisma.courseEnrollment.findFirst({
+      where: {
+        courseId: course.id,
+        userId: session.user.id,
+      },
+    })
+
+    isEnrolled = enrollment !== null
+    enrollmentStatus = enrollment?.status
+
+    canReview = (hasPurchase !== null || isEnrolled) && course.organizerId !== session.user.id
   }
 
   return (
@@ -211,27 +239,43 @@ export default async function CourseDetailPage({
               {/* Przycisk zapisu */}
               <div className="glass rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-500/30 text-center">
                 <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
-                  Zainteresowany tym kursem?
+                  {course.type === 'STACJONARNY' ? 'Zapisz się na kurs' : 'Zainteresowany tym kursem?'}
                 </h3>
-                <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6">
-                  Zarejestruj się lub zaloguj, aby zapisać się na kurs
-                </p>
-                <div className="space-y-2 sm:space-y-3">
-                  <Link
-                    href={`/register?course=${course.id}`}
-                    className="w-full bg-purple-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg hover:bg-purple-700 flex items-center justify-center space-x-2 shadow-lg hover-lift transition-all font-semibold text-sm sm:text-base"
-                  >
-                    <UserPlus className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Zarejestruj się</span>
-                  </Link>
-                  <Link
-                    href={`/login?course=${course.id}`}
-                    className="w-full bg-gray-700 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg hover:bg-gray-600 flex items-center justify-center space-x-2 shadow-lg hover-lift transition-all font-semibold border border-purple-500/50 text-sm sm:text-base"
-                  >
-                    <LogIn className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Zaloguj się</span>
-                  </Link>
-                </div>
+                {session ? (
+                  course.type === 'STACJONARNY' ? (
+                    <EnrollButton 
+                      courseId={course.id} 
+                      isEnrolled={isEnrolled}
+                      enrollmentStatus={enrollmentStatus}
+                    />
+                  ) : (
+                    <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6">
+                      To jest kurs online. Przejdź do zakładki kursy online, aby go zakupić.
+                    </p>
+                  )
+                ) : (
+                  <>
+                    <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6">
+                      Zarejestruj się lub zaloguj, aby zapisać się na kurs
+                    </p>
+                    <div className="space-y-2 sm:space-y-3">
+                      <Link
+                        href={`/register?course=${course.id}`}
+                        className="w-full bg-purple-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg hover:bg-purple-700 flex items-center justify-center space-x-2 shadow-lg hover-lift transition-all font-semibold text-sm sm:text-base"
+                      >
+                        <UserPlus className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span>Zarejestruj się</span>
+                      </Link>
+                      <Link
+                        href={`/login?course=${course.id}`}
+                        className="w-full bg-gray-700 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg hover:bg-gray-600 flex items-center justify-center space-x-2 shadow-lg hover-lift transition-all font-semibold border border-purple-500/50 text-sm sm:text-base"
+                      >
+                        <LogIn className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span>Zaloguj się</span>
+                      </Link>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Informacje o organizatorze */}
@@ -263,6 +307,13 @@ export default async function CourseDetailPage({
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Sekcja z recenzjami */}
+      <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <CourseReviews courseId={course.id} canReview={canReview} />
         </div>
       </div>
     </div>

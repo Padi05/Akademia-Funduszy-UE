@@ -25,6 +25,12 @@ model User {
   purchases     CoursePurchase[] // Zakupione kursy online
   subscription  Subscription? // Subskrypcja miesięczna
   coursePayments CoursePayment[] // Płatności za dodanie kursów
+  enrollments   CourseEnrollment[] // Zapisy na kursy
+  reviews       CourseReview[] // Recenzje napisane przez użytkownika
+  sentMessages  Message[] @relation("MessageSender") // Wiadomości wysłane
+  receivedMessages Message[] @relation("MessageReceiver") // Wiadomości otrzymane
+  forumPosts    ForumPost[] // Posty na forum
+  forumComments ForumComment[] // Komentarze na forum
 }
 
 model Course {
@@ -46,11 +52,18 @@ model Course {
   isPublished    Boolean   @default(false) // Czy kurs jest wystawiony na sprzedaż
   videoFiles     CourseVideoFile[] // Pliki wideo kursu online
   
+  // Pola dla promocji
+  isPromoted     Boolean   @default(false) // Czy kurs jest promowany
+  promotionEndDate DateTime? // Data zakończenia promocji
+  promotionPrice  Float?    // Cena promocyjna
+  
   organizerId   String
   organizer     User        @relation(fields: [organizerId], references: [id], onDelete: Cascade)
   files         CourseFile[]
   purchases     CoursePurchase[] // Zakupy kursów online
   payment       CoursePayment? // Płatność za dodanie tego kursu
+  enrollments   CourseEnrollment[] // Zapisy na kursy stacjonarne
+  reviews       CourseReview[] // Recenzje i oceny
 }
 
 model CourseFile {
@@ -133,4 +146,81 @@ model CoursePayment {
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   courseId      String?   @unique // Opcjonalne - ustawiane po utworzeniu kursu
   course        Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+// Zapisy na kursy stacjonarne
+model CourseEnrollment {
+  id          String    @id @default(cuid())
+  status      String    @default("PENDING") // PENDING, CONFIRMED, CANCELLED
+  enrolledAt  DateTime  @default(now())
+  notes       String?   // Opcjonalne notatki
+  
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@unique([courseId, userId]) // Użytkownik może zapisać się tylko raz na kurs
+}
+
+// Recenzje i oceny kursów
+model CourseReview {
+  id          String    @id @default(cuid())
+  rating      Int       // Ocena 1-5
+  comment     String?   // Opcjonalny komentarz
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([courseId, userId]) // Użytkownik może ocenić kurs tylko raz
+}
+
+// Wiadomości między użytkownikami (Komunikator)
+model Message {
+  id          String    @id @default(cuid())
+  content     String
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  
+  senderId    String
+  sender      User      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User      @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+}
+
+// Posty na forum
+model ForumPost {
+  id          String    @id @default(cuid())
+  title       String
+  content     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments    ForumComment[]
+  
+  @@index([createdAt])
+}
+
+// Komentarze do postów na forum
+model ForumComment {
+  id          String    @id @default(cuid())
+  content     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  postId      String
+  post        ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  @@index([postId])
 }
