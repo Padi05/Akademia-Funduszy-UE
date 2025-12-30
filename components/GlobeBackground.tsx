@@ -19,20 +19,26 @@ export default function GlobeBackground() {
   useEffect(() => {
     if (!globeReady || !globeRef.current) return
 
-    // Automatyczna rotacja kuli ziemskiej
+    // Automatyczna rotacja kuli ziemskiej - płynna rotacja wokół osi Y
     let animationFrameId: number
     const animateRotation = () => {
       if (globeRef.current) {
-        rotationRef.current += 0.1
-        globeRef.current.rotation({ 
-          lat: 0, 
-          lng: rotationRef.current, 
-          meridian: 0 
-        })
+        rotationRef.current += 0.2 // Szybkość rotacji (0.2 stopnia na klatkę)
+        // Normalizuj wartość do zakresu 0-360
+        if (rotationRef.current >= 360) {
+          rotationRef.current -= 360
+        }
+        // Aktualizuj kamerę - rotacja wokół osi Y (długość geograficzna)
+        globeRef.current.pointOfView({
+          lat: 0,
+          lng: rotationRef.current,
+          altitude: 2.5,
+        }, 0) // 0ms dla natychmiastowej aktualizacji (requestAnimationFrame zapewnia płynność)
       }
       animationFrameId = requestAnimationFrame(animateRotation)
     }
 
+    // Rozpocznij animację
     animationFrameId = requestAnimationFrame(animateRotation)
 
     return () => {

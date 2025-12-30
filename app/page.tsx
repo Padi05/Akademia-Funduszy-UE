@@ -100,8 +100,10 @@ export default async function HomePage() {
       </div>
 
       {/* Sekcja z kursami */}
-      <div id="courses" className="bg-gradient-to-b from-luxury-darkNavy via-luxury-navy to-luxury-darkNavy">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+      <div id="courses" className="hero-background relative" style={{ overflow: 'visible' }}>
+        {/* Kula ziemska w tle */}
+        <GlobeBackground />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 relative z-10">
           <div className="text-center mb-8 sm:mb-12 lg:mb-16 animate-fade-in-smooth px-4">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold gradient-text mb-4 sm:mb-6 animate-fade-in-smooth">
               Dostępne Kursy
@@ -203,6 +205,15 @@ export default async function HomePage() {
         </div>
         )}
         </div>
+        {/* Dekoracyjne animowane elementy */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gold-500/20 rounded-full blur-2xl animate-float-slow"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gold-400/15 rounded-full blur-2xl animate-float-slow animate-delay-300"></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-luxury-purple/20 rounded-full blur-xl animate-float animate-delay-200"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-28 h-28 bg-gold-600/20 rounded-full blur-xl animate-float animate-delay-100"></div>
+        <div className="absolute top-1/3 right-1/3 w-36 h-36 bg-gold-500/10 rounded-full blur-3xl animate-float-slow animate-delay-400"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-44 h-44 bg-luxury-darkPurple/30 rounded-full blur-3xl animate-float-slow animate-delay-500"></div>
+        <div className="absolute top-1/4 left-1/2 w-20 h-20 bg-gold-400/20 rounded-full blur-xl animate-float animate-delay-400"></div>
+        <div className="absolute bottom-1/2 right-1/5 w-28 h-28 bg-luxury-purple/15 rounded-full blur-2xl animate-float animate-delay-500"></div>
       </div>
     </div>
   )
