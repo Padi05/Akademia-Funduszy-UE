@@ -113,3 +113,4 @@ npx prisma studio
 - Używaj connection pooling dla produkcji
 
 
+

@@ -67,3 +67,4 @@ Wszystkie znalezione błędy zostały naprawione. Aplikacja jest teraz:
 - ✅ Wszystkie komponenty są poprawnie zdefiniowane
 - ✅ Routing działa poprawnie
 
+

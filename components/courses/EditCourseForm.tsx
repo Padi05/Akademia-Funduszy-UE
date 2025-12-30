@@ -97,6 +97,7 @@ export default function EditCourseForm({ course }: EditCourseFormProps) {
 
       if (!response.ok) {
         setError(result.error || 'Wystąpił błąd podczas aktualizacji kursu')
+        setIsLoading(false)
         return
       }
 

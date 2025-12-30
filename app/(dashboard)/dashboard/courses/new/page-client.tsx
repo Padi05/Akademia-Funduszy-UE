@@ -219,7 +219,6 @@ export default function NewCoursePageClient() {
       }
     } catch (err) {
       setError('Wystąpił błąd podczas tworzenia kursu')
-    } finally {
       setIsLoading(false)
       setUploadProgress('')
     }

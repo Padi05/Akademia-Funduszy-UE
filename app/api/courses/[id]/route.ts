@@ -16,6 +16,11 @@ const courseSchema = z.object({
   fundingInfo: z.string().min(5, 'Informacje o dofinansowaniu są wymagane'),
   startDate: z.string().min(1, 'Data rozpoczęcia jest wymagana'),
   endDate: z.string().optional(),
+  // Pola dla kursów online (opcjonalne przy edycji)
+  isOnlineCourse: z.boolean().optional(),
+  onlinePrice: z.number().min(0).nullable().optional(),
+  commissionRate: z.number().min(0).max(100).nullable().optional(),
+  isPublished: z.boolean().optional(),
 }).refine((data) => {
   // Jeśli data zakończenia jest podana, musi być po dacie rozpoczęcia
   if (data.endDate && data.startDate) {
@@ -98,6 +103,11 @@ export async function PUT(
     const body = await request.json()
     const validatedData = courseSchema.parse(body)
 
+    // Określ czy kurs jest online (zachowaj istniejące ustawienie jeśli nie podano)
+    const isOnlineCourse = body.isOnlineCourse !== undefined 
+      ? body.isOnlineCourse 
+      : course.isOnlineCourse
+
     const updatedCourse = await prisma.course.update({
       where: { id: params.id },
       data: {
@@ -108,6 +118,11 @@ export async function PUT(
         fundingInfo: validatedData.fundingInfo,
         startDate: new Date(validatedData.startDate),
         endDate: validatedData.endDate ? new Date(validatedData.endDate) : null,
+        // Pola dla kursów online (zachowaj istniejące jeśli nie podano)
+        isOnlineCourse: isOnlineCourse,
+        onlinePrice: body.onlinePrice !== undefined ? body.onlinePrice : course.onlinePrice,
+        commissionRate: body.commissionRate !== undefined ? body.commissionRate : course.commissionRate,
+        isPublished: body.isPublished !== undefined ? body.isPublished : course.isPublished,
       },
     })
 

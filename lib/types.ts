@@ -1,4 +1,4 @@
-export type UserRole = 'ORGANIZER' | 'PARTICIPANT'
+export type UserRole = 'ORGANIZER' | 'PARTICIPANT' | 'ADMIN'
 export type CourseType = 'STACJONARNY' | 'ONLINE'
 
 export interface SessionUser {

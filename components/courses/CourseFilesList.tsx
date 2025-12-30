@@ -1,66 +1,74 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { FileText, Download, Calendar, User, BookOpen, Trash2 } from 'lucide-react'
-import Link from 'next/link'
-
-interface CourseFile {
-  id: string
-  originalName: string
-  size: number
-  createdAt: Date | string
-  course: {
-    id: string
-    title: string
-    organizer: {
-      name: string
-      email: string
-    }
-  }
-}
+import { Download, Trash2, FileText, Calendar, User } from 'lucide-react'
+import { CourseFile } from '@prisma/client'
+import { format } from 'date-fns'
+import { pl } from 'date-fns/locale/pl'
 
 interface CourseFilesListProps {
-  files: CourseFile[]
+  files: (CourseFile & {
+    course: {
+      id: string
+      title: string
+      organizerId: string
+      organizer: {
+        name: string
+        email: string
+      }
+    }
+  })[]
   userRole: string
   userId: string
-  courseOrganizers: Record<string, string> // courseId -> organizerId
+  courseOrganizers: Record<string, string>
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
-}
-
-function formatDate(date: Date | string): string {
-  return new Date(date).toLocaleDateString('pl-PL', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
-export default function CourseFilesList({ files, userRole, userId, courseOrganizers }: CourseFilesListProps) {
-  const router = useRouter()
+export default function CourseFilesList({
+  files,
+  userRole,
+  userId,
+  courseOrganizers,
+}: CourseFilesListProps) {
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
 
-  const canDeleteFile = (file: CourseFile) => {
+  const canDeleteFile = (file: CourseFilesListProps['files'][0]) => {
     // ADMIN może usuwać wszystkie pliki
     if (userRole === 'ADMIN') return true
+    
     // Organizator może usuwać pliki ze swoich kursów
-    if (userRole === 'ORGANIZER' && courseOrganizers[file.course.id] === userId) return true
+    if (userRole === 'ORGANIZER' && file.course.organizerId === userId) {
+      return true
+    }
+    
     return false
   }
 
-  const handleDelete = async (file: CourseFile) => {
+  const handleDownload = async (file: CourseFilesListProps['files'][0]) => {
+    try {
+      const response = await fetch(`/api/courses/${file.course.id}/files/${file.id}/download`)
+      
+      if (!response.ok) {
+        throw new Error('Błąd podczas pobierania pliku')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = file.originalName
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Błąd podczas pobierania pliku:', error)
+      alert('Wystąpił błąd podczas pobierania pliku')
+    }
+  }
+
+  const handleDelete = async (file: CourseFilesListProps['files'][0]) => {
     if (!canDeleteFile(file)) {
-      setError('Brak uprawnień do usunięcia tego pliku')
+      alert('Nie masz uprawnień do usunięcia tego pliku')
       return
     }
 
@@ -69,129 +77,106 @@ export default function CourseFilesList({ files, userRole, userId, courseOrganiz
     }
 
     setDeletingFileId(file.id)
-    setError(null)
 
     try {
       const response = await fetch(`/api/courses/${file.course.id}/files/${file.id}`, {
         method: 'DELETE',
       })
 
-      const result = await response.json()
-
       if (!response.ok) {
-        setError(result.error || 'Wystąpił błąd podczas usuwania pliku')
-        setDeletingFileId(null)
-        return
+        const result = await response.json()
+        throw new Error(result.error || 'Błąd podczas usuwania pliku')
       }
 
       // Odśwież stronę po usunięciu
-      router.refresh()
-    } catch (err) {
-      setError('Wystąpił błąd podczas usuwania pliku')
+      window.location.reload()
+    } catch (error) {
+      console.error('Błąd podczas usuwania pliku:', error)
+      alert(error instanceof Error ? error.message : 'Wystąpił błąd podczas usuwania pliku')
       setDeletingFileId(null)
     }
   }
 
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+  }
+
   return (
     <div className="space-y-4">
-      {error && (
-        <div className="bg-red-900/30 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg mb-4">
-          {error}
-        </div>
-      )}
-      
-      <div className="glass rounded-2xl p-6 border border-purple-500/30">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">
-            Wszystkie pliki PDF ({files.length})
-          </h2>
-        </div>
-
-        <div className="grid gap-4">
-          {files.map((file) => {
-            const canDelete = canDeleteFile(file)
-            const isDeleting = deletingFileId === file.id
-
-            return (
-              <div
-                key={file.id}
-                className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 hover:border-purple-500/50 transition-all hover:bg-gray-800/70"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <FileText className="h-5 w-5 text-purple-400 flex-shrink-0" />
-                      <h3 className="text-lg font-semibold text-white">
-                        {file.originalName}
-                      </h3>
-                    </div>
-
-                    <div className="ml-8 space-y-2">
-                      <div className="flex items-center space-x-4 text-sm text-gray-400">
-                        <div className="flex items-center space-x-1">
-                          <BookOpen className="h-4 w-4" />
-                          <span>
-                            Kurs:{' '}
-                            <Link
-                              href={`/courses/${file.course.id}`}
-                              className="text-purple-400 hover:text-purple-300 transition-colors"
-                            >
-                              {file.course.title}
-                            </Link>
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-4 text-sm text-gray-400">
-                        <div className="flex items-center space-x-1">
-                          <User className="h-4 w-4" />
-                          <span>
-                            Organizator: {file.course.organizer.name}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-4 text-sm text-gray-400">
-                        <div className="flex items-center space-x-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>Dodano: {formatDate(file.createdAt)}</span>
-                        </div>
-                        <span>•</span>
-                        <span>Rozmiar: {formatFileSize(file.size)}</span>
-                      </div>
-                    </div>
+      {files.map((file) => (
+        <div
+          key={file.id}
+          className="glass rounded-xl p-6 border border-purple-500/30 hover:border-purple-500/50 transition-all hover-lift"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                    <FileText className="h-6 w-6 text-purple-400" />
                   </div>
-
-                  <div className="ml-4 flex items-center space-x-2 flex-shrink-0">
-                    <a
-                      href={`/api/courses/${file.course.id}/files/${file.id}/download`}
-                      download={file.originalName}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
-                    >
-                      <Download className="h-4 w-4" />
-                      <span className="hidden sm:inline">Pobierz</span>
-                    </a>
-                    
-                    {canDelete && (
-                      <button
-                        onClick={() => handleDelete(file)}
-                        disabled={isDeleting}
-                        className="px-4 py-2 bg-red-900/50 text-red-300 rounded-lg hover:bg-red-800/50 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed border border-red-500/30"
-                        title="Usuń plik"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="hidden sm:inline">
-                          {isDeleting ? 'Usuwanie...' : 'Usuń'}
-                        </span>
-                      </button>
-                    )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-white mb-1 truncate">
+                    {file.originalName}
+                  </h3>
+                  <div className="space-y-1 text-sm text-gray-300">
+                    <div className="flex items-center space-x-2">
+                      <FileText className="h-4 w-4 text-gray-400" />
+                      <span>{formatFileSize(file.size)}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="h-4 w-4 text-gray-400" />
+                      <span>
+                        Dodano: {format(new Date(file.createdAt), 'dd MMMM yyyy, HH:mm', { locale: pl })}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4 text-gray-400" />
+                      <span>
+                        Kurs: <span className="text-purple-400">{file.course.title}</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4 text-gray-400" />
+                      <span>
+                        Organizator: <span className="text-purple-400">{file.course.organizer.name}</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            )
-          })}
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handleDownload(file)}
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center space-x-2 shadow-lg hover-lift transition-all font-semibold border border-purple-500/50"
+                title="Pobierz plik"
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">Pobierz</span>
+              </button>
+              {canDeleteFile(file) && (
+                <button
+                  onClick={() => handleDelete(file)}
+                  disabled={deletingFileId === file.id}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center space-x-2 shadow-lg hover-lift transition-all font-semibold border border-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Usuń plik"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">
+                    {deletingFileId === file.id ? 'Usuwanie...' : 'Usuń'}
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      ))}
     </div>
   )
 }

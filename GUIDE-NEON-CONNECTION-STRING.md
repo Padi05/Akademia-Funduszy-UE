@@ -136,3 +136,4 @@ Neon.tech Dashboard
 3. **SQL Editor** - przycisk "Copy connection string" w prawym górnym rogu
 
 
+

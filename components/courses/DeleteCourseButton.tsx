@@ -61,3 +61,4 @@ export default function DeleteCourseButton({ courseId }: DeleteCourseButtonProps
   )
 }
 
+

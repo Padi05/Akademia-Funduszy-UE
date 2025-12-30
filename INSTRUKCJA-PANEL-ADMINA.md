@@ -146,3 +146,4 @@ Panel admina jest dostępny na dwa sposoby:
 
 Panel admina jest w pełni funkcjonalny i gotowy do użycia. Wystarczy utworzyć konto administratora i zalogować się!
 
+
