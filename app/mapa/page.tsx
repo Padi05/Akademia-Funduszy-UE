@@ -168,56 +168,56 @@ export default function MapPage() {
           }}
         >
           <GlobeComponent
-              ref={globeRef}
-              globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-              backgroundColor="rgba(0, 0, 0, 0)"
-              showAtmosphere={true}
-              atmosphereColor="#00D9FF"
-              atmosphereAltitude={0.25}
-              pointsData={points}
-              pointColor="color"
-              pointRadius="size"
-              pointLabel={(d: any) => `${d.voivodeship}\n(Kliknij, aby zobaczyć kursy)`}
-              onPointClick={handlePointClick}
-              onGlobeReady={() => {
-                setGlobeReady(true)
-                // Ustaw początkowy widok na Polskę
-                if (globeRef.current) {
-                  globeRef.current.pointOfView({
-                    lat: 52.0,
-                    lng: 19.0,
-                    altitude: 2.2,
-                  }, 0)
-                }
-              }}
-              pointResolution={16}
-              pointAltitude={0.05}
-              showGlobe={true}
-              showGraticules={true}
-            />
+            ref={globeRef}
+            globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+            backgroundColor="rgba(0, 0, 0, 0)"
+            showAtmosphere={true}
+            atmosphereColor="#00D9FF"
+            atmosphereAltitude={0.25}
+            pointsData={points}
+            pointColor="color"
+            pointRadius="size"
+            pointLabel={(d: any) => `${d.voivodeship}\n(Kliknij, aby zobaczyć kursy)`}
+            onPointClick={handlePointClick}
+            onGlobeReady={() => {
+              setGlobeReady(true)
+              // Ustaw początkowy widok na Polskę
+              if (globeRef.current) {
+                globeRef.current.pointOfView({
+                  lat: 52.0,
+                  lng: 19.0,
+                  altitude: 2.2,
+                }, 0)
+              }
+            }}
+            pointResolution={12}
+            pointAltitude={0.03}
+            showGlobe={true}
+            showGraticules={true}
+          />
           {!globeReady && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
-                <div className="text-center">
-                  <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin" style={{ color: '#FF6B35' }} />
-                  <p className="text-gray-300">Ładowanie globu...</p>
-                </div>
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
+              <div className="text-center">
+                <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin" style={{ color: '#FF6B35' }} />
+                <p className="text-gray-300">Ładowanie globu...</p>
               </div>
-            )}
-            {/* Instrukcja */}
-            <div 
-              className="absolute bottom-4 left-4 right-4 rounded-lg p-3"
-              style={{
-                background: 'rgba(0, 0, 0, 0.8)',
-                border: '1px solid rgba(255, 107, 53, 0.4)',
-                boxShadow: '0 0 20px rgba(255, 107, 53, 0.3)'
-              }}
-            >
-              <p className="text-sm text-white text-center">
-                <span className="font-semibold" style={{ color: '#FFD700' }}>💡 Wskazówka:</span>{' '}
-                <span>Kliknij na punkt na globie, aby zobaczyć kursy w danym województwie</span>
-              </p>
             </div>
+          )}
+          {/* Instrukcja */}
+          <div 
+            className="absolute bottom-4 left-4 right-4 rounded-lg p-3"
+            style={{
+              background: 'rgba(0, 0, 0, 0.8)',
+              border: '1px solid rgba(255, 107, 53, 0.4)',
+              boxShadow: '0 0 20px rgba(255, 107, 53, 0.3)'
+            }}
+          >
+            <p className="text-sm text-white text-center">
+              <span className="font-semibold" style={{ color: '#FFD700' }}>💡 Wskazówka:</span>{' '}
+              <span>Kliknij na punkt na globie, aby zobaczyć kursy w danym województwie</span>
+            </p>
           </div>
+        </div>
         </div>
       </div>
 
