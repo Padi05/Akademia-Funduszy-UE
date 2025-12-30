@@ -65,6 +65,7 @@ export default function MapPage() {
   const [courses, setCourses] = useState<Course[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [globeReady, setGlobeReady] = useState(false)
+  const [countriesData, setCountriesData] = useState<any[]>([])
   const globeRef = useRef<any>(null)
   const rotationRef = useRef<number>(0)
 
@@ -85,6 +86,25 @@ export default function MapPage() {
       setCourses([])
     }
   }, [selectedVoivodeship])
+
+  // Załaduj dane o granicach państw przy montowaniu komponentu
+  useEffect(() => {
+    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
+      .then(res => res.json())
+      .then((data: any) => {
+        setCountriesData(data.features || [])
+      })
+      .catch(err => {
+        console.error('Error loading countries:', err)
+        // Fallback - użyj prostszego źródła danych
+        fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
+          .then(res => res.json())
+          .then((data: any) => {
+            setCountriesData(data.features || [])
+          })
+          .catch(err2 => console.error('Error loading fallback countries:', err2))
+      })
+  }, [])
 
   // Animacja automatycznego obrotu globusa
   useEffect(() => {
@@ -177,21 +197,21 @@ export default function MapPage() {
               className="rounded-xl relative overflow-hidden"
               data-globe-container
               style={{
-                background: 'rgba(15, 23, 42, 0.8)',
-                border: '1px solid rgba(59, 130, 246, 0.3)',
-                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                background: 'linear-gradient(135deg, rgba(200, 220, 255, 0.15) 0%, rgba(150, 180, 220, 0.1) 100%)',
+                border: '1px solid rgba(100, 150, 200, 0.4)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3), inset 0 0 100px rgba(200, 220, 255, 0.1)',
                 height: 'calc(100vh - 280px)',
                 minHeight: '600px'
               }}
             >
               <GlobeComponent
                 ref={globeRef}
-                globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-                backgroundColor="rgba(0, 0, 0, 0)"
+                globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+                backgroundColor="rgba(200, 220, 255, 0.1)"
                 showAtmosphere={true}
-                atmosphereColor="#4a90e2"
-                atmosphereAltitude={0.15}
-                backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+                atmosphereColor="#87ceeb"
+                atmosphereAltitude={0.2}
+                backgroundImageUrl=""
                 pointsData={points}
                 pointColor="color"
                 pointRadius="size"
@@ -211,6 +231,25 @@ export default function MapPage() {
                 pointAltitude={0.03}
                 showGlobe={true}
                 showGraticules={true}
+                polygonsData={countriesData}
+                polygonAltitude={0.01}
+                polygonCapColor={(d: any) => 'rgba(120, 160, 200, 0.25)'}
+                polygonSideColor={(d: any) => 'rgba(100, 140, 180, 0.15)'}
+                polygonStrokeColor={() => 'rgba(150, 180, 220, 0.6)'}
+                polygonLabel={(d: any) => {
+                  const props = d.properties || {}
+                  return props.NAME || props.name || props.NAME_EN || 'Country'
+                }}
+                polygonCapMaterial={{ 
+                  ambient: '#ffffff',
+                  opacity: 0.25,
+                  transparent: true
+                }}
+                polygonSideMaterial={{ 
+                  ambient: '#ffffff',
+                  opacity: 0.15,
+                  transparent: true
+                }}
               />
               {!globeReady && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 rounded-xl">
