@@ -316,10 +316,54 @@ export default function MapPage() {
 
   // Załaduj dane o granicach państw przy montowaniu komponentu
   useEffect(() => {
+    // Użyj lepszego źródła danych z centroidami
     fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
       .then(res => res.json())
       .then((data: any) => {
-        setCountriesData(data.features || [])
+        // Przetwórz dane i dodaj centroidy dla etykiet
+        const processedData = (data.features || []).map((feature: any) => {
+          const props = feature.properties || {}
+          const geometry = feature.geometry
+          
+          // Oblicz centroid (środek) kraju
+          let centroid = { lat: 0, lng: 0 }
+          if (geometry && geometry.coordinates) {
+            try {
+              const coords = geometry.coordinates
+              let totalLat = 0
+              let totalLng = 0
+              let count = 0
+              
+              const extractCoords = (arr: any) => {
+                if (Array.isArray(arr)) {
+                  if (arr.length === 2 && typeof arr[0] === 'number' && typeof arr[1] === 'number') {
+                    totalLng += arr[0]
+                    totalLat += arr[1]
+                    count++
+                  } else {
+                    arr.forEach(extractCoords)
+                  }
+                }
+              }
+              
+              extractCoords(coords)
+              
+              if (count > 0) {
+                centroid = { lat: totalLat / count, lng: totalLng / count }
+              }
+            } catch (e) {
+              console.warn('Error calculating centroid:', e)
+            }
+          }
+          
+          return {
+            ...feature,
+            centroid,
+            name: props.NAME || props.name || props.NAME_EN || props.NAME_LONG || props.ADMIN || props.NAME_ALT
+          }
+        })
+        
+        setCountriesData(processedData)
       })
       .catch(err => {
         console.error('Error loading countries:', err)
@@ -594,14 +638,32 @@ export default function MapPage() {
                   showGraticules={true}
                   graticuleColor="rgba(150, 180, 220, 0.2)"
                   polygonsData={countriesData}
-                  polygonAltitude={0.005}
-                  polygonCapColor="rgba(100, 150, 200, 0.15)"
-                  polygonSideColor="rgba(80, 120, 160, 0.1)"
-                  polygonStrokeColor="rgba(150, 180, 220, 0.25)"
+                  polygonAltitude={0.01}
+                  polygonCapColor="rgba(100, 150, 200, 0.25)"
+                  polygonSideColor="rgba(80, 120, 160, 0.2)"
+                  polygonStrokeColor="rgba(255, 255, 255, 0.5)"
+                  polygonStrokeWidth={2}
                   polygonLabel={(d: any) => {
                     const props = d.properties || {}
-                    return props.NAME || props.name || props.NAME_EN || 'Country'
+                    const name = props.NAME || props.name || props.NAME_EN || props.NAME_LONG || props.ADMIN || d.name || 'Country'
+                    return `<b>${name}</b>`
                   }}
+                  labelsData={countriesData
+                    .filter((country: any) => country.name && country.centroid && country.centroid.lat !== 0)
+                    .map((country: any) => ({
+                      lat: country.centroid.lat,
+                      lng: country.centroid.lng,
+                      text: country.name,
+                      size: country.name.length > 15 ? 0.4 : 0.5,
+                    }))}
+                  labelColor={() => 'rgba(255, 255, 255, 0.95)'}
+                  labelSize={(d: any) => d.size || 0.5}
+                  labelResolution={2}
+                  labelDotRadius={0}
+                  labelDotOrientation={() => 'right'}
+                  labelText={(d: any) => d.text || ''}
+                  labelLat={(d: any) => d.lat}
+                  labelLng={(d: any) => d.lng}
                 />
               </div>
               {!globeReady && (
