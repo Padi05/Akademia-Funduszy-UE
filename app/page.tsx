@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { format } from 'date-fns'
 import { pl } from 'date-fns/locale/pl'
 import { Calendar, MapPin, Monitor } from 'lucide-react'
+import GlobeBackground from '@/components/GlobeBackground'
 
 export const dynamic = 'force-dynamic' // Zawsze pobieraj najnowsze dane
 export const revalidate = 0 // Wyłącz cache
@@ -40,7 +41,9 @@ export default async function HomePage() {
     <div className="min-h-screen">
       {/* Hero Section z jednolitym tłem */}
       <div className="hero-background relative overflow-hidden">
-        <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32">
+        {/* Kula ziemska w tle */}
+        <GlobeBackground />
+        <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32 relative z-10">
           <div className="text-center animate-fade-in-smooth">
             <div className="mb-6">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 animate-fade-in-smooth px-2" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)' }}>
