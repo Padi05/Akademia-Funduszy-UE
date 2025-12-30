@@ -9,7 +9,17 @@ import Link from 'next/link'
 
 // Dynamiczny import Globe z opcjami optymalizacji
 const GlobeComponent = dynamic(
-  () => import('react-globe.gl').then((mod) => mod.default || mod),
+  () => import('react-globe.gl').then((mod) => {
+    // Obsługa różnych sposobów eksportu
+    if (mod.default) {
+      return mod.default
+    }
+    if (typeof mod === 'function') {
+      return mod
+    }
+    // Jeśli moduł ma właściwość Globe lub default
+    return mod.Globe || mod
+  }),
   { 
     ssr: false,
     loading: () => (
@@ -270,45 +280,47 @@ export default function MapPage() {
                 <div className="nebula nebula-2" />
                 <div className="nebula nebula-3" />
               </div>
-              <GlobeComponent
-                ref={globeRef}
-                globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-                backgroundColor="rgba(0, 0, 0, 0)"
-                showAtmosphere={true}
-                atmosphereColor="#87ceeb"
-                atmosphereAltitude={0.2}
-                backgroundImageUrl=""
-                pointsData={points}
-                pointColor="color"
-                pointLabel={(d: any) => `${d.voivodeship}`}
-                onPointClick={handlePointClick}
-                onGlobeReady={() => {
-                  setGlobeReady(true)
-                  if (globeRef.current) {
-                    const initialPOV = {
-                      lat: 52.0,
-                      lng: 19.0,
-                      altitude: 2.5,
+              <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
+                <GlobeComponent
+                  ref={globeRef}
+                  globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+                  backgroundColor="rgba(0, 0, 0, 0)"
+                  showAtmosphere={true}
+                  atmosphereColor="#87ceeb"
+                  atmosphereAltitude={0.2}
+                  backgroundImageUrl=""
+                  pointsData={points}
+                  pointColor="color"
+                  pointLabel={(d: any) => `${d.voivodeship}`}
+                  onPointClick={handlePointClick}
+                  onGlobeReady={() => {
+                    setGlobeReady(true)
+                    if (globeRef.current) {
+                      const initialPOV = {
+                        lat: 52.0,
+                        lng: 19.0,
+                        altitude: 2.5,
+                      }
+                      globeRef.current.pointOfView(initialPOV, 0)
+                      setCurrentAltitude(initialPOV.altitude)
                     }
-                    globeRef.current.pointOfView(initialPOV, 0)
-                    setCurrentAltitude(initialPOV.altitude)
-                  }
-                }}
-                pointResolution={32}
-                pointAltitude={0.02}
-                pointRadius={(d: any) => d.size || 0.8}
-                showGlobe={true}
-                showGraticules={true}
-                polygonsData={countriesData}
-                polygonAltitude={0.01}
-                polygonCapColor={(d: any) => 'rgba(120, 160, 200, 0.25)'}
-                polygonSideColor={(d: any) => 'rgba(100, 140, 180, 0.15)'}
-                polygonStrokeColor={() => 'rgba(150, 180, 220, 0.6)'}
-                polygonLabel={(d: any) => {
-                  const props = d.properties || {}
-                  return props.NAME || props.name || props.NAME_EN || 'Country'
-                }}
-              />
+                  }}
+                  pointResolution={32}
+                  pointAltitude={0.02}
+                  pointRadius={(d: any) => d.size || 0.8}
+                  showGlobe={true}
+                  showGraticules={true}
+                  polygonsData={countriesData}
+                  polygonAltitude={0.01}
+                  polygonCapColor={(d: any) => 'rgba(120, 160, 200, 0.25)'}
+                  polygonSideColor={(d: any) => 'rgba(100, 140, 180, 0.15)'}
+                  polygonStrokeColor={() => 'rgba(150, 180, 220, 0.6)'}
+                  polygonLabel={(d: any) => {
+                    const props = d.properties || {}
+                    return props.NAME || props.name || props.NAME_EN || 'Country'
+                  }}
+                />
+              </div>
               {!globeReady && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-xl z-10">
                   <div className="text-center">
