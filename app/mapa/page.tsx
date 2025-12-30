@@ -278,7 +278,6 @@ export default function MapPage() {
                 backgroundImageUrl=""
                 pointsData={points}
                 pointColor="color"
-                pointRadius="size"
                 pointLabel={(d: any) => `${d.voivodeship}`}
                 onPointClick={handlePointClick}
                 onGlobeReady={() => {
