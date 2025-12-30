@@ -9,7 +9,7 @@ import Link from 'next/link'
 
 // Dynamiczny import Globe z opcjami optymalizacji
 const GlobeComponent = dynamic(
-  () => import('react-globe.gl'),
+  () => import('react-globe.gl').then((mod) => mod.default || mod),
   { 
     ssr: false,
     loading: () => (
@@ -21,7 +21,7 @@ const GlobeComponent = dynamic(
       </div>
     )
   }
-)
+) as any
 
 // Lista województw Polski z koordynatami
 const VOIVODESHIPS = [
@@ -239,7 +239,9 @@ export default function MapPage() {
                 border: '1px solid rgba(100, 150, 200, 0.4)',
                 boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 100px rgba(200, 220, 255, 0.1)',
                 height: 'calc(100vh - 280px)',
-                minHeight: '600px'
+                minHeight: '600px',
+                width: '100%',
+                position: 'relative'
               }}
             >
               {/* Starfield Background */}
