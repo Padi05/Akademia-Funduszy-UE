@@ -16,6 +16,9 @@ const courseSchema = z.object({
   fundingInfo: z.string().min(5, 'Informacje o dofinansowaniu są wymagane'),
   startDate: z.string().min(1, 'Data rozpoczęcia jest wymagana'),
   endDate: z.string().optional(),
+  // Pola lokalizacji
+  voivodeship: z.string().optional(),
+  city: z.string().optional(),
   // Pola dla kursów online
   isOnlineCourse: z.boolean().optional(),
   onlinePrice: z.number().min(0).nullable().optional(),
@@ -102,6 +105,8 @@ export async function POST(request: NextRequest) {
         fundingInfo: validatedData.fundingInfo,
         startDate: new Date(validatedData.startDate),
         endDate: validatedData.endDate ? new Date(validatedData.endDate) : null,
+        voivodeship: validatedData.voivodeship || null,
+        city: validatedData.city || null,
         organizerId: session.user.id,
         // Pola dla kursów online
         isOnlineCourse: isOnlineCourse,

@@ -20,6 +20,8 @@ const courseSchema = z.object({
   fundingInfo: z.string().min(5, 'Informacje o dofinansowaniu są wymagane'),
   startDate: z.string().min(1, 'Data rozpoczęcia jest wymagana'),
   endDate: z.string().optional(),
+  voivodeship: z.string().optional(),
+  city: z.string().optional(),
   // Pola dla kursów online
   isOnlineCourse: z.boolean().optional(),
   onlinePrice: z.string().refine((val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0), {
@@ -180,6 +182,8 @@ export default function NewCoursePageClient() {
           // Kursy stacjonarne są automatycznie publikowane (widoczne na stronie głównej)
           // Kursy online wymagają ręcznej publikacji
           isPublished: courseType === 'STACJONARNY' ? true : (data.isPublished || false),
+          voivodeship: courseType === 'STACJONARNY' ? (data.voivodeship || null) : null,
+          city: courseType === 'STACJONARNY' ? (data.city || null) : null,
         }),
       })
 
@@ -522,6 +526,54 @@ export default function NewCoursePageClient() {
               )}
             </div>
           </div>
+
+          {/* Pola lokalizacji - tylko dla kursów stacjonarnych */}
+          {courseType === 'STACJONARNY' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="voivodeship" className="block text-sm font-medium text-white mb-2">
+                  Województwo (opcjonalnie)
+                </label>
+                <select
+                  {...register('voivodeship')}
+                  id="voivodeship"
+                  disabled={isLoading}
+                  className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
+                >
+                  <option value="">Wybierz województwo</option>
+                  <option value="Dolnośląskie">Dolnośląskie</option>
+                  <option value="Kujawsko-Pomorskie">Kujawsko-Pomorskie</option>
+                  <option value="Lubelskie">Lubelskie</option>
+                  <option value="Lubuskie">Lubuskie</option>
+                  <option value="Łódzkie">Łódzkie</option>
+                  <option value="Małopolskie">Małopolskie</option>
+                  <option value="Mazowieckie">Mazowieckie</option>
+                  <option value="Opolskie">Opolskie</option>
+                  <option value="Podkarpackie">Podkarpackie</option>
+                  <option value="Podlaskie">Podlaskie</option>
+                  <option value="Pomorskie">Pomorskie</option>
+                  <option value="Śląskie">Śląskie</option>
+                  <option value="Świętokrzyskie">Świętokrzyskie</option>
+                  <option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
+                  <option value="Wielkopolskie">Wielkopolskie</option>
+                  <option value="Zachodniopomorskie">Zachodniopomorskie</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="city" className="block text-sm font-medium text-white mb-2">
+                  Miasto (opcjonalnie)
+                </label>
+                <input
+                  {...register('city')}
+                  id="city"
+                  type="text"
+                  disabled={isLoading}
+                  className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
+                  placeholder="Np. Warszawa"
+                />
+              </div>
+            </div>
+          )}
 
           <div>
             <label htmlFor="files" className="block text-sm font-medium text-white mb-2">

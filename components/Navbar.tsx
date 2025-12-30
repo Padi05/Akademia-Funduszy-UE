@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { LogIn, LogOut, User, Home, Menu, X, FileText, CreditCard, Shield } from 'lucide-react'
+import { LogIn, LogOut, User, Home, Menu, X, FileText, CreditCard, Shield, Globe } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Navbar() {
@@ -45,6 +45,13 @@ export default function Navbar() {
             >
               <Home className="h-4 w-4 flex-shrink-0" />
               <span className="whitespace-nowrap">Strona główna</span>
+            </Link>
+            <Link
+              href="/mapa"
+              className="text-gray-200 hover:text-purple-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
+            >
+              <Globe className="h-4 w-4 flex-shrink-0" />
+              <span className="whitespace-nowrap">Mapa</span>
             </Link>
 
             {status === 'loading' ? (
@@ -161,6 +168,14 @@ export default function Navbar() {
               >
                 <Home className="h-4 w-4 flex-shrink-0" />
                 <span>Strona główna</span>
+              </Link>
+              <Link
+                href="/mapa"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-gray-200 hover:text-purple-300 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
+              >
+                <Globe className="h-4 w-4 flex-shrink-0" />
+                <span>Mapa</span>
               </Link>
 
               {status === 'loading' ? (
