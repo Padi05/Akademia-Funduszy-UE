@@ -71,22 +71,18 @@ export default function GlobeBackground() {
 
   return (
     <div 
-      className="absolute pointer-events-none"
+      className="absolute pointer-events-none inset-0"
       style={{
         zIndex: 1,
         opacity: 0.25,
-        top: 0,
-        left: 0,
         width: '100%',
         height: '100%',
-        minHeight: '100vh',
         overflow: 'visible',
       }}
     >
       <div style={{ 
         width: '100%', 
-        height: '100%', 
-        minHeight: '100vh',
+        height: '100%',
         position: 'relative',
         overflow: 'visible',
       }}>

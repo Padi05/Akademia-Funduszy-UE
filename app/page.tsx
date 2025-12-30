@@ -92,7 +92,7 @@ export default async function HomePage() {
         </div>
 
         {/* Sekcja z kursami */}
-        <div id="courses" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24 lg:pb-32 relative z-10">
+        <div id="courses" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20 sm:pb-32 lg:pb-40 relative z-10">
           <div className="text-center mb-8 sm:mb-12 lg:mb-16 animate-fade-in-smooth px-4">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold gradient-text mb-4 sm:mb-6 animate-fade-in-smooth">
               Dostępne Kursy
