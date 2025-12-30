@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { Globe, MapPin, X, Calendar, Star, Loader2 } from 'lucide-react'
+import { Globe, MapPin, X, Calendar, Star, Loader2, Filter, Check } from 'lucide-react'
 import { format } from 'date-fns'
 import { pl } from 'date-fns/locale/pl'
 import Link from 'next/link'
@@ -220,6 +220,8 @@ export default function MapPage() {
   const rotationRef = useRef<number>(0)
   const [atmosphereColor, setAtmosphereColor] = useState<string>('#87ceeb')
   const [animationTime, setAnimationTime] = useState<number>(0)
+  const [selectedCountries, setSelectedCountries] = useState<Set<string>>(new Set())
+  const [showFilter, setShowFilter] = useState<boolean>(false)
 
   // Funkcja obliczająca rozmiar punktu na podstawie altitude
   // Im mniejsze altitude (bliżej/przybliżenie), tym mniejszy punkt
@@ -252,6 +254,19 @@ export default function MapPage() {
     return () => clearInterval(intervalId)
   }, [globeReady, animationTime])
 
+  // Pobierz unikalne kraje z regionów
+  const uniqueCountries = useMemo(() => {
+    const countries = new Set(REGIONS.map(r => r.country).filter(Boolean))
+    return Array.from(countries).sort()
+  }, [])
+
+  // Inicjalizuj wszystkie kraje jako wybrane przy pierwszym renderowaniu
+  useEffect(() => {
+    if (selectedCountries.size === 0 && uniqueCountries.length > 0) {
+      setSelectedCountries(new Set(uniqueCountries))
+    }
+  }, [uniqueCountries, selectedCountries.size])
+
   // Przygotuj punkty na globie dla województw z dynamicznym rozmiarem i animacjami
   // Użyj useMemo, aby przeliczać tylko gdy zmienia się altitude lub selectedVoivodeship
   const points = useMemo(() => {
@@ -259,7 +274,13 @@ export default function MapPage() {
     const baseSize = selectedVoivodeship ? 0.5 : 0.4
     const pulseFactor = 1 + Math.sin(animationTime * 3) * 0.15 // Pulsowanie punktów
     
-    return REGIONS.map((region, index) => {
+    // Filtruj regiony według wybranych krajów
+    const filteredRegions = REGIONS.filter(region => {
+      if (selectedCountries.size === 0) return true
+      return region.country && selectedCountries.has(region.country)
+    })
+    
+    return filteredRegions.map((region, index) => {
       const isSelected = selectedVoivodeship === region.name
       // Animowane kolory - gradient dla wybranego, pulsujące dla innych
       let color: string
@@ -284,7 +305,7 @@ export default function MapPage() {
         country: region.country,
       }
     })
-  }, [currentAltitude, selectedVoivodeship, animationTime])
+  }, [currentAltitude, selectedVoivodeship, animationTime, selectedCountries])
 
   useEffect(() => {
     if (selectedVoivodeship) {
@@ -416,10 +437,88 @@ export default function MapPage() {
                 Mapa Kursów
               </span>
             </h1>
-            <p className="text-gray-300 text-lg">
+            <p className="text-gray-300 text-lg mb-4">
               Kliknij na punkt na globie, aby zobaczyć dostępne kursy w danym regionie
             </p>
+            <button
+              onClick={() => setShowFilter(!showFilter)}
+              className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all shadow-lg hover:shadow-xl"
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              Filtruj regiony
+            </button>
           </div>
+          
+          {/* Panel filtrowania */}
+          {showFilter && (
+            <div className="mt-4 glass rounded-xl p-6 border border-purple-500/30 animate-fade-in">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-white flex items-center">
+                  <Filter className="h-5 w-5 mr-2 text-purple-400" />
+                  Wybierz kraje do wyświetlenia
+                </h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSelectedCountries(new Set(uniqueCountries))}
+                    className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all"
+                  >
+                    Zaznacz wszystkie
+                  </button>
+                  <button
+                    onClick={() => setSelectedCountries(new Set())}
+                    className="px-3 py-1 text-sm bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-all"
+                  >
+                    Odznacz wszystkie
+                  </button>
+                  <button
+                    onClick={() => setShowFilter(false)}
+                    className="px-3 py-1 text-sm bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-64 overflow-y-auto pr-2">
+                {uniqueCountries.map((country) => {
+                  const isSelected = selectedCountries.has(country)
+                  return (
+                    <label
+                      key={country}
+                      className={`flex items-center p-3 rounded-lg cursor-pointer transition-all ${
+                        isSelected
+                          ? 'bg-purple-600/50 border-2 border-purple-400'
+                          : 'bg-gray-800/50 border-2 border-gray-700 hover:border-gray-600'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          const newSet = new Set(selectedCountries)
+                          if (e.target.checked) {
+                            newSet.add(country)
+                          } else {
+                            newSet.delete(country)
+                          }
+                          setSelectedCountries(newSet)
+                        }}
+                        className="sr-only"
+                      />
+                      <div className={`flex items-center justify-center w-5 h-5 rounded border-2 mr-3 ${
+                        isSelected ? 'bg-purple-500 border-purple-400' : 'border-gray-500'
+                      }`}>
+                        {isSelected && <Check className="h-3 w-3 text-white" />}
+                      </div>
+                      <span className="text-white text-sm font-medium">{country}</span>
+                    </label>
+                  )
+                })}
+              </div>
+              <p className="mt-4 text-sm text-gray-400">
+                Wybrano: {selectedCountries.size} z {uniqueCountries.length} krajów
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
