@@ -79,7 +79,7 @@ export default function RegisterPage() {
   }
 
   return (
-      <div className="min-h-screen flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 hero-background">
+      <div className="auth-page-container py-8 sm:py-12 px-4 sm:px-6 lg:px-8 hero-background">
       <div className="max-w-md w-full space-y-6 sm:space-y-8 animate-scale-in relative z-10">
         <div className="glass rounded-2xl shadow-2xl p-6 sm:p-8 relative z-10">
           <div className="text-center mb-6 sm:mb-8">

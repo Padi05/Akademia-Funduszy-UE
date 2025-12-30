@@ -259,29 +259,38 @@ export default function AdminDashboard() {
           <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-6">Statystyki</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div className="glass rounded-xl p-6 border border-purple-500/30">
+            <button
+              onClick={() => setActiveTab('users')}
+              className="glass rounded-xl p-6 border border-purple-500/30 hover:border-purple-400/50 hover:bg-purple-500/10 transition-all cursor-pointer text-left"
+            >
               <div className="flex items-center justify-between mb-2">
                 <Users className="h-8 w-8 text-purple-400" />
                 <span className="text-2xl font-bold text-white">{stats.totalUsers}</span>
               </div>
               <p className="text-gray-300 text-sm">Użytkowników</p>
-            </div>
+            </button>
             
-            <div className="glass rounded-xl p-6 border border-purple-500/30">
+            <button
+              onClick={() => setActiveTab('courses')}
+              className="glass rounded-xl p-6 border border-purple-500/30 hover:border-purple-400/50 hover:bg-purple-500/10 transition-all cursor-pointer text-left"
+            >
               <div className="flex items-center justify-between mb-2">
                 <BookOpen className="h-8 w-8 text-blue-400" />
                 <span className="text-2xl font-bold text-white">{stats.totalCourses}</span>
               </div>
               <p className="text-gray-300 text-sm">Kursów</p>
-            </div>
+            </button>
             
-            <div className="glass rounded-xl p-6 border border-purple-500/30">
+            <button
+              onClick={() => setActiveTab('subscriptions')}
+              className="glass rounded-xl p-6 border border-purple-500/30 hover:border-purple-400/50 hover:bg-purple-500/10 transition-all cursor-pointer text-left"
+            >
               <div className="flex items-center justify-between mb-2">
                 <CreditCard className="h-8 w-8 text-green-400" />
                 <span className="text-2xl font-bold text-white">{stats.activeSubscriptions}</span>
               </div>
               <p className="text-gray-300 text-sm">Aktywnych subskrypcji</p>
-            </div>
+            </button>
             
             <div className="glass rounded-xl p-6 border border-purple-500/30">
               <div className="flex items-center justify-between mb-2">

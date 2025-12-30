@@ -621,6 +621,25 @@ body {
   z-index: 2;
 }
 
+/* Fix dla urządzeń mobilnych - zapobiega zwijaniu się przy klawiaturze */
+.auth-page-container {
+  height: 100vh; /* Fallback dla starszych przeglądarek */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+/* Dynamic viewport height dla nowoczesnych przeglądarek */
+@supports (height: 100dvh) {
+  .auth-page-container {
+    height: 100dvh;
+  }
+}
+
 /* Glassmorphism effect */
 .glass {
   background: rgba(10, 14, 39, 0.85);
