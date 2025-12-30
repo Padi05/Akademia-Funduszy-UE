@@ -17,8 +17,8 @@ const GlobeComponent = dynamic(
     if (typeof mod === 'function') {
       return mod
     }
-    // Jeśli moduł ma właściwość Globe lub default
-    return mod.Globe || mod
+    // Zwróć moduł jako fallback
+    return mod
   }),
   { 
     ssr: false,
