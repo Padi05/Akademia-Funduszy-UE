@@ -2,13 +2,26 @@
 
 import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
-import { Globe, MapPin, X, Calendar, Star } from 'lucide-react'
+import { Globe, MapPin, X, Calendar, Star, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { pl } from 'date-fns/locale/pl'
 import Link from 'next/link'
 
-// Dynamiczny import Globe (wymaga client-side rendering)
-const GlobeComponent = dynamic(() => import('react-globe.gl'), { ssr: false })
+// Dynamiczny import Globe z opcjami optymalizacji
+const GlobeComponent = dynamic(
+  () => import('react-globe.gl'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 text-purple-400 mx-auto mb-4 animate-spin" />
+          <p className="text-gray-300">Ładowanie globu...</p>
+        </div>
+      </div>
+    )
+  }
+)
 
 // Lista województw Polski z koordynatami
 const VOIVODESHIPS = [
@@ -54,13 +67,14 @@ export default function MapPage() {
   const [globeReady, setGlobeReady] = useState(false)
   const globeRef = useRef<any>(null)
 
-  // Przygotuj punkty na globie dla województw
+  // Przygotuj punkty na globie dla województw z większymi rozmiarami dla lepszej interakcji
   const points = VOIVODESHIPS.map((voivodeship) => ({
     lat: voivodeship.lat,
     lng: voivodeship.lng,
-    size: 0.5,
-    color: selectedVoivodeship === voivodeship.name ? '#a855f7' : '#6b7280',
+    size: selectedVoivodeship === voivodeship.name ? 1.2 : 0.8,
+    color: selectedVoivodeship === voivodeship.name ? '#a855f7' : '#8b5cf6',
     voivodeship: voivodeship.name,
+    label: voivodeship.name,
   }))
 
   useEffect(() => {
@@ -90,7 +104,20 @@ export default function MapPage() {
   }
 
   const handlePointClick = (point: any) => {
-    setSelectedVoivodeship(point.voivodeship)
+    if (point && point.voivodeship) {
+      setSelectedVoivodeship(point.voivodeship)
+      // Przesuń glob do wybranego województwa
+      if (globeRef.current) {
+        const voivodeshipData = VOIVODESHIPS.find((v) => v.name === point.voivodeship)
+        if (voivodeshipData) {
+          globeRef.current.pointOfView({
+            lat: voivodeshipData.lat,
+            lng: voivodeshipData.lng,
+            altitude: 1.5,
+          }, 1000)
+        }
+      }
+    }
   }
 
   const handleVoivodeshipSelect = (voivodeship: string) => {
@@ -132,24 +159,33 @@ export default function MapPage() {
           {/* Lewa kolumna - Glob */}
           <div className="lg:col-span-2">
             <div className="glass rounded-2xl p-4 sm:p-6 border border-purple-500/30 h-[500px] sm:h-[600px] relative">
-              {globeReady ? (
-                <GlobeComponent
-                  ref={globeRef}
-                  globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-                  backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
-                  pointsData={points}
-                  pointColor="color"
-                  pointRadius="size"
-                  pointLabel={(d: any) => d.voivodeship}
-                  onPointClick={handlePointClick}
-                  onGlobeReady={() => setGlobeReady(true)}
-                  pointResolution={12}
-                  pointAltitude={0.01}
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full">
+              <GlobeComponent
+                ref={globeRef}
+                globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+                backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+                pointsData={points}
+                pointColor="color"
+                pointRadius="size"
+                pointLabel={(d: any) => d.voivodeship}
+                onPointClick={handlePointClick}
+                onGlobeReady={() => {
+                  setGlobeReady(true)
+                  // Ustaw początkowy widok na Polskę
+                  if (globeRef.current) {
+                    globeRef.current.pointOfView({
+                      lat: 52.0,
+                      lng: 19.0,
+                      altitude: 2.5,
+                    }, 0)
+                  }
+                }}
+                pointResolution={8}
+                pointAltitude={0.02}
+              />
+              {!globeReady && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50 rounded-xl">
                   <div className="text-center">
-                    <Globe className="h-16 w-16 text-purple-400 mx-auto mb-4 animate-spin" />
+                    <Loader2 className="h-12 w-12 text-purple-400 mx-auto mb-4 animate-spin" />
                     <p className="text-gray-300">Ładowanie globu...</p>
                   </div>
                 </div>
