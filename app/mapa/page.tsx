@@ -238,21 +238,21 @@ export default function MapPage() {
     return baseSize * sizeMultiplier
   }
 
-  // Animacja kolorów atmosfery - zmieniające się kolory
+  // Delikatna animacja czasu dla innych efektów
   useEffect(() => {
     if (!globeReady) return
 
     const intervalId = setInterval(() => {
-      setAnimationTime((prev) => prev + 0.01)
-      // Tworzenie płynnie zmieniających się kolorów (cykl kolorów)
-      const hue = (animationTime * 50) % 360
-      const saturation = 60 + Math.sin(animationTime * 2) * 20
-      const lightness = 70 + Math.cos(animationTime * 1.5) * 15
-      setAtmosphereColor(`hsl(${hue}, ${saturation}%, ${lightness}%)`)
-    }, 50)
+      setAnimationTime((prev) => prev + 0.005) // Wolniejsza animacja
+    }, 100)
 
     return () => clearInterval(intervalId)
-  }, [globeReady, animationTime])
+  }, [globeReady])
+  
+  // Stały, czytelny kolor atmosfery
+  useEffect(() => {
+    setAtmosphereColor('#87ceeb') // Delikatny niebieski
+  }, [])
 
   // Pobierz unikalne kraje z regionów
   const uniqueCountries = useMemo(() => {
@@ -272,7 +272,7 @@ export default function MapPage() {
   const points = useMemo(() => {
     // Zmniejszone baseSize dla mniejszych znaczników
     const baseSize = selectedVoivodeship ? 0.5 : 0.4
-    const pulseFactor = 1 + Math.sin(animationTime * 3) * 0.15 // Pulsowanie punktów
+    const pulseFactor = 1 + Math.sin(animationTime * 1.5) * 0.08 // Delikatne pulsowanie punktów
     
     // Filtruj regiony według wybranych krajów
     const filteredRegions = REGIONS.filter(region => {
@@ -282,17 +282,16 @@ export default function MapPage() {
     
     return filteredRegions.map((region, index) => {
       const isSelected = selectedVoivodeship === region.name
-      // Animowane kolory - gradient dla wybranego, pulsujące dla innych
+      // Czytelne, statyczne kolory
       let color: string
       if (isSelected) {
-        // Wybrany punkt - jasny niebieski z pulsowaniem
-        const brightness = 0.7 + Math.sin(animationTime * 4 + index) * 0.3
-        color = `rgba(96, 165, 250, ${brightness})`
+        // Wybrany punkt - jasny niebieski
+        color = '#60a5fa'
       } else {
-        // Inne punkty - fioletowy z pulsowaniem
-        const hue = (240 + Math.sin(animationTime * 2 + index * 0.5) * 30) % 360
-        const saturation = 70 + Math.cos(animationTime * 3 + index) * 20
-        color = `hsl(${hue}, ${saturation}%, 65%)`
+        // Inne punkty - delikatny fioletowy, mniej animacji
+        const hue = 250 + Math.sin(animationTime * 0.5 + index * 0.1) * 10
+        const saturation = 60 + Math.cos(animationTime * 1 + index) * 10
+        color = `hsl(${hue}, ${saturation}%, 70%)`
       }
       
       return {
@@ -355,21 +354,19 @@ export default function MapPage() {
     return () => clearInterval(intervalId)
   }, [globeReady, currentAltitude])
 
-  // Animacja automatycznego obrotu globusa z płynnymi efektami
+  // Delikatna animacja automatycznego obrotu globusa
   useEffect(() => {
     if (!globeReady || !globeRef.current || selectedVoivodeship) return
 
     let animationFrameId: number
     const animateRotation = () => {
       if (globeRef.current && !selectedVoivodeship) {
-        // Płynniejsza rotacja z lekkim efektem falowania
-        rotationRef.current += 0.12 + Math.sin(animationTime * 0.5) * 0.03
-        // Dodaj subtelne wahania w osi lat dla efektu "kołysania"
-        const latVariation = Math.sin(animationTime * 0.3) * 2
+        // Płynna, spokojna rotacja bez efektów falowania
+        rotationRef.current += 0.08
         globeRef.current.rotation({ 
-          lat: latVariation, 
+          lat: 0, 
           lng: rotationRef.current, 
-          meridian: Math.sin(animationTime * 0.4) * 5 
+          meridian: 0 
         })
       }
       animationFrameId = requestAnimationFrame(animateRotation)
@@ -381,7 +378,7 @@ export default function MapPage() {
         cancelAnimationFrame(animationFrameId)
       }
     }
-  }, [globeReady, selectedVoivodeship, animationTime])
+  }, [globeReady, selectedVoivodeship])
 
 
   const fetchCourses = async (voivodeship: string) => {
@@ -540,14 +537,14 @@ export default function MapPage() {
                 position: 'relative'
               }}
             >
-              {/* Starfield Background */}
-              <div className="starfield">
-                {/* Generate stars */}
-                {Array.from({ length: 200 }).map((_, i) => {
-                  const size = Math.random() < 0.7 ? 'small' : Math.random() < 0.9 ? 'medium' : 'large'
+              {/* Delikatne tło - mniej gwiazd, subtelne efekty */}
+              <div className="starfield" style={{ opacity: 0.3 }}>
+                {/* Mniej gwiazd dla czytelności */}
+                {Array.from({ length: 60 }).map((_, i) => {
+                  const size = Math.random() < 0.8 ? 'small' : 'medium'
                   const left = Math.random() * 100
                   const top = Math.random() * 100
-                  const delay = Math.random() * 3
+                  const delay = Math.random() * 5
                   return (
                     <div
                       key={i}
@@ -556,15 +553,14 @@ export default function MapPage() {
                         left: `${left}%`,
                         top: `${top}%`,
                         animationDelay: `${delay}s`,
-                        animationDuration: `${2 + Math.random() * 2}s`
+                        animationDuration: `${4 + Math.random() * 3}s`,
+                        opacity: 0.4 + Math.random() * 0.3
                       }}
                     />
                   )
                 })}
-                {/* Nebula effects */}
-                <div className="nebula nebula-1" />
-                <div className="nebula nebula-2" />
-                <div className="nebula nebula-3" />
+                {/* Tylko jedna subtelna mgławica */}
+                <div className="nebula nebula-1" style={{ opacity: 0.15 }} />
               </div>
               <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
                 <GlobeComponent
@@ -572,8 +568,8 @@ export default function MapPage() {
                   globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
                   backgroundColor="rgba(0, 0, 0, 0)"
                   showAtmosphere={true}
-                  atmosphereColor={atmosphereColor}
-                  atmosphereAltitude={0.15 + Math.sin(animationTime * 2) * 0.05}
+                  atmosphereColor="#87ceeb"
+                  atmosphereAltitude={0.1}
                   backgroundImageUrl=""
                   pointsData={points}
                   pointColor="color"
@@ -596,23 +592,12 @@ export default function MapPage() {
                   pointRadius={(d: any) => d.size || 0.8}
                   showGlobe={true}
                   showGraticules={true}
-                  graticuleColor="rgba(100, 150, 200, 0.3)"
+                  graticuleColor="rgba(150, 180, 220, 0.2)"
                   polygonsData={countriesData}
-                  polygonAltitude={0.01}
-                  polygonCapColor={(d: any) => {
-                    // Animowane kolory krajów z gradientem
-                    const hue = (animationTime * 20 + (d.properties?.NAME?.length || 0) * 10) % 360
-                    return `hsla(${hue}, 40%, 50%, 0.2)`
-                  }}
-                  polygonSideColor={(d: any) => {
-                    const hue = (animationTime * 20 + (d.properties?.NAME?.length || 0) * 10) % 360
-                    return `hsla(${hue}, 30%, 40%, 0.15)`
-                  }}
-                  polygonStrokeColor={() => {
-                    // Animowany kolor obramowania
-                    const hue = (animationTime * 30) % 360
-                    return `hsla(${hue}, 50%, 60%, 0.4)`
-                  }}
+                  polygonAltitude={0.005}
+                  polygonCapColor="rgba(100, 150, 200, 0.15)"
+                  polygonSideColor="rgba(80, 120, 160, 0.1)"
+                  polygonStrokeColor="rgba(150, 180, 220, 0.25)"
                   polygonLabel={(d: any) => {
                     const props = d.properties || {}
                     return props.NAME || props.name || props.NAME_EN || 'Country'
