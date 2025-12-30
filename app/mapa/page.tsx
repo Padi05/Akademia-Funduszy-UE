@@ -193,7 +193,6 @@ export default function MapPage() {
               pointAltitude={0.03}
               showGlobe={true}
               showGraticules={true}
-              graticuleColor="rgba(255, 107, 53, 0.5)"
             />
             {!globeReady && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
