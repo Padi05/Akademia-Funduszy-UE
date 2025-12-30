@@ -84,8 +84,8 @@ export default function RegisterPage() {
         <div className="glass rounded-2xl shadow-2xl p-6 sm:p-8 relative z-10">
           <div className="text-center mb-6 sm:mb-8">
             <div className="flex justify-center mb-3 sm:mb-4">
-              <div className="bg-purple-900/50 p-3 sm:p-4 rounded-full animate-float border border-purple-500/30">
-                <UserPlus className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400" />
+              <div className="bg-gold-900/40 p-3 sm:p-4 rounded-full animate-float border border-gold-500/40">
+                <UserPlus className="h-6 w-6 sm:h-8 sm:w-8 text-gold-400" />
               </div>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
@@ -95,7 +95,7 @@ export default function RegisterPage() {
               Lub{' '}
               <Link
                 href="/login"
-                className="font-semibold text-purple-300 hover:text-purple-200 transition-colors"
+                className="font-semibold text-gold-300 hover:text-gold-200 transition-colors"
               >
                 zaloguj się do istniejącego konta
               </Link>
@@ -115,7 +115,7 @@ export default function RegisterPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-purple-400" />
+                  <User className="h-5 w-5 text-gold-400" />
                 </div>
                 <input
                   {...register('name')}
@@ -137,7 +137,7 @@ export default function RegisterPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-purple-400" />
+                  <Mail className="h-5 w-5 text-gold-400" />
                 </div>
                 <input
                   {...register('email')}
@@ -145,7 +145,7 @@ export default function RegisterPage() {
                   type="email"
                   autoComplete="email"
                   disabled={isLoading}
-                  className="appearance-none block w-full pl-10 pr-3 py-3 border-2 border-gray-700 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all bg-gray-800 text-white font-medium disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
+                  className="appearance-none block w-full pl-10 pr-3 py-3 border-2 border-gray-700 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all bg-gray-800 text-white font-medium disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
                   placeholder="twoj@email.pl"
                 />
               </div>
@@ -160,7 +160,7 @@ export default function RegisterPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-purple-400" />
+                  <Lock className="h-5 w-5 text-gold-400" />
                 </div>
                 <input
                   {...register('password')}
@@ -168,7 +168,7 @@ export default function RegisterPage() {
                   type="password"
                   autoComplete="new-password"
                   disabled={isLoading}
-                  className="appearance-none block w-full pl-10 pr-3 py-3 border-2 border-gray-700 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all bg-gray-800 text-white font-medium disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
+                  className="appearance-none block w-full pl-10 pr-3 py-3 border-2 border-gray-700 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all bg-gray-800 text-white font-medium disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
                   placeholder="••••••••"
                 />
               </div>
@@ -183,7 +183,7 @@ export default function RegisterPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-purple-400" />
+                  <Lock className="h-5 w-5 text-gold-400" />
                 </div>
                 <input
                   {...register('confirmPassword')}
@@ -191,7 +191,7 @@ export default function RegisterPage() {
                   type="password"
                   autoComplete="new-password"
                   disabled={isLoading}
-                  className="appearance-none block w-full pl-10 pr-3 py-3 border-2 border-gray-700 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all bg-gray-800 text-white font-medium disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
+                  className="appearance-none block w-full pl-10 pr-3 py-3 border-2 border-gray-700 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all bg-gray-800 text-white font-medium disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500"
                   placeholder="••••••••"
                 />
               </div>
@@ -200,48 +200,48 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <div className="p-5 bg-purple-900/30 rounded-xl border-2 border-purple-500/50 shadow-sm">
+            <div className="p-5 bg-gold-900/30 rounded-xl border-2 border-gold-500/50 shadow-sm">
               <label htmlFor="role" className="block text-base font-bold text-white mb-4">
                 Typ konta
               </label>
               <div className="space-y-3">
-                <label className="flex items-center p-4 bg-gray-800 rounded-xl border-2 border-gray-700 hover:border-purple-500 hover:shadow-md cursor-pointer transition-all group">
+                <label className="flex items-center p-4 bg-gray-800 rounded-xl border-2 border-gray-700 hover:border-gold-500 hover:shadow-md cursor-pointer transition-all group">
                   <input
                     {...register('role')}
                     id="role-organizer"
                     type="radio"
                     value="ORGANIZER"
                     disabled={isLoading}
-                    className="mr-4 h-5 w-5 text-purple-600 focus:ring-purple-500 focus:ring-2 disabled:cursor-not-allowed cursor-pointer"
+                    className="mr-4 h-5 w-5 text-gold-600 focus:ring-gold-500 focus:ring-2 disabled:cursor-not-allowed cursor-pointer"
                   />
-                  <span className="font-semibold text-white text-base group-hover:text-purple-300 transition-colors">Organizator kursów</span>
+                  <span className="font-semibold text-white text-base group-hover:text-gold-300 transition-colors">Organizator kursów</span>
                 </label>
-                <label className="flex items-center p-4 bg-gray-800 rounded-xl border-2 border-gray-700 hover:border-purple-500 hover:shadow-md cursor-pointer transition-all group">
+                <label className="flex items-center p-4 bg-gray-800 rounded-xl border-2 border-gray-700 hover:border-gold-500 hover:shadow-md cursor-pointer transition-all group">
                   <input
                     {...register('role')}
                     id="role-participant"
                     type="radio"
                     value="PARTICIPANT"
                     disabled={isLoading}
-                    className="mr-4 h-5 w-5 text-purple-600 focus:ring-purple-500 focus:ring-2 disabled:cursor-not-allowed cursor-pointer"
+                    className="mr-4 h-5 w-5 text-gold-600 focus:ring-gold-500 focus:ring-2 disabled:cursor-not-allowed cursor-pointer"
                   />
-                  <span className="font-semibold text-white text-base group-hover:text-purple-300 transition-colors">Uczestnik</span>
+                  <span className="font-semibold text-white text-base group-hover:text-gold-300 transition-colors">Uczestnik</span>
                 </label>
               </div>
             </div>
 
             {selectedRole === 'PARTICIPANT' && (
-              <div className="p-4 bg-purple-900/30 rounded-lg border border-purple-500/50 animate-fade-in">
+              <div className="p-4 bg-gold-900/30 rounded-lg border border-gold-500/50 animate-fade-in">
                 <label className="flex items-center cursor-pointer">
                   <input
                     {...register('hasBurEntry')}
                     id="hasBurEntry"
                     type="checkbox"
                     disabled={isLoading}
-                    className="mr-3 h-5 w-5 text-purple-600 focus:ring-purple-500 rounded disabled:cursor-not-allowed"
+                    className="mr-3 h-5 w-5 text-gold-600 focus:ring-gold-500 rounded disabled:cursor-not-allowed"
                   />
                   <span className="text-sm text-white flex items-center font-medium">
-                    <CheckSquare className="h-4 w-4 mr-2 text-purple-300" />
+                    <CheckSquare className="h-4 w-4 mr-2 text-gold-300" />
                     Mam wpis w BUR (uprawnia do przesyłania dokumentów)
                   </span>
                 </label>
@@ -253,7 +253,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-semibold text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover-lift"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-semibold text-black bg-gold-600 hover:bg-gold-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover-lift"
             >
               {isLoading ? (
                 <span className="flex items-center">

@@ -18,13 +18,16 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: #030712;
+  background: #050711;
   background: linear-gradient(
-      to bottom,
-      #030712,
-      #111827,
-      #1f2937
+      135deg,
+      #050711 0%,
+      #0a0e27 25%,
+      #2d1045 50%,
+      #1a0d2e 75%,
+      #050711 100%
     );
+  background-attachment: fixed;
 }
 
 @layer utilities {
@@ -130,14 +133,16 @@ body {
 
 @keyframes glow {
   0%, 100% {
-    text-shadow: 0 0 10px rgba(168, 85, 247, 0.5),
-                 0 0 20px rgba(168, 85, 247, 0.3),
-                 0 0 30px rgba(168, 85, 247, 0.2);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6),
+                 0 0 20px rgba(255, 215, 0, 0.4),
+                 0 0 30px rgba(255, 215, 0, 0.3),
+                 0 0 40px rgba(184, 134, 11, 0.2);
   }
   50% {
-    text-shadow: 0 0 20px rgba(168, 85, 247, 0.8),
-                 0 0 30px rgba(168, 85, 247, 0.6),
-                 0 0 40px rgba(168, 85, 247, 0.4);
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.9),
+                 0 0 30px rgba(255, 215, 0, 0.7),
+                 0 0 40px rgba(255, 215, 0, 0.5),
+                 0 0 50px rgba(184, 134, 11, 0.4);
   }
 }
 
@@ -441,19 +446,21 @@ body {
 .animate-gradient-text {
   background: linear-gradient(
     135deg,
-    #fef08a 0%,
-    #fde047 25%,
-    #facc15 50%,
-    #eab308 75%,
-    #fde047 100%
+    #ffd700 0%,
+    #ffed4e 15%,
+    #ffd700 30%,
+    #f4a460 50%,
+    #daa520 70%,
+    #ffd700 85%,
+    #ffed4e 100%
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: gradientShift 4s ease infinite;
-  filter: drop-shadow(0 0 1px rgba(254, 240, 138, 0.9));
-  -webkit-text-stroke: 0.5px rgba(250, 204, 21, 0.5);
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 6px rgba(184, 134, 11, 0.5));
+  -webkit-text-stroke: 0.5px rgba(255, 215, 0, 0.3);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -558,19 +565,21 @@ body {
 }
 
 .animate-shimmer-text {
-  background: linear-gradient(90deg, #fff 0%, #f0f9ff 50%, #fff 100%);
+  background: linear-gradient(90deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: shimmerText 3s linear infinite;
+  filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));
 }
 
 /* Tło jednolite w kolorze fioletowym z czarnym */
 .hero-background {
-  background: linear-gradient(135deg, #1f2937 0%, #4b5563 30%, #7e22ce 70%, #9333ea 100%);
+  background: linear-gradient(135deg, #050711 0%, #0a0e27 20%, #2d1045 40%, #4a148c 60%, #1a0d2e 80%, #050711 100%);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  min-height: 100vh;
 }
 
 /* Animowane kółka w tle */
@@ -581,7 +590,7 @@ body {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.08) 1px, transparent 1px);
   background-size: 50px 50px;
   animation: backgroundMove 20s linear infinite;
   z-index: 1;
@@ -614,10 +623,11 @@ body {
 
 /* Glassmorphism effect */
 .glass {
-  background: rgba(31, 41, 55, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(147, 51, 234, 0.3);
+  background: rgba(10, 14, 39, 0.85);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 215, 0, 0.1);
   position: relative;
   z-index: 10;
 }
@@ -645,26 +655,27 @@ body {
 
 .hover-lift:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2), 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #9333ea 100%);
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 25%, #daa520 50%, #f4a460 75%, #ffd700 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));
 }
 
-/* Gradient text for EU Academy (blue and yellow - EU colors) */
+/* Gradient text for EU Academy (luxury gold) */
 .gradient-text-eu {
-  background: linear-gradient(135deg, #003399 0%, #0066cc 25%, #ffcc00 50%, #ffd700 75%, #0066cc 100%); /* EU colors: blue and gold */
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 20%, #daa520 40%, #ffd700 60%, #f4a460 80%, #ffd700 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   background-size: 200% auto;
   animation: gradientShift 3s ease infinite;
-  filter: drop-shadow(0 0 2px rgba(0, 102, 204, 0.5));
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 6px rgba(184, 134, 11, 0.4));
   font-weight: 700;
 }
 
@@ -672,9 +683,9 @@ body {
 .shimmer {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.2) 50%,
-    rgba(255, 255, 255, 0) 100%
+    rgba(255, 215, 0, 0) 0%,
+    rgba(255, 215, 0, 0.3) 50%,
+    rgba(255, 215, 0, 0) 100%
   );
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;

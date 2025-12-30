@@ -72,8 +72,8 @@ export default function LoginPage() {
         <div className="glass rounded-2xl shadow-2xl p-6 sm:p-8 relative z-20">
           <div className="text-center mb-6 sm:mb-8">
             <div className="flex justify-center mb-3 sm:mb-4">
-              <div className="bg-purple-900/50 p-3 sm:p-4 rounded-full animate-float border border-purple-500/30">
-                <LogIn className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400" />
+              <div className="bg-gold-900/40 p-3 sm:p-4 rounded-full animate-float border border-gold-500/40">
+                <LogIn className="h-6 w-6 sm:h-8 sm:w-8 text-gold-400" />
               </div>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
@@ -83,7 +83,7 @@ export default function LoginPage() {
               Lub{' '}
               <Link
                 href="/register"
-                className="font-semibold text-purple-300 hover:text-purple-200 transition-colors"
+                className="font-semibold text-gold-300 hover:text-gold-200 transition-colors"
               >
                 utwórz nowe konto
               </Link>
@@ -109,7 +109,7 @@ export default function LoginPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-purple-400" />
+                  <Mail className="h-5 w-5 text-gold-400" />
                 </div>
                 <input
                   {...register('email')}
@@ -119,7 +119,7 @@ export default function LoginPage() {
                   autoComplete="email"
                   disabled={isLoading}
                   readOnly={false}
-                  className="appearance-none block w-full pl-10 pr-3 py-3 border-2 border-gray-700 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all bg-gray-800 text-white font-medium disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500 relative z-10"
+                  className="appearance-none block w-full pl-10 pr-3 py-3 border-2 border-gray-700 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all bg-gray-800 text-white font-medium disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500 relative z-10"
                   placeholder="twoj@email.pl"
                 />
               </div>
@@ -134,7 +134,7 @@ export default function LoginPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-purple-400" />
+                  <Lock className="h-5 w-5 text-gold-400" />
                 </div>
                 <input
                   {...register('password')}
@@ -144,7 +144,7 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   disabled={isLoading}
                   readOnly={false}
-                  className="appearance-none block w-full pl-10 pr-3 py-3 border-2 border-gray-700 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all bg-gray-800 text-white font-medium disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500 relative z-10"
+                  className="appearance-none block w-full pl-10 pr-3 py-3 border-2 border-gray-700 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all bg-gray-800 text-white font-medium disabled:bg-gray-900 disabled:cursor-not-allowed disabled:text-gray-500 relative z-10"
                   placeholder="••••••••"
                 />
               </div>
@@ -158,7 +158,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover-lift"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-semibold text-black bg-gold-600 hover:bg-gold-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover-lift"
             >
               {isLoading ? (
                 <span className="flex items-center">

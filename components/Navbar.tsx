@@ -10,11 +10,11 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <nav className="glass border-b border-purple-500/30 sticky top-0 z-50 backdrop-blur-md bg-gray-900/95">
+    <nav className="glass border-b border-gold-500/40 sticky top-0 z-50 backdrop-blur-md bg-luxury-navy/98">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 gap-4">
-          <Link href="/" className="flex items-center gap-2 xl:gap-3 text-purple-400 hover:text-purple-300 transition-all group flex-shrink-0">
-            <div className="bg-purple-900/50 p-2 rounded-lg group-hover:bg-purple-800/80 transition-all duration-200 border border-purple-500/30 flex items-center justify-center shadow-sm">
+          <Link href="/" className="flex items-center gap-2 xl:gap-3 text-gold-400 hover:text-gold-300 transition-all group flex-shrink-0">
+            <div className="bg-gold-900/40 p-2 rounded-lg group-hover:bg-gold-800/60 transition-all duration-200 border border-gold-500/40 flex items-center justify-center shadow-sm">
               <svg 
                 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin-slow group-hover:scale-110 transition-transform"
                 viewBox="0 0 24 24" 
@@ -41,14 +41,14 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-2 xl:gap-3">
             <Link
               href="/"
-              className="text-gray-200 hover:text-purple-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
+              className="text-gray-200 hover:text-gold-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
             >
               <Home className="h-4 w-4 flex-shrink-0" />
               <span className="whitespace-nowrap">Strona główna</span>
             </Link>
             <Link
               href="/mapa"
-              className="text-gray-200 hover:text-purple-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
+              className="text-gray-200 hover:text-gold-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
             >
               <Globe className="h-4 w-4 flex-shrink-0" />
               <span className="whitespace-nowrap">Mapa</span>
@@ -56,28 +56,28 @@ export default function Navbar() {
 
             {status === 'loading' ? (
               <div className="text-gray-200 flex items-center px-3 xl:px-4 py-2">
-                <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500 mr-2"></span>
+                <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-gold-500 mr-2"></span>
                 <span className="hidden xl:inline whitespace-nowrap">Ładowanie...</span>
               </div>
             ) : session ? (
               <>
                 <Link
                   href="/dashboard"
-                  className="text-gray-200 hover:text-purple-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
+                  className="text-gray-200 hover:text-gold-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
                 >
                   <User className="h-4 w-4 flex-shrink-0" />
                   <span className="whitespace-nowrap">Panel</span>
                 </Link>
                 <Link
                   href="/dashboard/course-files"
-                  className="text-gray-200 hover:text-purple-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
+                  className="text-gray-200 hover:text-gold-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
                 >
                   <FileText className="h-4 w-4 flex-shrink-0" />
                   <span className="whitespace-nowrap">Pliki z kursów</span>
                 </Link>
                 <Link
                   href="/dashboard/subscription"
-                  className="text-gray-200 hover:text-purple-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
+                  className="text-gray-200 hover:text-gold-300 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800/80 transition-all duration-200"
                 >
                   <CreditCard className="h-4 w-4 flex-shrink-0" />
                   <span className="whitespace-nowrap">Subskrypcja</span>
@@ -101,7 +101,7 @@ export default function Navbar() {
                     session.user.role === 'ADMIN' 
                       ? 'bg-red-600' 
                       : session.user.role === 'ORGANIZER' 
-                        ? 'bg-purple-600' 
+                        ? 'bg-gold-600' 
                         : 'bg-blue-600'
                   }`}>
                     {session.user.role === 'ADMIN' 
@@ -127,13 +127,13 @@ export default function Navbar() {
               <>
                 <Link
                   href="/register"
-                  className="bg-purple-600 text-white hover:bg-purple-700 px-4 xl:px-6 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg hover:shadow-purple-500/20 transition-all duration-200 whitespace-nowrap"
+                  className="bg-gold-600 text-black hover:bg-gold-500 px-4 xl:px-6 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg hover:shadow-gold-500/40 transition-all duration-200 whitespace-nowrap"
                 >
                   <span>Rejestracja</span>
                 </Link>
                 <Link
                   href="/login"
-                  className="bg-gray-700 text-white hover:bg-gray-600 px-4 xl:px-6 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg hover:shadow-gray-500/20 transition-all duration-200 border border-purple-500/50 whitespace-nowrap"
+                  className="bg-gray-700 text-white hover:bg-gray-600 px-4 xl:px-6 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg hover:shadow-gray-500/20 transition-all duration-200 border border-gold-500/50 whitespace-nowrap"
                 >
                   <LogIn className="h-4 w-4 flex-shrink-0" />
                   <span className="hidden xl:inline">Zaloguj się</span>
@@ -146,7 +146,7 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden text-gray-200 hover:text-purple-300 p-2 rounded-lg hover:bg-gray-800/80 transition-all duration-200 flex items-center justify-center"
+            className="lg:hidden text-gray-200 hover:text-gold-300 p-2 rounded-lg hover:bg-gray-800/80 transition-all duration-200 flex items-center justify-center"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? (
@@ -159,7 +159,7 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-purple-500/30 pt-4 pb-4 animate-slide-down">
+          <div className="lg:hidden border-t border-gold-500/40 pt-4 pb-4 animate-slide-down">
             <div className="flex flex-col gap-2">
               <Link
                 href="/"
@@ -180,7 +180,7 @@ export default function Navbar() {
 
               {status === 'loading' ? (
                 <div className="text-gray-200 flex items-center px-4 py-3">
-                  <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500 mr-2"></span>
+                  <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-gold-500 mr-2"></span>
                   Ładowanie...
                 </div>
               ) : session ? (

@@ -44,15 +44,25 @@ export default function GlobeBackground() {
 
   return (
     <div 
-      className="absolute inset-0 pointer-events-none"
+      className="absolute pointer-events-none"
       style={{
         zIndex: 1,
         opacity: 0.25,
+        top: 0,
+        left: 0,
         width: '100%',
         height: '100%',
+        minHeight: '100vh',
+        overflow: 'visible',
       }}
     >
-      <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <div style={{ 
+        width: '100%', 
+        height: '100%', 
+        minHeight: '100vh',
+        position: 'relative',
+        overflow: 'visible',
+      }}>
         <GlobeComponent
           ref={globeRef}
           globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
