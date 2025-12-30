@@ -71,8 +71,8 @@ export default function MapPage() {
   const points = VOIVODESHIPS.map((voivodeship) => ({
     lat: voivodeship.lat,
     lng: voivodeship.lng,
-    size: selectedVoivodeship === voivodeship.name ? 1.2 : 0.8,
-    color: selectedVoivodeship === voivodeship.name ? '#a855f7' : '#8b5cf6',
+    size: selectedVoivodeship === voivodeship.name ? 1.5 : 1.0,
+    color: selectedVoivodeship === voivodeship.name ? '#a855f7' : '#9333ea',
     voivodeship: voivodeship.name,
     label: voivodeship.name,
   }))
@@ -120,21 +120,6 @@ export default function MapPage() {
     }
   }
 
-  const handleVoivodeshipSelect = (voivodeship: string) => {
-    setSelectedVoivodeship(voivodeship)
-    // Przesuń glob do wybranego województwa
-    if (globeRef.current) {
-      const voivodeshipData = VOIVODESHIPS.find((v) => v.name === voivodeship)
-      if (voivodeshipData) {
-        globeRef.current.pointOfView({
-          lat: voivodeshipData.lat,
-          lng: voivodeshipData.lng,
-          altitude: 2,
-        }, 1000)
-      }
-    }
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
       {/* Hero Section */}
@@ -147,7 +132,7 @@ export default function MapPage() {
                 <span>Mapa Kursów</span>
               </h1>
               <p className="text-base sm:text-lg text-white drop-shadow-md">
-                Wybierz województwo, aby zobaczyć dostępne kursy w Twojej okolicy
+                Kliknij na fioletowy punkt na kuli ziemskiej, aby zobaczyć dostępne kursy w danym województwie
               </p>
             </div>
           </div>
@@ -156,9 +141,9 @@ export default function MapPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* Lewa kolumna - Glob */}
+          {/* Glob - zajmuje 2/3 szerokości */}
           <div className="lg:col-span-2">
-            <div className="glass rounded-2xl p-4 sm:p-6 border border-purple-500/30 h-[500px] sm:h-[600px] relative">
+            <div className="glass rounded-2xl p-4 sm:p-6 border border-purple-500/30 h-[600px] sm:h-[700px] lg:h-[800px] relative">
               <GlobeComponent
                 ref={globeRef}
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
@@ -166,7 +151,7 @@ export default function MapPage() {
                 pointsData={points}
                 pointColor="color"
                 pointRadius="size"
-                pointLabel={(d: any) => d.voivodeship}
+                pointLabel={(d: any) => `${d.voivodeship}\n(Kliknij, aby zobaczyć kursy)`}
                 onPointClick={handlePointClick}
                 onGlobeReady={() => {
                   setGlobeReady(true)
@@ -175,12 +160,12 @@ export default function MapPage() {
                     globeRef.current.pointOfView({
                       lat: 52.0,
                       lng: 19.0,
-                      altitude: 2.5,
+                      altitude: 2.2,
                     }, 0)
                   }
                 }}
-                pointResolution={8}
-                pointAltitude={0.02}
+                pointResolution={12}
+                pointAltitude={0.03}
               />
               {!globeReady && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50 rounded-xl">
@@ -190,43 +175,37 @@ export default function MapPage() {
                   </div>
                 </div>
               )}
+              {/* Instrukcja */}
+              <div className="absolute bottom-4 left-4 right-4 glass rounded-lg p-3 border border-purple-500/30">
+                <p className="text-sm text-white text-center">
+                  <span className="text-purple-300 font-semibold">💡 Wskazówka:</span> Kliknij na fioletowy punkt na globie, aby zobaczyć kursy w danym województwie
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Prawa kolumna - Lista województw i kursy */}
+          {/* Prawa kolumna - Kursy */}
           <div className="space-y-6">
-            {/* Lista województw */}
-            <div className="glass rounded-2xl p-4 sm:p-6 border border-purple-500/30">
-              <h2 className="text-xl font-bold text-white mb-4 flex items-center">
-                <MapPin className="h-5 w-5 mr-2 text-purple-400" />
-                Województwa
-              </h2>
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {VOIVODESHIPS.map((voivodeship) => (
-                  <button
-                    key={voivodeship.name}
-                    onClick={() => handleVoivodeshipSelect(voivodeship.name)}
-                    className={`w-full text-left px-4 py-2 rounded-lg transition-all ${
-                      selectedVoivodeship === voivodeship.name
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-gray-800/50 text-gray-200 hover:bg-gray-700'
-                    }`}
-                  >
-                    {voivodeship.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Wybrane województwo i kursy */}
-            {selectedVoivodeship && (
+            {selectedVoivodeship ? (
               <div className="glass rounded-2xl p-4 sm:p-6 border border-purple-500/30">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-white">
+                  <h2 className="text-xl font-bold text-white flex items-center">
+                    <MapPin className="h-5 w-5 mr-2 text-purple-400" />
                     {selectedVoivodeship}
                   </h2>
                   <button
-                    onClick={() => setSelectedVoivodeship(null)}
+                    onClick={() => {
+                      setSelectedVoivodeship(null)
+                      setCourses([])
+                      // Przywróć widok na całą Polskę
+                      if (globeRef.current) {
+                        globeRef.current.pointOfView({
+                          lat: 52.0,
+                          lng: 19.0,
+                          altitude: 2.2,
+                        }, 1000)
+                      }
+                    }}
                     className="text-gray-400 hover:text-white transition-colors"
                   >
                     <X className="h-5 w-5" />
@@ -244,7 +223,7 @@ export default function MapPage() {
                     <p className="text-gray-300">Brak kursów w tym województwie</p>
                   </div>
                 ) : (
-                  <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                  <div className="space-y-4 max-h-[600px] overflow-y-auto">
                     {courses.map((course) => (
                       <Link
                         key={course.id}
@@ -280,6 +259,14 @@ export default function MapPage() {
                   </div>
                 )}
               </div>
+            ) : (
+              <div className="glass rounded-2xl p-6 border border-purple-500/30 text-center">
+                <Globe className="h-16 w-16 text-purple-400 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">Wybierz województwo</h3>
+                <p className="text-gray-300">
+                  Kliknij na fioletowy punkt na globie, aby zobaczyć dostępne kursy w danym województwie
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -287,4 +274,3 @@ export default function MapPage() {
     </div>
   )
 }
-
