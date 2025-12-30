@@ -130,21 +130,21 @@ export default function MapPage() {
       </div>
 
       {/* Hero Section */}
-      <div className="relative z-10 pt-8 pb-6">
+      <div className="relative z-10 pt-6 pb-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 animate-fade-in-scale">
-            <div className="glass rounded-2xl p-6 sm:p-8 shadow-xl border-orange-500/30" style={{
+          <div className="mb-4 animate-fade-in-scale">
+            <div className="glass rounded-2xl p-4 sm:p-6 shadow-xl border-orange-500/30" style={{
               background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(31, 41, 55, 0.95) 100%)',
               borderColor: 'rgba(255, 107, 53, 0.3)',
               boxShadow: '0 0 30px rgba(255, 107, 53, 0.2), 0 0 60px rgba(0, 217, 255, 0.1)'
             }}>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3 drop-shadow-lg flex items-center justify-center space-x-3">
-                <Globe className="h-8 w-8 sm:h-10 sm:w-10" style={{ color: '#FF6B35', filter: 'drop-shadow(0 0 10px rgba(255, 107, 53, 0.8))' }} />
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg flex items-center justify-center space-x-2 sm:space-x-3">
+                <Globe className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: '#FF6B35', filter: 'drop-shadow(0 0 10px rgba(255, 107, 53, 0.8))' }} />
                 <span className="bg-gradient-to-r from-orange-400 via-yellow-400 to-cyan-400 bg-clip-text text-transparent">
                   Mapa Kursów
                 </span>
               </h1>
-              <p className="text-base sm:text-lg text-gray-300 drop-shadow-md text-center">
+              <p className="text-sm sm:text-base text-gray-300 drop-shadow-md text-center">
                 Kliknij na punkt na kuli ziemskiej, aby zobaczyć dostępne kursy w danym województwie
               </p>
             </div>
@@ -153,7 +153,7 @@ export default function MapPage() {
       </div>
 
       {/* Centered Globe */}
-      <div className="relative z-10 flex items-center justify-center px-4 sm:px-6 lg:px-8 pb-12 min-h-[calc(100vh-250px)]">
+      <div className="relative z-10 flex items-center justify-center px-4 sm:px-6 lg:px-8 pb-12 mt-4">
         <div 
           className="rounded-2xl relative mx-auto flex items-center justify-center"
           data-globe-container
@@ -163,8 +163,8 @@ export default function MapPage() {
             boxShadow: '0 0 40px rgba(255, 107, 53, 0.3), 0 0 80px rgba(0, 217, 255, 0.2), inset 0 0 60px rgba(0, 0, 0, 0.5)',
             width: '90vw',
             maxWidth: '1200px',
-            height: 'calc(100vh - 250px)',
-            minHeight: '600px'
+            height: 'calc(100vh - 280px)',
+            minHeight: '500px'
           }}
         >
           <GlobeComponent
