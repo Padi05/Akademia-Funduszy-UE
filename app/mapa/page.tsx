@@ -67,11 +67,11 @@ export default function MapPage() {
   const [globeReady, setGlobeReady] = useState(false)
   const globeRef = useRef<any>(null)
 
-  // Przygotuj punkty na globie dla województw z większymi rozmiarami dla lepszej interakcji
+  // Przygotuj punkty na globie dla województw z mniejszymi rozmiarami dla lepszej widoczności
   const points = VOIVODESHIPS.map((voivodeship) => ({
     lat: voivodeship.lat,
     lng: voivodeship.lng,
-    size: selectedVoivodeship === voivodeship.name ? 1.8 : 1.2,
+    size: selectedVoivodeship === voivodeship.name ? 0.8 : 0.5,
     color: selectedVoivodeship === voivodeship.name ? '#00D9FF' : '#FF6B35',
     voivodeship: voivodeship.name,
     label: voivodeship.name,
@@ -153,20 +153,21 @@ export default function MapPage() {
       </div>
 
       {/* Centered Globe */}
-      <div className="relative z-10 flex items-center justify-center px-4 sm:px-6 lg:px-8 pb-12">
-        <div className="w-full max-w-6xl">
-          <div 
-            className="rounded-2xl p-4 sm:p-6 relative"
-            data-globe-container
-            style={{
-              background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(31, 41, 55, 0.9) 100%)',
-              border: '2px solid rgba(255, 107, 53, 0.4)',
-              boxShadow: '0 0 40px rgba(255, 107, 53, 0.3), 0 0 80px rgba(0, 217, 255, 0.2), inset 0 0 60px rgba(0, 0, 0, 0.5)',
-              height: 'calc(100vh - 250px)',
-              minHeight: '600px'
-            }}
-          >
-            <GlobeComponent
+      <div className="relative z-10 flex items-center justify-center px-4 sm:px-6 lg:px-8 pb-12 min-h-[calc(100vh-250px)]">
+        <div 
+          className="rounded-2xl relative mx-auto flex items-center justify-center"
+          data-globe-container
+          style={{
+            background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(31, 41, 55, 0.9) 100%)',
+            border: '2px solid rgba(255, 107, 53, 0.4)',
+            boxShadow: '0 0 40px rgba(255, 107, 53, 0.3), 0 0 80px rgba(0, 217, 255, 0.2), inset 0 0 60px rgba(0, 0, 0, 0.5)',
+            width: '90vw',
+            maxWidth: '1200px',
+            height: 'calc(100vh - 250px)',
+            minHeight: '600px'
+          }}
+        >
+          <GlobeComponent
               ref={globeRef}
               globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
               backgroundColor="rgba(0, 0, 0, 0)"
@@ -189,12 +190,12 @@ export default function MapPage() {
                   }, 0)
                 }
               }}
-              pointResolution={12}
-              pointAltitude={0.03}
+              pointResolution={16}
+              pointAltitude={0.05}
               showGlobe={true}
               showGraticules={true}
             />
-            {!globeReady && (
+          {!globeReady && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
                 <div className="text-center">
                   <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin" style={{ color: '#FF6B35' }} />
