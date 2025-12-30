@@ -191,14 +191,9 @@ export default function MapPage() {
               }}
               pointResolution={12}
               pointAltitude={0.03}
-              pointLabelSize={2.5}
-              pointLabelColor={() => '#FFFFFF'}
-              pointLabelDotRadius={0}
-              pointLabelDotOrientation={() => 'bottom'}
               showGlobe={true}
               showGraticules={true}
               graticuleColor="rgba(255, 107, 53, 0.5)"
-              htmlElementsData={[]}
             />
             {!globeReady && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
