@@ -67,12 +67,12 @@ export default function MapPage() {
   const [globeReady, setGlobeReady] = useState(false)
   const globeRef = useRef<any>(null)
 
-  // Przygotuj punkty na globie dla województw z mniejszymi rozmiarami dla lepszej widoczności
+  // Przygotuj punkty na globie dla województw
   const points = VOIVODESHIPS.map((voivodeship) => ({
     lat: voivodeship.lat,
     lng: voivodeship.lng,
-    size: selectedVoivodeship === voivodeship.name ? 0.8 : 0.5,
-    color: selectedVoivodeship === voivodeship.name ? '#00D9FF' : '#FF6B35',
+    size: selectedVoivodeship === voivodeship.name ? 1.0 : 0.6,
+    color: selectedVoivodeship === voivodeship.name ? '#60a5fa' : '#a78bfa',
     voivodeship: voivodeship.name,
     label: voivodeship.name,
   }))
@@ -122,205 +122,184 @@ export default function MapPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-black to-gray-950 relative overflow-hidden">
-      {/* Iron Man style background effects */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
       </div>
 
-      {/* Hero Section */}
-      <div className="relative z-10 pt-6 pb-4">
+      {/* Header */}
+      <div className="relative z-10 pt-8 pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-4 animate-fade-in-scale">
-            <div className="glass rounded-2xl p-4 sm:p-6 shadow-xl border-orange-500/30" style={{
-              background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(31, 41, 55, 0.95) 100%)',
-              borderColor: 'rgba(255, 107, 53, 0.3)',
-              boxShadow: '0 0 30px rgba(255, 107, 53, 0.2), 0 0 60px rgba(0, 217, 255, 0.1)'
-            }}>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg flex items-center justify-center space-x-2 sm:space-x-3">
-                <Globe className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: '#FF6B35', filter: 'drop-shadow(0 0 10px rgba(255, 107, 53, 0.8))' }} />
-                <span className="bg-gradient-to-r from-orange-400 via-yellow-400 to-cyan-400 bg-clip-text text-transparent">
-                  Mapa Kursów
-                </span>
-              </h1>
-              <p className="text-sm sm:text-base text-gray-300 drop-shadow-md text-center">
-                Kliknij na punkt na kuli ziemskiej, aby zobaczyć dostępne kursy w danym województwie
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Centered Globe */}
-      <div className="relative z-10 flex items-center justify-center px-4 sm:px-6 lg:px-8 pb-12 mt-4">
-        <div 
-          className="rounded-2xl relative mx-auto flex items-center justify-center"
-          data-globe-container
-          style={{
-            background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(31, 41, 55, 0.9) 100%)',
-            border: '2px solid rgba(255, 107, 53, 0.4)',
-            boxShadow: '0 0 40px rgba(255, 107, 53, 0.3), 0 0 80px rgba(0, 217, 255, 0.2), inset 0 0 60px rgba(0, 0, 0, 0.5)',
-            width: '90vw',
-            maxWidth: '1200px',
-            height: 'calc(100vh - 280px)',
-            minHeight: '500px'
-          }}
-        >
-          <GlobeComponent
-            ref={globeRef}
-            globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-            backgroundColor="rgba(0, 0, 0, 0)"
-            showAtmosphere={true}
-            atmosphereColor="#00D9FF"
-            atmosphereAltitude={0.25}
-            pointsData={points}
-            pointColor="color"
-            pointRadius="size"
-            pointLabel={(d: any) => `${d.voivodeship}\n(Kliknij, aby zobaczyć kursy)`}
-            onPointClick={handlePointClick}
-            onGlobeReady={() => {
-              setGlobeReady(true)
-              // Ustaw początkowy widok na Polskę
-              if (globeRef.current) {
-                globeRef.current.pointOfView({
-                  lat: 52.0,
-                  lng: 19.0,
-                  altitude: 2.2,
-                }, 0)
-              }
-            }}
-            pointResolution={12}
-            pointAltitude={0.03}
-            showGlobe={true}
-            showGraticules={true}
-          />
-          {!globeReady && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
-              <div className="text-center">
-                <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin" style={{ color: '#FF6B35' }} />
-                <p className="text-gray-300">Ładowanie globu...</p>
-              </div>
-            </div>
-          )}
-          {/* Instrukcja */}
-          <div 
-            className="absolute bottom-4 left-4 right-4 rounded-lg p-3"
-            style={{
-              background: 'rgba(0, 0, 0, 0.8)',
-              border: '1px solid rgba(255, 107, 53, 0.4)',
-              boxShadow: '0 0 20px rgba(255, 107, 53, 0.3)'
-            }}
-          >
-            <p className="text-sm text-white text-center">
-              <span className="font-semibold" style={{ color: '#FFD700' }}>💡 Wskazówka:</span>{' '}
-              <span>Kliknij na punkt na globie, aby zobaczyć kursy w danym województwie</span>
+          <div className="text-center mb-6">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 flex items-center justify-center space-x-3">
+              <Globe className="h-8 w-8 sm:h-10 sm:w-10 text-blue-400" />
+              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-blue-600 bg-clip-text text-transparent">
+                Mapa Kursów
+              </span>
+            </h1>
+            <p className="text-gray-300 text-lg">
+              Kliknij na punkt na globie, aby zobaczyć dostępne kursy w danym województwie
             </p>
           </div>
         </div>
       </div>
 
-      {/* Courses Modal/Overlay - appears when a voivodeship is selected */}
-      {selectedVoivodeship && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div 
-            className="rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col"
-            style={{
-              background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(31, 41, 55, 0.98) 100%)',
-              border: '2px solid rgba(255, 107, 53, 0.5)',
-              boxShadow: '0 0 40px rgba(255, 107, 53, 0.4), 0 0 80px rgba(0, 217, 255, 0.3)'
-            }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-white flex items-center">
-                <MapPin className="h-6 w-6 mr-2" style={{ color: '#FF6B35' }} />
-                <span className="bg-gradient-to-r from-orange-400 to-cyan-400 bg-clip-text text-transparent">
-                  {selectedVoivodeship}
-                </span>
-              </h2>
-              <button
-                onClick={() => {
-                  setSelectedVoivodeship(null)
-                  setCourses([])
+      {/* Main Content - Globe and Sidebar */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Globe - Left Side */}
+          <div className="lg:col-span-2">
+            <div 
+              className="rounded-xl relative overflow-hidden"
+              data-globe-container
+              style={{
+                background: 'rgba(15, 23, 42, 0.8)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                height: 'calc(100vh - 280px)',
+                minHeight: '600px'
+              }}
+            >
+              <GlobeComponent
+                ref={globeRef}
+                globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+                backgroundColor="rgba(0, 0, 0, 0)"
+                showAtmosphere={false}
+                pointsData={points}
+                pointColor="color"
+                pointRadius="size"
+                pointLabel={(d: any) => `${d.voivodeship}`}
+                onPointClick={handlePointClick}
+                onGlobeReady={() => {
+                  setGlobeReady(true)
                   if (globeRef.current) {
                     globeRef.current.pointOfView({
                       lat: 52.0,
                       lng: 19.0,
-                      altitude: 2.2,
-                    }, 1000)
+                      altitude: 2.5,
+                    }, 0)
                   }
                 }}
-                className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
-              >
-                <X className="h-6 w-6" />
-              </button>
+                pointResolution={12}
+                pointAltitude={0.02}
+                showGlobe={true}
+                showGraticules={false}
+              />
+              {!globeReady && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 rounded-xl">
+                  <div className="text-center">
+                    <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin text-blue-400" />
+                    <p className="text-gray-300">Ładowanie globu...</p>
+                  </div>
+                </div>
+              )}
             </div>
+          </div>
 
-            {isLoading ? (
-              <div className="text-center py-12 flex-1 flex items-center justify-center">
-                <div>
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#FF6B35' }}></div>
-                  <p className="text-gray-300">Ładowanie kursów...</p>
-                </div>
-              </div>
-            ) : courses.length === 0 ? (
-              <div className="text-center py-12 flex-1 flex items-center justify-center">
-                <div>
-                  <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-300">Brak kursów w tym województwie</p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4 overflow-y-auto flex-1 pr-2">
-                {courses.map((course) => (
-                  <Link
-                    key={course.id}
-                    href={`/courses/${course.id}`}
-                    className="block p-4 rounded-lg border transition-all hover:scale-105"
-                    style={{
-                      background: 'rgba(31, 41, 55, 0.6)',
-                      borderColor: 'rgba(255, 107, 53, 0.3)',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(255, 107, 53, 0.8)'
-                      e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 107, 53, 0.4)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(255, 107, 53, 0.3)'
-                      e.currentTarget.style.boxShadow = 'none'
-                    }}
-                  >
-                    <h3 className="text-white font-semibold mb-2 line-clamp-2 text-lg">
-                      {course.title}
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      {course.city && (
-                        <div className="flex items-center text-gray-300">
-                          <MapPin className="h-4 w-4 mr-2" style={{ color: '#FF6B35' }} />
-                          {course.city}
-                        </div>
-                      )}
-                      <div className="flex items-center text-gray-300">
-                        <Calendar className="h-4 w-4 mr-2" style={{ color: '#FFD700' }} />
-                        {format(new Date(course.startDate), 'dd MMMM yyyy', { locale: pl })}
-                      </div>
-                      {course.averageRating > 0 && (
-                        <div className="flex items-center text-gray-300">
-                          <Star className="h-4 w-4 mr-2 text-yellow-400 fill-yellow-400" />
-                          {course.averageRating.toFixed(1)} ({course.totalReviews} {course.totalReviews === 1 ? 'ocena' : 'ocen'})
-                        </div>
-                      )}
-                      <div className="font-semibold" style={{ color: '#FFD700' }}>
-                        {course.price} zł
-                      </div>
+          {/* Sidebar - Courses List */}
+          <div className="lg:col-span-1">
+            <div 
+              className="rounded-xl p-6 h-full"
+              style={{
+                background: 'rgba(15, 23, 42, 0.9)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                minHeight: '600px'
+              }}
+            >
+              {selectedVoivodeship ? (
+                <>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-white flex items-center">
+                      <MapPin className="h-6 w-6 mr-2 text-blue-400" />
+                      <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        {selectedVoivodeship}
+                      </span>
+                    </h2>
+                    <button
+                      onClick={() => {
+                        setSelectedVoivodeship(null)
+                        setCourses([])
+                        if (globeRef.current) {
+                          globeRef.current.pointOfView({
+                            lat: 52.0,
+                            lng: 19.0,
+                            altitude: 2.5,
+                          }, 1000)
+                        }
+                      }}
+                      className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+
+                  {isLoading ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
+                      <p className="text-gray-300">Ładowanie kursów...</p>
                     </div>
-                  </Link>
-                ))}
-              </div>
-            )}
+                  ) : courses.length === 0 ? (
+                    <div className="text-center py-12">
+                      <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-300">Brak kursów w tym województwie</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 max-h-[calc(100vh-400px)] overflow-y-auto pr-2">
+                      {courses.map((course) => (
+                        <Link
+                          key={course.id}
+                          href={`/courses/${course.id}`}
+                          className="block p-4 rounded-lg border transition-all hover:border-blue-400"
+                          style={{
+                            background: 'rgba(30, 41, 59, 0.6)',
+                            borderColor: 'rgba(59, 130, 246, 0.3)',
+                          }}
+                        >
+                          <h3 className="text-white font-semibold mb-3 line-clamp-2">
+                            {course.title}
+                          </h3>
+                          <div className="space-y-2 text-sm">
+                            {course.city && (
+                              <div className="flex items-center text-gray-300">
+                                <MapPin className="h-4 w-4 mr-2 text-blue-400" />
+                                {course.city}
+                              </div>
+                            )}
+                            <div className="flex items-center text-gray-300">
+                              <Calendar className="h-4 w-4 mr-2 text-purple-400" />
+                              {format(new Date(course.startDate), 'dd MMMM yyyy', { locale: pl })}
+                            </div>
+                            {course.averageRating > 0 && (
+                              <div className="flex items-center text-gray-300">
+                                <Star className="h-4 w-4 mr-2 text-yellow-400 fill-yellow-400" />
+                                {course.averageRating.toFixed(1)} ({course.totalReviews} {course.totalReviews === 1 ? 'ocena' : 'ocen'})
+                              </div>
+                            )}
+                            <div className="font-semibold text-blue-400">
+                              {course.price} zł
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-12">
+                  <Globe className="h-20 w-20 text-blue-400 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-xl font-bold text-white mb-2">Wybierz województwo</h3>
+                  <p className="text-gray-400">
+                    Kliknij na punkt na globie, aby zobaczyć dostępne kursy w danym województwie
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
