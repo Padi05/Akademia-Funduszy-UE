@@ -218,7 +218,6 @@ export default function MapPage() {
             </p>
           </div>
         </div>
-        </div>
       </div>
 
       {/* Courses Modal/Overlay - appears when a voivodeship is selected */}
