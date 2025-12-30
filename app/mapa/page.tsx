@@ -81,21 +81,25 @@ export default function MapPage() {
   const rotationRef = useRef<number>(0)
 
   // Funkcja obliczająca rozmiar punktu na podstawie altitude
-  // Im mniejsze altitude (bliżej), tym mniejszy punkt
+  // Im mniejsze altitude (bliżej/przybliżenie), tym mniejszy punkt
   const calculatePointSize = (baseSize: number, altitude: number) => {
-    // Normalizuj altitude (zakres 0.5-3.0)
-    const normalizedAltitude = Math.max(0.5, Math.min(3.0, altitude))
+    // Normalizuj altitude (zakres 0.5-3.5)
+    const normalizedAltitude = Math.max(0.5, Math.min(3.5, altitude))
     // Odwrotna proporcjonalność: mniejsze altitude = mniejszy punkt
-    // Dla altitude 0.5 (bardzo blisko) -> rozmiar 0.3
-    // Dla altitude 3.0 (daleko) -> rozmiar 1.2
-    const sizeMultiplier = 0.3 + (normalizedAltitude - 0.5) / (3.0 - 0.5) * 0.9
+    // Dla altitude 0.5 (bardzo blisko/przybliżenie) -> rozmiar 0.15
+    // Dla altitude 3.5 (daleko/oddalenie) -> rozmiar 0.6
+    // Większa różnica między min a max dla lepszej widoczności zmian
+    const minSize = 0.15
+    const maxSize = 0.6
+    const sizeMultiplier = minSize + (normalizedAltitude - 0.5) / (3.5 - 0.5) * (maxSize - minSize)
     return baseSize * sizeMultiplier
   }
 
   // Przygotuj punkty na globie dla województw z dynamicznym rozmiarem
   // Użyj useMemo, aby przeliczać tylko gdy zmienia się altitude lub selectedVoivodeship
   const points = useMemo(() => {
-    const baseSize = selectedVoivodeship ? 1.2 : 0.8
+    // Zmniejszone baseSize dla mniejszych znaczników
+    const baseSize = selectedVoivodeship ? 0.5 : 0.4
     return VOIVODESHIPS.map((voivodeship) => ({
       lat: voivodeship.lat,
       lng: voivodeship.lng,
