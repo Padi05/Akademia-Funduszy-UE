@@ -6,6 +6,8 @@ import OrganizerDashboard from '@/components/dashboard/OrganizerDashboard'
 import ParticipantDashboard from '@/components/dashboard/ParticipantDashboard'
 import AdminDashboard from '@/components/dashboard/AdminDashboard'
 
+export const dynamic = 'force-dynamic' // Zawsze pobieraj najnowsze dane
+
 async function getOrganizerData(userId: string) {
   const courses = await prisma.course.findMany({
     where: { organizerId: userId },

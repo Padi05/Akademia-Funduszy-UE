@@ -14,11 +14,10 @@ export async function POST(
   try {
     const session = await getServerSession(authOptions)
 
-    // Tylko ADMIN może publikować kursy
-    if (!session || session.user.role !== 'ADMIN') {
+    if (!session) {
       return NextResponse.json(
-        { error: 'Brak uprawnień. Tylko administrator może publikować kursy.' },
-        { status: 403 }
+        { error: 'Brak autoryzacji' },
+        { status: 401 }
       )
     }
 
@@ -36,7 +35,13 @@ export async function POST(
       )
     }
 
-    // ADMIN może publikować każdy kurs (nie sprawdzamy organizerId)
+    // ADMIN może publikować każdy kurs, organizator tylko swoje kursy
+    if (session.user.role !== 'ADMIN' && course.organizerId !== session.user.id) {
+      return NextResponse.json(
+        { error: 'Brak uprawnień. Możesz publikować tylko swoje kursy.' },
+        { status: 403 }
+      )
+    }
 
     if (!course.isOnlineCourse) {
       return NextResponse.json(

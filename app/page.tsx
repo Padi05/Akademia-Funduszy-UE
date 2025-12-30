@@ -4,7 +4,8 @@ import { format } from 'date-fns'
 import { pl } from 'date-fns/locale/pl'
 import { Calendar, MapPin, Monitor } from 'lucide-react'
 
-export const revalidate = 60 // Revalidate every 60 seconds
+export const dynamic = 'force-dynamic' // Zawsze pobieraj najnowsze dane
+export const revalidate = 0 // Wyłącz cache
 
 async function getCourses() {
   try {

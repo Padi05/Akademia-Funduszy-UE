@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { Globe, MapPin, X, Calendar, Star, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
@@ -66,18 +66,35 @@ export default function MapPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [globeReady, setGlobeReady] = useState(false)
   const [countriesData, setCountriesData] = useState<any[]>([])
+  const [currentAltitude, setCurrentAltitude] = useState<number>(2.5)
   const globeRef = useRef<any>(null)
   const rotationRef = useRef<number>(0)
 
-  // Przygotuj punkty na globie dla województw z animacją pulsowania
-  const points = VOIVODESHIPS.map((voivodeship) => ({
-    lat: voivodeship.lat,
-    lng: voivodeship.lng,
-    size: selectedVoivodeship === voivodeship.name ? 1.2 : 0.8,
-    color: selectedVoivodeship === voivodeship.name ? '#60a5fa' : '#a78bfa',
-    voivodeship: voivodeship.name,
-    label: voivodeship.name,
-  }))
+  // Funkcja obliczająca rozmiar punktu na podstawie altitude
+  // Im mniejsze altitude (bliżej), tym mniejszy punkt
+  const calculatePointSize = (baseSize: number, altitude: number) => {
+    // Normalizuj altitude (zakres 0.5-3.0)
+    const normalizedAltitude = Math.max(0.5, Math.min(3.0, altitude))
+    // Odwrotna proporcjonalność: mniejsze altitude = mniejszy punkt
+    // Dla altitude 0.5 (bardzo blisko) -> rozmiar 0.3
+    // Dla altitude 3.0 (daleko) -> rozmiar 1.2
+    const sizeMultiplier = 0.3 + (normalizedAltitude - 0.5) / (3.0 - 0.5) * 0.9
+    return baseSize * sizeMultiplier
+  }
+
+  // Przygotuj punkty na globie dla województw z dynamicznym rozmiarem
+  // Użyj useMemo, aby przeliczać tylko gdy zmienia się altitude lub selectedVoivodeship
+  const points = useMemo(() => {
+    const baseSize = selectedVoivodeship ? 1.2 : 0.8
+    return VOIVODESHIPS.map((voivodeship) => ({
+      lat: voivodeship.lat,
+      lng: voivodeship.lng,
+      size: calculatePointSize(baseSize, currentAltitude),
+      color: selectedVoivodeship === voivodeship.name ? '#60a5fa' : '#a78bfa',
+      voivodeship: voivodeship.name,
+      label: voivodeship.name,
+    }))
+  }, [currentAltitude, selectedVoivodeship])
 
   useEffect(() => {
     if (selectedVoivodeship) {
@@ -105,6 +122,27 @@ export default function MapPage() {
           .catch(err2 => console.error('Error loading fallback countries:', err2))
       })
   }, [])
+
+  // Śledź zmiany punktu widoku (altitude) dla dynamicznego rozmiaru punktów
+  useEffect(() => {
+    if (!globeReady || !globeRef.current) return
+
+    const checkAltitude = () => {
+      if (globeRef.current) {
+        try {
+          const pov = globeRef.current.pointOfView()
+          if (pov && pov.altitude !== undefined && pov.altitude !== currentAltitude) {
+            setCurrentAltitude(pov.altitude)
+          }
+        } catch (e) {
+          // Ignoruj błędy podczas sprawdzania
+        }
+      }
+    }
+
+    const intervalId = setInterval(checkAltitude, 100) // Sprawdzaj co 100ms
+    return () => clearInterval(intervalId)
+  }, [globeReady, currentAltitude])
 
   // Animacja automatycznego obrotu globusa
   useEffect(() => {
@@ -197,17 +235,43 @@ export default function MapPage() {
               className="rounded-xl relative overflow-hidden"
               data-globe-container
               style={{
-                background: 'linear-gradient(135deg, rgba(200, 220, 255, 0.15) 0%, rgba(150, 180, 220, 0.1) 100%)',
+                background: '#000',
                 border: '1px solid rgba(100, 150, 200, 0.4)',
-                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3), inset 0 0 100px rgba(200, 220, 255, 0.1)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 100px rgba(200, 220, 255, 0.1)',
                 height: 'calc(100vh - 280px)',
                 minHeight: '600px'
               }}
             >
+              {/* Starfield Background */}
+              <div className="starfield">
+                {/* Generate stars */}
+                {Array.from({ length: 200 }).map((_, i) => {
+                  const size = Math.random() < 0.7 ? 'small' : Math.random() < 0.9 ? 'medium' : 'large'
+                  const left = Math.random() * 100
+                  const top = Math.random() * 100
+                  const delay = Math.random() * 3
+                  return (
+                    <div
+                      key={i}
+                      className={`star ${size}`}
+                      style={{
+                        left: `${left}%`,
+                        top: `${top}%`,
+                        animationDelay: `${delay}s`,
+                        animationDuration: `${2 + Math.random() * 2}s`
+                      }}
+                    />
+                  )
+                })}
+                {/* Nebula effects */}
+                <div className="nebula nebula-1" />
+                <div className="nebula nebula-2" />
+                <div className="nebula nebula-3" />
+              </div>
               <GlobeComponent
                 ref={globeRef}
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-                backgroundColor="rgba(200, 220, 255, 0.1)"
+                backgroundColor="rgba(0, 0, 0, 0)"
                 showAtmosphere={true}
                 atmosphereColor="#87ceeb"
                 atmosphereAltitude={0.2}
@@ -220,15 +284,23 @@ export default function MapPage() {
                 onGlobeReady={() => {
                   setGlobeReady(true)
                   if (globeRef.current) {
-                    globeRef.current.pointOfView({
+                    const initialPOV = {
                       lat: 52.0,
                       lng: 19.0,
                       altitude: 2.5,
-                    }, 0)
+                    }
+                    globeRef.current.pointOfView(initialPOV, 0)
+                    setCurrentAltitude(initialPOV.altitude)
                   }
                 }}
-                pointResolution={16}
-                pointAltitude={0.03}
+                onPointOfViewChange={(pov: any) => {
+                  if (pov && pov.altitude !== undefined) {
+                    setCurrentAltitude(pov.altitude)
+                  }
+                }}
+                pointResolution={32}
+                pointAltitude={0.02}
+                pointRadius={(d: any) => d.size || 0.8}
                 showGlobe={true}
                 showGraticules={true}
                 polygonsData={countriesData}
@@ -242,7 +314,7 @@ export default function MapPage() {
                 }}
               />
               {!globeReady && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 rounded-xl">
+                <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-xl z-10">
                   <div className="text-center">
                     <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin text-blue-400" />
                     <p className="text-gray-300">Ładowanie globu...</p>

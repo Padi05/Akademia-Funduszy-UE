@@ -687,6 +687,8 @@ body {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  position: relative;
+  z-index: 1;
 }
 
 [data-globe-container] canvas {
@@ -706,5 +708,114 @@ body {
 
 [data-globe-container] {
   animation: globeGlow 3s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Starfield background */
+.starfield {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 3s infinite;
+}
+
+.star.small {
+  width: 1px;
+  height: 1px;
+  opacity: 0.6;
+}
+
+.star.medium {
+  width: 2px;
+  height: 2px;
+  opacity: 0.8;
+}
+
+.star.large {
+  width: 3px;
+  height: 3px;
+  opacity: 1;
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes starMove {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100vh);
+  }
+}
+
+/* Nebula/galaxy effect */
+.nebula {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.3;
+  animation: nebulaFloat 20s ease-in-out infinite;
+}
+
+.nebula-1 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(138, 43, 226, 0.4), rgba(0, 0, 0, 0));
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.nebula-2 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(0, 191, 255, 0.3), rgba(0, 0, 0, 0));
+  bottom: 15%;
+  right: 15%;
+  animation-delay: 5s;
+}
+
+.nebula-3 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(75, 0, 130, 0.35), rgba(0, 0, 0, 0));
+  top: 50%;
+  right: 20%;
+  animation-delay: 10s;
+}
+
+@keyframes nebulaFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.2;
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+    opacity: 0.35;
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+    opacity: 0.3;
+  }
 }
 
